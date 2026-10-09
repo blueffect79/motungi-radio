@@ -172,3 +172,46 @@ it("region selection while another broadcaster plays does not stop or change its
   expect(root.querySelector("footer")?.textContent).toContain("다른 방송");
   stations.pop();
 });
+it("keeps current program and Korean airtime visible in permanent footer through metadata refresh", async () => {
+  const original = mock.invoke.getMockImplementation()!;
+  let title = "아침 라디오";
+  mock.invoke.mockImplementation(async (command, args) =>
+    command === "get_programs"
+      ? {
+          ok: true,
+          data: stations.map((s) => ({
+            stationId: s.id,
+            status: "available",
+            sourceKind: "schedule",
+            title: `${title} ${s.id}`,
+            startsAt: new Date(Date.now() - 3600000).toISOString(),
+            endsAt: new Date(Date.now() + 3600000).toISOString(),
+            fetchedAt: new Date().toISOString(),
+            sourceUrl: "https://example.com/program",
+          })),
+        }
+      : original(command, args),
+  );
+  dispose = await mountApp(root);
+  await tick();
+  const footer = root.querySelector("footer")!;
+  expect(footer.textContent).toContain("아침 라디오 tbn-0");
+  expect(footer.textContent).toMatch(/\d{2}:\d{2}–\d{2}:\d{2} \(한국 시간\)/);
+  expect(footer.textContent).toContain("편성표 기준");
+  expect(root.querySelector("main")?.textContent).not.toContain("한국 시간");
+  const volume = footer.querySelector<HTMLInputElement>("input")!;
+  volume.focus();
+  title = "새 프로그램";
+  window.dispatchEvent(new Event("focus"));
+  await tick();
+  expect(footer.textContent).toContain("새 프로그램 tbn-0");
+  expect(document.activeElement).toBe(volume);
+  expect(footer.querySelector("input")).toBe(volume);
+  click("TBN 지역 선택");
+  click("TBN 5 지역 선택");
+  await tick();
+  expect(footer.textContent).toContain("새 프로그램 tbn-0");
+  expect(root.querySelector(".station .program")?.textContent).toBe(
+    "새 프로그램 tbn-5",
+  );
+});
