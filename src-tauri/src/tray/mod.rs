@@ -38,6 +38,14 @@ fn toggle(state: &mut ToggleState, visible: bool, now: Instant) -> Option<bool> 
         .is_some_and(|t| now.duration_since(t) < Duration::from_millis(300));
     Some(!visible && !just_blurred)
 }
+fn contains_point(bounds: (i32, i32, u32, u32), point: (i32, i32)) -> bool {
+    let (x, y, w, h) = bounds;
+    let (px, py) = point;
+    px as i64 >= x as i64
+        && py as i64 >= y as i64
+        && (px as i64) < x as i64 + w as i64
+        && (py as i64) < y as i64 + h as i64
+}
 fn clamped_position(
     icon: (i32, i32, u32, u32),
     work: (i32, i32, u32, u32),
@@ -65,7 +73,15 @@ pub fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
                 .is_some_and(|s| s.pinned.load(Ordering::SeqCst))
         }) {
             let point = rect.position.to_physical::<i32>(1.0);
-            if let Ok(Some(monitor)) = window.monitor_from_point(point.x as f64, point.y as f64) {
+            // macOS monitor_from_point forwards to CoreGraphics logical coordinates,
+            // while tray rectangles are physical pixels. Compare physical bounds directly.
+            if let Some(monitor) = window.available_monitors().ok().and_then(|monitors| {
+                monitors.into_iter().find(|m| {
+                    let pos = m.position();
+                    let size = m.size();
+                    contains_point((pos.x, pos.y, size.width, size.height), (point.x, point.y))
+                })
+            }) {
                 // Tray rectangles already use physical pixels; applying monitor scaling twice shifts Retina placement.
                 let scale = 1.0;
                 let pos = rect.position.to_physical::<i32>(scale);
@@ -299,6 +315,17 @@ mod tests {
         assert_eq!(
             toggle(&mut s, false, now + Duration::from_secs(1)),
             Some(true)
+        );
+    }
+    #[test]
+    fn retina_tray_point_matches_physical_monitor_bounds() {
+        assert!(contains_point((0, 0, 3360, 2100), (3000, 0)));
+        assert!(!contains_point((0, 0, 1680, 1050), (3000, 0)));
+        assert!(contains_point((-2880, 0, 2880, 1800), (-200, 0)));
+        assert!(!contains_point((-2880, 0, 2880, 1800), (0, 0)));
+        assert_eq!(
+            clamped_position((3000, 0, 60, 50), (0, 50, 3360, 2050), (760, 1280), true),
+            (2600, 56)
         );
     }
     #[test]

@@ -6,3 +6,5 @@
 - 백그라운드 타이머 지연은 절전과 같지 않다. 타이머 공백 추정 대신 macOS NSWorkspace의 전용 notification center와 Windows 전원 콜백을 사용한다. 이벤트 루프의 Resumed 이름만으로 전원 복귀라고 판단하지 않는다.
 - CI=true로 Mac DMG를 만들면 Finder 배치용 AppleScript를 생략한다. 완료 뒤 중간 .app이 정리될 수 있으므로 최종 DMG를 읽기 전용 마운트하여 내부 앱을 검사한다. codesign 검증 성공도 Developer ID 공증을 뜻하지 않는다.
 - Node 기본 테스트 러너의 .test.mjs를 Vitest가 수집하면 0 test suite 오류가 난다. 패키지 스크립트 테스트는 Node로, 화면 테스트는 Vitest로 분리하여 실행한다.
+
+- macOS에서 tray-icon 사각형은 물리 픽셀이지만 Tao monitor_from_point는 CoreGraphics의 논리 좌표로 조회한다. Retina의 오른쪽 아이콘은 화면 밖으로 잘못 판정될 수 있다. 트레이 물리 좌표를 available_monitors의 물리 경계와 비교한 뒤 같은 단위로 창을 배치한다.
