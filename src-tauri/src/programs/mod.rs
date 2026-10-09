@@ -29,6 +29,7 @@ struct Slot {
 }
 fn endpoint(id: &str) -> Option<&'static str> {
     match id.split('-').next()? {
+        "wbs" => Some("https://wbsi.kr/onair_radio.php"),
         "mbc" => Some("https://miniapi.imbc.com/Schedule/schedulelist"),
         "cbs" => Some("https://cbs.co.kr/schedule/all/ajax"),
         "febc" => Some("https://seoul.febc.net/api/stream/current?channelId=175"),
@@ -171,6 +172,24 @@ fn parse(id: &str, v: &Value, now: DateTime<FixedOffset>) -> Vec<Slot> {
             }
         }
     }
+    if id == "wbs-seoul" {
+        for date in [today.pred_opt().unwrap(), today] {
+            if v.get("days").and_then(Value::as_array).is_some_and(|days| {
+                days.iter()
+                    .any(|d| d.as_u64() == Some(date.weekday().num_days_from_monday() as u64))
+            }) {
+                if let Some(s) = slot(
+                    date,
+                    text(v, "startTime"),
+                    text(v, "endTime"),
+                    text(v, "title"),
+                    now,
+                ) {
+                    result.push(s)
+                }
+            }
+        }
+    }
     result
 }
 fn state(
@@ -194,7 +213,7 @@ fn state(
         let s = &slots[0];
         state.status = "available".into();
         state.source_kind = Some(
-            if id.starts_with("cpbc") || id.starts_with("febc") {
+            if id.starts_with("cpbc") || id.starts_with("febc") || id.starts_with("wbs") {
                 "live"
             } else {
                 "schedule"
@@ -241,6 +260,7 @@ fn valid_url(u: &url::Url) -> bool {
         && u.password().is_none()
         && u.port_or_known_default() == Some(443)
         && [
+            "wbsi.kr",
             "miniapi.imbc.com",
             "cbs.co.kr",
             "apis.cpbc.co.kr",
@@ -279,6 +299,9 @@ async fn fetch(raw: &str) -> Result<Value, AppError> {
             return Err(invalid());
         }
         body.extend_from_slice(&chunk)
+    }
+    if raw == "https://wbsi.kr/onair_radio.php" {
+        return parse_wbs(std::str::from_utf8(&body).map_err(|_| invalid())?);
     }
     serde_json::from_slice(&body).map_err(|_| invalid())
 }
@@ -368,3 +391,49 @@ pub async fn get_programs(station_ids: Vec<String>) -> Result<Vec<ProgramState>,
 }
 #[cfg(test)]
 mod tests;
+
+// Parse only the official live-heading fragment. Layout changes fail closed.
+fn parse_wbs(body: &str) -> Result<Value, AppError> {
+    let heading = body
+        .split_once("<li class=\"onair-program-heading\">")
+        .ok_or_else(invalid)?
+        .1;
+    let (heading, rest) = heading.split_once("</li>").ok_or_else(invalid)?;
+    if !heading.contains("지금 방송 중") {
+        return Err(invalid());
+    }
+    let title = heading
+        .split_once("<div class=\"tit\">")
+        .and_then(|(_, s)| s.split_once("</div>"))
+        .map(|(s, _)| s.trim())
+        .filter(|s| !s.is_empty() && !s.contains(['<', '>', '&']))
+        .ok_or_else(invalid)?;
+    let line = rest
+        .split_once("방송시간 | ")
+        .and_then(|(_, s)| s.split_once("</p>"))
+        .map(|(s, _)| s.trim())
+        .ok_or_else(invalid)?;
+    let (days, times) = line.rsplit_once(' ').ok_or_else(invalid)?;
+    let (start, end) = times.split_once('~').ok_or_else(invalid)?;
+    let weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    let mut selected = Vec::new();
+    for part in days.split(',') {
+        let chars: Vec<char> = part.trim().chars().collect();
+        match chars.as_slice() {
+            [day] => selected.push(weekdays.iter().position(|x| x == day).ok_or_else(invalid)?),
+            [a, '~', b] => {
+                let a = weekdays.iter().position(|x| x == a).ok_or_else(invalid)?;
+                let b = weekdays.iter().position(|x| x == b).ok_or_else(invalid)?;
+                if a > b {
+                    return Err(invalid());
+                }
+                selected.extend(a..=b)
+            }
+            _ => return Err(invalid()),
+        }
+    }
+    if time(now().date_naive(), start).is_none() || time(now().date_naive(), end).is_none() {
+        return Err(invalid());
+    }
+    Ok(serde_json::json!({"title":title,"startTime":start,"endTime":end,"days":selected}))
+}

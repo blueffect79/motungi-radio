@@ -111,11 +111,12 @@ fn live_programs() {
         "cbs-joy4u",
         "cpbc-seoul",
         "febc-seoul",
+        "wbs-seoul",
     ];
     let values = rt
         .block_on(get_programs(ids.iter().map(|s| s.to_string()).collect()))
         .unwrap();
-    assert_eq!(values.len(), 8);
+    assert_eq!(values.len(), 9);
     for s in values {
         eprintln!(
             "{} {} {:?} {:?} {:?}",
@@ -158,4 +159,30 @@ fn concurrent_requests_share_fetch_and_failure_discards_previous_body() {
         .0
         .is_none());
     });
+}
+#[test]
+fn wbs_heading_and_weekday_range_are_required() {
+    let body = r#"<li class="onair-program-heading"><div class="tit">노래하나 추억 둘</div><span>지금 방송 중</span></li><p>방송시간 | 월~일 09:00~11:00</p>"#;
+    let v = parse_wbs(body).unwrap();
+    let now = at("2026-10-09T10:00:00+09:00");
+    assert_eq!(
+        state("wbs-seoul", Some(&v), now, now).title.as_deref(),
+        Some("노래하나 추억 둘")
+    );
+    assert_eq!(
+        state("wbs-seoul", Some(&v), at("2026-10-09T11:00:00+09:00"), now).title,
+        None
+    );
+    assert_eq!(
+        state(
+            "wbs-seoul",
+            Some(&parse_wbs(&body.replace("월~일", "토~일")).unwrap()),
+            now,
+            now
+        )
+        .title,
+        None
+    );
+    assert!(parse_wbs(&body.replace("지금 방송 중", "지난 방송")).is_err());
+    assert!(parse_wbs(&body.replace("09:00~11:00", "알 수 없음")).is_err());
 }
