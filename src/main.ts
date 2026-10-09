@@ -1,1 +1,4 @@
-document.querySelector('#app')!.textContent = '한국 라디오를 준비하고 있습니다.';
+/// <reference types="vite/client" />
+import {mountApp} from './App';
+import './styles/app.css';
+void mountApp(document.querySelector<HTMLElement>('#app')!);
