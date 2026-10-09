@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=모퉁이 라디오
+Comment=한국 라디오를 한곳에서
+Exec={{exec}}
+Icon={{icon}}
+Terminal=false
+Categories=AudioVideo;Audio;Player;
+StartupWMClass=motungi-radio

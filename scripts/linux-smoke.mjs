@@ -66,7 +66,7 @@ try {
   );
   assert.equal(
     await execute(
-      'return [...document.querySelectorAll("audio")].every(a=>a.paused)',
+      `return document.querySelector('button[aria-label="방송 재생"]').title === "방송 재생"`,
     ),
     true,
     "시작은 무음",

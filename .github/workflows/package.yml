@@ -53,6 +53,11 @@ jobs:
           rustup toolchain install stable --profile minimal
           rustup default stable
           rustup target add ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        with:
+          workspaces: src-tauri -> target
+          cache-on-failure: true
       - name: 프런트엔드 검증
         if: inputs.platform == 'all' || inputs.platform == matrix.platform
         run: npm run verify
@@ -63,6 +68,7 @@ jobs:
         if: inputs.platform == 'all' || inputs.platform == matrix.platform
         run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }}
       - name: 설치파일 형식 및 SHA256 검증
+        id: packages
         if: inputs.platform == 'all' || inputs.platform == matrix.platform
         run: node scripts/package-artifacts.mjs ${{ matrix.target }} src-tauri/target/${{ matrix.target }}/release/bundle dist-packages/${{ matrix.name }}
       - name: Linux 설치 및 가상 화면 실행 검사
@@ -72,7 +78,7 @@ jobs:
           cargo install tauri-driver --locked
           dbus-run-session -- xvfb-run -a bash -c 'openbox & node scripts/linux-smoke.mjs /usr/bin/motungi-radio'
       - uses: actions/upload-artifact@v7.0.2
-        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        if: always() && steps.packages.outcome == 'success'
         with:
           name: motungi-radio-${{ matrix.name }}-${{ github.sha }}
           path: dist-packages/${{ matrix.name }}/

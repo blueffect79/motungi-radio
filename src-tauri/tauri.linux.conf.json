@@ -1,0 +1,14 @@
+{
+  "productName": "motungi-radio",
+  "bundle": {
+    "targets": [
+      "deb",
+      "appimage"
+    ],
+    "linux": {
+      "deb": {
+        "desktopTemplate": "linux/motungi-radio.desktop"
+      }
+    }
+  }
+}

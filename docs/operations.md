@@ -27,7 +27,7 @@ Windows PowerShell에서는 `$env:CI='true'`를 지정하고 `npm run tauri -- b
 
 CARGO_HOME/RUSTUP_HOME은 Rust 설치 위치, CARGO_TARGET_DIR은 빌드 출력 위치다. 설정하지 않으면 시스템 기본값을 사용한다. npm의 tauri 래퍼는 프로젝트에 .local-tools/cargo가 있으면 그 도구체인을 선택한다. 직접 cargo를 실행할 때는 동일한 환경을 명시한다. CI=true는 GUI 배치 작업 생략에 사용하며 권한 확인이나 기능 테스트를 대신하지 않는다.
 
-GitHub의 package.yml은 workflow_dispatch의 platform=all/windows/macos/linux로 실행한다. 설치파일과 SHA256이 artifact에 14일 보관되며 자동 공개 릴리스는 만들지 않는다. 생성된 설치파일을 읽기 전용으로 검사하고 실기기 결과와 공개 조건을 확인한 뒤 공개 여부를 결정한다. 현재 저장소는 비공개 시험용이다.
+GitHub의 package.yml은 workflow_dispatch의 platform=all/windows/macos/linux로 실행한다. 설치파일과 SHA256이 artifact에 14일 보관되며 자동 공개 릴리스는 만들지 않는다. 생성된 설치파일을 읽기 전용으로 검사하고 실기기 결과와 공개 조건을 확인한 뒤 공개 여부를 결정한다. 앱 소스·홈페이지·Releases는 같은 공개 저장소에서 관리한다.
 
 ## Linux
 
