@@ -5,6 +5,7 @@ pub mod playback;
 pub mod programs;
 pub mod settings;
 pub mod desktop;
+pub mod tray;
 
 #[tauri::command]
 fn list_stations() -> radio::ApiResult<radio::Catalog> {
@@ -31,11 +32,11 @@ async fn get_programs(station_ids: Vec<String>) -> radio::ApiResult<Vec<programs
 pub fn run() {
     desktop::plugins(tauri::Builder::default())
         .manage(playback::Resolver::default())
-        .setup(desktop::setup)
+        .setup(|app| { desktop::setup(app)?; tray::setup(app) })
         .invoke_handler(tauri::generate_handler![
             list_stations, resolve_stream, cancel_resolve_stream, get_programs,
             settings::load_settings, settings::save_settings,
-            desktop::get_autostart, desktop::set_autostart,
+            desktop::get_autostart, desktop::set_autostart, tray::quit_app,
         ])
         .run(tauri::generate_context!())
         .expect("앱 실행에 실패했습니다");
