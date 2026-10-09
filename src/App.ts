@@ -106,7 +106,6 @@ export async function mountApp(root: HTMLElement) {
     hero = node("footer", undefined, "now-playing");
   const cover = node("div", undefined, "cover"),
     heroText = node("div", undefined, "hero-copy"),
-    status = node("span", undefined, "play-status"),
     title = node("strong", undefined, "current-title"),
     stationName = node("span", undefined, "current-station"),
     airtime = node("span", undefined, "program-time"),
@@ -132,11 +131,60 @@ export async function mountApp(root: HTMLElement) {
   next.className = "next-program";
   const heroTop = node("div", undefined, "hero-top"),
     heroBottom = node("div", undefined, "hero-bottom");
-  heroText.append(status, title, stationName);
+  const previousChannelName = node("span", undefined, "neighbor-name"),
+    nextChannelName = node("span", undefined, "neighbor-name");
+  const neighbors = () => {
+    const playable = stations.filter((s) => s.streamKey !== "unavailable");
+    const index = playable.findIndex((s) => s.id === player.state.stationId);
+    return {
+      previous:
+        index >= 0 && playable.length > 1
+          ? playable[(index - 1 + playable.length) % playable.length]
+          : undefined,
+      next:
+        index >= 0 && playable.length > 1
+          ? playable[(index + 1) % playable.length]
+          : undefined,
+    };
+  };
+  const previousChannel = button(
+    "",
+    "이전 채널",
+    () => {
+      const station = neighbors().previous;
+      if (station) void player.select(station.id);
+    },
+    "previous-channel",
+  );
+  const nextChannel = button(
+    "",
+    "다음 채널",
+    () => {
+      const station = neighbors().next;
+      if (station) void player.select(station.id);
+    },
+    "next-channel",
+  );
+  const glyph = (path: string) => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    const shape = document.createElementNS(svg.namespaceURI, "path");
+    shape.setAttribute("d", path);
+    svg.append(shape);
+    return svg;
+  };
+  previousChannel.className = nextChannel.className = "channel-step";
+  previousChannel.append(
+    glyph("M6 5h2v14H6zM18 5v14L8 12z"),
+    previousChannelName,
+  );
+  nextChannel.append(glyph("M16 5h2v14h-2zM6 5l10 7-10 7z"), nextChannelName);
+  heroText.append(stationName, title, next);
   heroTop.append(cover, heroText);
-  heroBottom.append(airtime, control);
+  heroBottom.append(previousChannel, control, nextChannel);
   error.setAttribute("role", "alert");
-  hero.append(heroTop, heroBottom, next, error);
+  hero.append(heroTop, heroBottom, error);
   hero.setAttribute("aria-label", "현재 프로그램");
   const volumeBox = node("section", undefined, "volume-setting"),
     volumeLabel = node("label", "음량"),
@@ -364,19 +412,35 @@ export async function mountApp(root: HTMLElement) {
     stationName.textContent =
       current?.name ??
       (state.stationId ? "이용 불가 채널" : "내 곁의 작은 라디오");
-    status.textContent = {
-      idle: "READY",
-      stopped: "정지됨",
-      playing: "재생 중",
-      loading: "연결 중",
-      error: "연결 오류",
-    }[state.status];
     airtime.textContent =
       p?.status === "available"
         ? `${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))}`
         : "실시간 라디오";
     const busy = ["playing", "loading"].includes(state.status);
-    control.textContent = busy ? "■ 정지" : "▶ 재생";
+    stationName.append(document.createTextNode(" · "), airtime);
+    control.replaceChildren(
+      glyph(busy ? "M7 5h4v14H7zM14 5h4v14h-4z" : "M8 4l13 8-13 8z"),
+    );
+    control.classList.toggle("connecting", state.status === "loading");
+    control.title =
+      state.status === "loading"
+        ? "연결 중 · 누르면 정지"
+        : busy
+          ? "방송 정지"
+          : "방송 재생";
+    const adjacent = neighbors();
+    previousChannelName.textContent = adjacent.previous?.name ?? "이전 채널";
+    nextChannelName.textContent = adjacent.next?.name ?? "다음 채널";
+    previousChannel.disabled = !adjacent.previous;
+    nextChannel.disabled = !adjacent.next;
+    previousChannel.setAttribute(
+      "aria-label",
+      adjacent.previous ? `이전 채널: ${adjacent.previous.name}` : "이전 채널",
+    );
+    nextChannel.setAttribute(
+      "aria-label",
+      adjacent.next ? `다음 채널: ${adjacent.next.name}` : "다음 채널",
+    );
     control.setAttribute("aria-label", busy ? "방송 정지" : "방송 재생");
     control.disabled = !current;
     error.textContent = state.error ? `오디오: ${state.error.message}` : "";
@@ -399,6 +463,7 @@ export async function mountApp(root: HTMLElement) {
         ? "다음 방송 확인 중…"
         : "다음 방송 · 편성표 보기  ›";
     next.disabled = !current;
+    next.title = next.textContent;
     if (document.activeElement !== volume)
       volume.value = String(settings.settings.volume);
     volumeValue.textContent = `${volume.value}%`;

@@ -205,7 +205,8 @@ it("does not let a late schedule response switch channel or reopen a panel", asy
   expect(root.querySelector("main")?.getAttribute("aria-label")).toBe(
     "방송 목록",
   );
-  expect(root.querySelector("footer")?.textContent).toContain("정지됨");
+  expect(root.querySelector('[aria-label="방송 재생"]')).toBeTruthy();
+  expect(root.querySelector("footer")?.textContent).not.toContain("정지됨");
   expect(mock.resolve).toHaveBeenCalledTimes(1);
 });
 it("refreshes OS registration and shows failed saves without replacing slider", async () => {
@@ -350,4 +351,38 @@ it("preserves saved volume and removes redundant settings copy", async () => {
   );
   expect(root.textContent).not.toContain("내 취향대로");
   expect(root.textContent).not.toContain("OS 등록 상태");
+});
+
+it("shows neighboring channel names and switches through the single player", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  const hero = root.querySelector("footer")!;
+  expect(hero.querySelector(".current-station")?.textContent).toContain(
+    "MBC FM4U ·",
+  );
+  expect(hero.querySelector(".play-status")).toBeNull();
+  click("다음 채널: SBS 파워FM");
+  await tick();
+  expect(mock.resolve).toHaveBeenLastCalledWith(
+    "sbs-powerpc",
+    expect.any(AbortSignal),
+  );
+  expect(hero.querySelector(".current-station")?.textContent).toContain(
+    "SBS 파워FM",
+  );
+  click("이전 채널: MBC FM4U");
+  await tick();
+  expect(hero.querySelector(".current-station")?.textContent).toContain(
+    "MBC FM4U",
+  );
+  click("이전 채널: TBN 경인");
+  await tick();
+  expect(hero.querySelector(".current-station")?.textContent).toContain(
+    "TBN 경인",
+  );
+  click("다음 채널: MBC FM4U");
+  await tick();
+  expect(hero.querySelector(".current-station")?.textContent).toContain(
+    "MBC FM4U",
+  );
 });
