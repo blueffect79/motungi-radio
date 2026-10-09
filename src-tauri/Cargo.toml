@@ -1,6 +1,6 @@
 [package]
 name = "radiokorea"
-version = "0.2.0"
+version = "0.2.1"
 description = "한국 라디오 메뉴 막대 플레이어"
 edition = "2021"
 license = "MIT"
