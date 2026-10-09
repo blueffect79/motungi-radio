@@ -20,4 +20,4 @@ Pages 실행 성공, 공개 자산 일치, 데스크톱·모바일 화면을 확
 
 ## 최신 확인
 
-2026-10-09 · 소스 `e47ba85` · Pages 37931003039 성공. 소개를 한 문장으로 줄이고 중복·영문 장식 문구와 미사용 CSS 127개 규칙을 정리했다. 다운로드·공유 이미지 유지. 공개 HTML·CSS 일치, 320·1280px 다운로드 노출·넘침 없음, 테마·미니 전환 확인. 캡처: `artifacts/site-tidy/public-desktop.jpg`.
+2026-10-09 · 소스 `bd96b41` · Pages 37934053997 성공. 다운로드 위에 PC 전용·모바일(iOS·Android) 미지원 안내를 추가했다. 공개 HTML 일치, 320px 문구 노출·다운로드 첫 화면 표시·넘침 없음 확인. 캡처: `artifacts/site-mobile-notice/public-mobile.jpg`.
