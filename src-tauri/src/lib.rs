@@ -23,12 +23,17 @@ fn cancel_resolve_stream(request_id: u64, state: tauri::State<'_ , playback::Res
     state.cancel(request_id);
 }
 
+#[tauri::command]
+async fn get_programs(station_ids: Vec<String>) -> radio::ApiResult<Vec<programs::ProgramState>> {
+    programs::get_programs(station_ids).await.into()
+}
+
 pub fn run() {
     desktop::plugins(tauri::Builder::default())
         .manage(playback::Resolver::default())
         .setup(desktop::setup)
         .invoke_handler(tauri::generate_handler![
-            list_stations, resolve_stream, cancel_resolve_stream,
+            list_stations, resolve_stream, cancel_resolve_stream, get_programs,
             settings::load_settings, settings::save_settings,
             desktop::get_autostart, desktop::set_autostart,
         ])
