@@ -483,6 +483,7 @@ struct Cache {
     failures: u32,
 }
 type SharedCache = Arc<Mutex<Option<Cache>>>;
+static TBN_REQUEST_SLOTS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
 static REQUEST_SLOTS: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
 static CACHE: OnceLock<Mutex<HashMap<String, SharedCache>>> = OnceLock::new();
 fn now() -> DateTime<FixedOffset> {
@@ -560,8 +561,11 @@ pub async fn get_programs(station_ids: Vec<String>) -> Result<Vec<ProgramState>,
         let ids: Vec<String> = ids.into_iter().map(str::to_owned).collect();
         // Fixed official endpoint set bounds parallelism; slow broadcasters do not serialize others.
         let slots = slots.clone();
+        let tbn_slots = TBN_REQUEST_SLOTS
+            .get_or_init(|| Arc::new(tokio::sync::Semaphore::new(2)))
+            .clone();
         tasks.spawn(async move {
-            let _permit = slots.acquire().await.expect("semaphore remains open");
+            let _permits = acquire_request_budget(url, &slots, &tbn_slots).await;
             let all_refs: Vec<&str> = all_ids.iter().map(String::as_str).collect();
             let (value, fetched) =
                 cached(&shared, &all_refs, || async { fetch(url).await.ok() }).await;
@@ -731,4 +735,30 @@ fn parse_tbn(body: &str, region: &str) -> Result<Value, AppError> {
         return Err(invalid());
     }
     Ok(serde_json::json!({"region":region,"title":title,"startTime":start,"endTime":end}))
+}
+async fn acquire_request_budget(
+    url: &str,
+    global: &Arc<tokio::sync::Semaphore>,
+    tbn: &Arc<tokio::sync::Semaphore>,
+) -> (
+    Option<tokio::sync::OwnedSemaphorePermit>,
+    tokio::sync::OwnedSemaphorePermit,
+) {
+    // Acquire the provider budget first: queued TBN regions must not reserve global slots.
+    let provider = if url.starts_with("https://www.tbn.or.kr/") {
+        Some(
+            tbn.clone()
+                .acquire_owned()
+                .await
+                .expect("semaphore remains open"),
+        )
+    } else {
+        None
+    };
+    let global = global
+        .clone()
+        .acquire_owned()
+        .await
+        .expect("semaphore remains open");
+    (provider, global)
 }
