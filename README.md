@@ -2,7 +2,7 @@
 
 한국 라디오 방송을 메뉴 막대(macOS) 또는 알림 영역(Windows)에서 선택하는 무료 데스크톱 앱입니다. 공식 방송 소스를 조회하며 인터넷 연결이 필요합니다. 방송사의 공식 앱이 아니며 방송 콘텐츠를 소유하지 않습니다.
 
-목표 환경은 macOS 13 이상 Apple Silicon/Intel 및 Windows 10/11 x64입니다. 설치파일은 DMG와 NSIS EXE로 준비합니다. 현재는 배포 준비 단계이며, 빌드 성공과 실제 설치·청취 성공은 구분합니다. 공개 다운로드가 있다고 가정하지 마세요.
+목표 환경은 macOS 13 이상 Apple Silicon/Intel 및 Windows 10/11 x64입니다. Mac 두 아키텍처의 DMG와 Windows x64 NSIS EXE 시험본을 생성했습니다. 현재는 비공개 시험 단계이며, 빌드 성공과 실제 설치·청취 성공은 구분합니다. 공개 다운로드가 있다고 가정하지 마세요.
 
 - [설치·업데이트 안내](docs/install.md)
 - [릴리스 검증 체크리스트](docs/release-checklist.md)

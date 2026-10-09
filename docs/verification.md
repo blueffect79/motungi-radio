@@ -12,7 +12,7 @@
 | 설치파일 검사 코드 | `91ffeb4`에서 `node --test scripts/check-binary-architecture.test.mjs`: 5개 통과, 종료 코드 0. `node scripts/check-package.mjs` 메타데이터 사전 검증 종료 코드 0 | 자동 검증 통과. 파일 검사 코드의 테스트이며 설치파일 자체의 성공 판정은 별도 |
 | 스트림 원천 | 32개 채널의 실제 네이티브 resolver 및 HLS/미디어 바이트 응답 성공 | 네트워크 응답 확인. 소리 출력, 디코딩 지속성, 30분 재생을 확인한 것은 아님 |
 | 프로그램 원천 | 18개 현재 프로그램 확인, 14개 확인 불가 | TBN 13개는 네이티브 TLS 요청 시간 초과, KBS 한민족은 응답 채널 불일치. 확인 불가를 정상 프로그램 정보로 간주하지 않음 |
-| 최신 설치파일 | `91ffeb4` 기준 Mac arm64·Intel 시험용 DMG 생성 및 형식·내부 바이너리·서명 일관성·해시 검증 통과. Windows x64는 [빌드 진행 중](https://github.com/devsejong/radiokorea/actions/runs/37873884953) | Mac 파일 확인 결과는 아래 표 참고. 실제 설치·화면·청취를 확인한 것은 아님. Windows 성공 판정은 대기하며 이전 취소 실행은 성공 근거에서 제외 |
+| 최신 설치파일 | `91ffeb4` 기준 Mac arm64·Intel DMG 생성·내부 바이너리·서명 일관성·해시 검증 통과. Windows x64 EXE도 [빌드 성공](https://github.com/devsejong/radiokorea/actions/runs/37873884953), 실제 앱 AMD64 PE32+·설치파일 형식·해시 확인 | 파일별 결과는 아래 표에 기록. 실제 설치·화면·청취를 확인한 것은 아님. 이전 취소 실행은 성공 근거에서 제외 |
 | 실기기 | 사용자 직접 확인 예정 | Mac 화면·청취 및 Windows 설치·실행 미검증 |
 | 공개 배포 | [GitHub 저장소](https://github.com/devsejong/radiokorea)는 비공개 검증 단계. MBC 재링크 고지 관련 공개 조건 미해결 | 공개 릴리스 완료 아님. 저장소·빌드 기록 접근에는 권한 필요 |
 
@@ -111,10 +111,12 @@ Mac과 Windows에서 아래 32개 채널을 각각 선택해 짧게 실제 소�
 | --- | --- | --- | --- | --- |
 | Mac arm64 | `91ffeb4` | `macos-arm64/radiokorea-0.1.0-macos-arm64.dmg`<br>SHA256: `c9a09382a5fb0873e5cff6804684cf87d6ccfe48b6948188d5dfa53e2bdda5a3` | 빌드·DMG·arm64 바이너리·서명 일관성·해시 검사 종료 코드 0 | 미검증 |
 | Mac x64 | `91ffeb4` | `macos-x64/radiokorea-0.1.0-macos-x64.dmg`<br>SHA256: `c7a25ff95a6025e488caa8ca6a60cea497c13ddddb0f9c54dce36358413f14cf` | 빌드·DMG·x86_64 바이너리·서명 일관성·해시 검사 종료 코드 0 | 미검증 |
-| Windows x64 | 기록 대기 | 기록 대기 | 기록 대기 | 미검증 |
+| Windows x64 | `91ffeb4` | `radiokorea-0.1.0-windows-x64.exe` / `44b51e0d2f3f1767d3773002c8a0dbe9866e1ad3c654913fc3e8e45fcb168222` | Windows 테스트 43+39+5개·EXE 생성·실제 앱 AMD64 PE32+·설치파일 형식·해시 검사 통과. 다운로드 사본 SHA256도 동일 | 미검증 |
 
 Mac 두 파일은 저장소의 `release-artifacts/0.1.0-91ffeb4/` 아래 각 하위 폴더에 보관한다. 각 대상에 `CI=true npm run tauri -- build --target aarch64-apple-darwin --bundles dmg` 또는 `--target x86_64-apple-darwin`을 실행해 종료 코드 0을 확인했다. `package-artifacts.mjs`의 실제 바이너리 아키텍처·DMG 헤더·SHA256 검사, `hdiutil verify`의 VALID 결과, 읽기 전용 마운트한 내부 앱의 `codesign --verify --deep --strict`, `file`의 arm64 또는 x86_64 확인, 마운트 해제가 모두 종료 코드 0이었다. 앱 UI를 실행하거나 소리를 청취한 검증은 아니다.
 
 Mac은 ad-hoc 서명이며 Developer ID 서명/공증이 아니다. Windows는 코드 서명하지 않았다. 형식·해시 검증은 게시자 신원, 설치 성공, 실제 청취의 증거가 아니다.
 
-공식 방송사 원천을 직접 사용하며 원천 응답 성공은 제3자 배포 허가가 아니다. MBC 공개 조건 해결, Windows 설치파일 증거, 직접 사용 결과와 최종 사용자 확인이 남아 있으므로 전체 검증 완료 또는 공개 배포 완료로 판정하지 않는다.
+공식 방송사 원천을 직접 사용하며 원천 응답 성공은 제3자 배포 허가가 아니다. MBC 공개 조건 해결, 직접 사용 결과와 최종 사용자 확인이 남아 있으므로 전체 검증 완료 또는 공개 배포 완료로 판정하지 않는다.
+
+Windows 파일은 `release-artifacts/0.1.0-91ffeb4/windows-x64/`에 보관했다. GitHub 실행 37873884953의 Windows 작업은 성공이며, 같은 실행의 Mac 작업은 플랫폼 선택 때문에 생략됐다. Mac 두 파일은 별도 로컬 빌드 결과다. Windows 설치기 자체가 x86 형식이어도 내부 앱은 검증한 x64 대상이다.
