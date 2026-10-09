@@ -1,1 +1,178 @@
-:root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#263c32;background:#f4f2eb;font-size:13px;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;border:1px solid #d5dacf;border-radius:8px;background:#fffef8;color:#254d3d;padding:9px 11px}button:hover{background:#e7ece2}button:disabled{cursor:default;color:#777}button:focus-visible,input:focus-visible{outline:3px solid #60917a;outline-offset:2px}button[aria-pressed=true]{background:#e1ece1;border-color:#638b71}.shell{height:100dvh;display:flex;flex-direction:column;overflow:hidden}header{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #dedfd4;flex-shrink:0}h1{font-size:19px;letter-spacing:-.7px;margin:0;flex:1}h2{font-size:12px;color:#637060;margin:18px 0 8px}main{min-height:0;overflow:auto;padding:0 14px 16px;flex:1}p{line-height:1.55;overflow-wrap:anywhere}.muted,.program{color:#748071;font-size:11px}.station{display:flex;align-items:center;gap:6px;margin-bottom:5px}.station-choice{flex:1;text-align:left;min-width:0;border-color:transparent;background:#faf9f3;font-weight:600;overflow-wrap:anywhere}.program{display:block;margin-top:4px;line-height:1.5;font-weight:400}.region-toggle{margin:1px 0 9px;font-size:11px}.regions{padding-left:9px;border-left:2px solid #bccab6;margin-bottom:12px}.regions button{display:block;width:100%;text-align:left;margin:4px 0}.selected,.settings{border:1px solid #d9dece;border-radius:10px;padding:0 12px 10px;margin:12px 0}.selected strong,footer strong{overflow-wrap:anywhere}.error{color:#9a442c;font-size:12px}footer{flex-shrink:0;display:grid;grid-template-columns:1fr auto;gap:7px 12px;padding:13px 16px;background:#e9ede2;border-top:1px solid #d0d9c8}footer strong{font-size:13px;min-width:0}footer .play-status{grid-column:1;font-size:11px;color:#687568}footer>button{grid-column:2;grid-row:1/3;background:#315e49;color:#fff}footer label{grid-column:1/3;display:flex;align-items:center;gap:10px;font-size:11px}input[type=range]{flex:1;min-width:0;accent-color:#315e49}footer .error{grid-column:1/3;margin:0;max-height:55px;overflow:auto}input[type=checkbox]{accent-color:#315e49;margin-right:8px}
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #263c32;
+  background: #f4f2eb;
+  font-size: 13px;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #d5dacf;
+  border-radius: 8px;
+  background: #fffef8;
+  color: #254d3d;
+  padding: 9px 11px;
+}
+button:hover {
+  background: #e7ece2;
+}
+button:disabled {
+  cursor: default;
+  color: #777;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #60917a;
+  outline-offset: 2px;
+}
+button[aria-pressed="true"] {
+  background: #e1ece1;
+  border-color: #638b71;
+}
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #dedfd4;
+  flex-shrink: 0;
+}
+h1 {
+  font-size: 19px;
+  letter-spacing: -0.7px;
+  margin: 0;
+  flex: 1;
+}
+h2 {
+  font-size: 12px;
+  color: #637060;
+  margin: 18px 0 8px;
+}
+main {
+  min-height: 0;
+  overflow: auto;
+  padding: 0 14px 16px;
+  flex: 1;
+}
+p {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.muted,
+.program {
+  color: #748071;
+  font-size: 11px;
+}
+.station {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.station-choice {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+  border-color: transparent;
+  background: #faf9f3;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.program {
+  display: block;
+  margin-top: 4px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.region-toggle {
+  margin: 1px 0 9px;
+  font-size: 11px;
+}
+.regions {
+  padding-left: 9px;
+  border-left: 2px solid #bccab6;
+  margin-bottom: 12px;
+}
+.regions button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 4px 0;
+}
+.selected,
+.settings {
+  border: 1px solid #d9dece;
+  border-radius: 10px;
+  padding: 0 12px 10px;
+  margin: 12px 0;
+}
+.selected strong,
+footer strong {
+  overflow-wrap: anywhere;
+}
+.error {
+  color: #9a442c;
+  font-size: 12px;
+}
+footer {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px 12px;
+  padding: 13px 16px;
+  background: #e9ede2;
+  border-top: 1px solid #d0d9c8;
+}
+footer strong {
+  font-size: 13px;
+  min-width: 0;
+}
+footer .play-status {
+  grid-column: 1;
+  font-size: 11px;
+  color: #687568;
+}
+footer > button {
+  grid-column: 2;
+  grid-row: 1/3;
+  background: #315e49;
+  color: #fff;
+}
+footer label {
+  grid-column: 1/3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: #315e49;
+}
+footer .error {
+  grid-column: 1/3;
+  margin: 0;
+  max-height: 55px;
+  overflow: auto;
+}
+input[type="checkbox"] {
+  accent-color: #315e49;
+  margin-right: 8px;
+}
