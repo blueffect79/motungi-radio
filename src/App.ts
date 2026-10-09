@@ -359,7 +359,10 @@ export async function mountApp(root: HTMLElement) {
   );
   void poller.refresh();
   const refresh = () => {
-    if (!document.hidden) void poller?.refresh();
+    if (!document.hidden) {
+      void poller?.refresh();
+      if (panel) void autostart.refresh();
+    }
   };
   document.addEventListener("visibilitychange", refresh);
   window.addEventListener("focus", refresh);

@@ -288,3 +288,26 @@ it.each(["later favorite", "later play", "later stop"] as const)(
     }
   },
 );
+it("refreshes actual OS autostart state when an open settings panel regains focus", async () => {
+  const original = mock.invoke.getMockImplementation()!;
+  let enabled = true;
+  mock.invoke.mockImplementation((command, args) =>
+    command === "get_autostart"
+      ? Promise.resolve({ ok: true, data: { enabled } })
+      : original(command, args),
+  );
+  dispose = await mountApp(root);
+  await tick();
+  click("설정");
+  await tick();
+  expect(
+    root.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked,
+  ).toBe(true);
+  enabled = false;
+  window.dispatchEvent(new Event("focus"));
+  await tick();
+  expect(
+    root.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked,
+  ).toBe(false);
+  expect(root.textContent).toContain("OS 등록 상태: 꺼짐");
+});
