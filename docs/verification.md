@@ -2,7 +2,7 @@
 
 ## Linux 시험판 — 2026-10-10
 
-소스 `165b9c0002c1d9142a8b905e2b5f3907a8abed99`. [빌드 37995950870](https://github.com/devsejong/motungi-radio/actions/runs/37995950870), [실행 37996577897](https://github.com/devsejong/motungi-radio/actions/runs/37996577897) 성공. 프런트 50개·네이티브 46개·형식 6개 통과. Ubuntu 22.04의 실제 WebKit/IPC, `.deb` 설치 및 AppImage 실행, 무음 시작, 미니 200–360px, 설정 640px·음량 100%, EBS FM playing 이벤트·5초 유지·정지 후 무재생을 확인했다. 가상 화면과 가상 음원 출력이며 사람의 청취, 물리 트레이·로그인·절전·Wayland는 미검증이다.
+소스 `165b9c0002c1d9142a8b905e2b5f3907a8abed99`. [빌드 37995950870](https://github.com/devsejong/motungi-radio/actions/runs/37995950870), [실행 37996892130](https://github.com/devsejong/motungi-radio/actions/runs/37996892130) 성공. 프런트 50개·네이티브 46개·형식 6개 통과. Ubuntu 22.04의 실제 WebKit/IPC, `.deb` 설치 및 AppImage 실행, 무음 시작, 미니 200–360px, 설정 640px·음량 100%, EBS FM playing 이벤트·5초 유지·정지 후 무재생을 확인했다. 가상 화면과 가상 음원 출력이며 사람의 청취, 물리 트레이·로그인·절전·Wayland는 미검증이다.
 
 | 설치파일 | SHA256 |
 | --- | --- |
