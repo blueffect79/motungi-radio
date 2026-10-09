@@ -2,6 +2,7 @@ use tauri::Manager;
 
 pub mod desktop;
 pub mod playback;
+mod power;
 pub mod programs;
 pub mod radio;
 pub mod settings;
@@ -36,6 +37,7 @@ async fn get_programs(station_ids: Vec<String>) -> radio::ApiResult<Vec<programs
 
 pub fn run() {
     desktop::plugins(tauri::Builder::default())
+        .plugin(power::plugin())
         .manage(playback::Resolver::default())
         .setup(|app| {
             desktop::setup(app)?;

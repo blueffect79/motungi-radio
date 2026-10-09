@@ -17,7 +17,9 @@ const unbindLifecycle = bindPlaybackLifecycle(player);
 
 상태는 공통 `Playback` 계약을 사용합니다. 볼륨이 0이어도 실제 미디어 `playing` 이벤트를 받으면 재생 상태입니다. URL 응답 성공만으로 재생 상태를 표시하지 않습니다. 매 재생·재시도·절전복귀 때 주소를 새로 요청합니다. 자동 재연결 타이머는 없고, hls.js의 조각·목록 요청 재시도만 각 1회로 제한합니다. 최종 실패는 오류와 수동 재시도로 표시합니다. 최초 미디어 시작 및 재버퍼링은 20초 제한을 두며, 실제 `playing` 이벤트가 오면 제한 타이머를 해제합니다. 반복 `waiting` 이벤트는 제한 시간을 연장하지 않습니다. 시간 초과는 재생을 정리하고 수동 재시도 가능한 `timeout` 오류로 표시합니다. 정지·채널 교체·앱 종료 시 이전 타이머도 해제합니다.
 
-`bindPlaybackLifecycle`는 네트워크 online 이벤트와 90초 초과 실행 공백을 감지합니다. 포커스나 창 표시·숨김은 재연결을 일으키지 않습니다. 실행 공백 감지는 OS의 스케줄링 제한을 절전으로 오인할 수 있는 보조 수단입니다. 정확한 네이티브 절전복귀 이벤트가 있으면 그 이벤트에서 `player.resume()`을 호출합니다. 정지한 상태에서는 복귀 이벤트도 재생하지 않습니다.
+`bindPlaybackLifecycle`는 네트워크 online 이벤트와 네이티브 `system-resumed` 이벤트를 구독합니다. macOS는 NSWorkspace 전용 알림 센터의 `NSWorkspaceDidWakeNotification`, Windows는 `PowerRegisterSuspendResumeNotification`의 `PBT_APMRESUMEAUTOMATIC`을 연결합니다. Windows의 뒤따르는 `RESUMESUSPEND` 알림은 중복 재연결을 막기 위해 무시합니다. 별도 권한이나 절전 방지 설정은 필요하지 않습니다. 포커스·창 표시·숨김·타이머 실행 공백은 재연결을 일으키지 않습니다. 정지한 상태에서는 복귀 이벤트도 재생하지 않습니다. 종료 시 OS 알림과 프런트 이벤트 구독을 해제하며, 늦게 완료된 구독도 즉시 해제합니다. 30–60초 절전 및 장기 절전 후 실제 재생은 Mac과 Windows PC에서 수동 검증해야 합니다.
+
+공식 API 근거: [Apple NSWorkspace.didWakeNotification](https://developer.apple.com/documentation/appkit/nsworkspace/didwakenotification), [Microsoft PowerRegisterSuspendResumeNotification](https://learn.microsoft.com/windows/win32/api/powerbase/nf-powerbase-powerregistersuspendresumenotification).
 
 ## 네이티브 등록
 
