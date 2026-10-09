@@ -38,29 +38,79 @@ themeButton.addEventListener("click", () => {
 systemDark.addEventListener("change", (event) => {
   if (!rememberedTheme) applyTheme(event.matches ? "dark" : "light");
 });
-const miniButton = document.querySelector("#mini-toggle");
-const previewModes = document.querySelectorAll("[data-preview-mode]");
-function setPreviewMode(mini) {
-  document.querySelector(".app-window").classList.toggle("is-mini", mini);
-  document
-    .querySelector(".showcase-desktop")
-    .classList.toggle("mini-scene", mini);
-  miniButton.setAttribute("aria-pressed", String(mini));
-  miniButton.textContent = mini ? "전체" : "미니";
-  previewModes.forEach((button) =>
-    button.setAttribute(
-      "aria-pressed",
-      String((button.dataset.previewMode === "mini") === mini),
-    ),
-  );
+const track = document.querySelector(".feature-track");
+const dots = [...document.querySelectorAll("[data-slide]")];
+const arrows = [...document.querySelectorAll("[data-direction]")];
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let currentSlide = 0;
+function selectSlide(index) {
+  if (!track.clientWidth || !Number.isFinite(index)) return;
+  const next = Math.max(0, Math.min(dots.length - 1, index));
+  track.scrollTo({
+    left: next * track.clientWidth,
+    behavior: reducedMotion.matches ? "instant" : "smooth",
+  });
 }
-miniButton.addEventListener("click", () =>
-  setPreviewMode(
-    !document.querySelector(".app-window").classList.contains("is-mini"),
+function updateSlide() {
+  if (!track.clientWidth) return;
+  currentSlide = Math.max(
+    0,
+    Math.min(dots.length - 1, Math.round(track.scrollLeft / track.clientWidth)),
+  );
+  dots.forEach((dot, index) =>
+    dot.setAttribute("aria-pressed", String(index === currentSlide)),
+  );
+  arrows[0].disabled = currentSlide === 0;
+  arrows[1].disabled = currentSlide === dots.length - 1;
+}
+let frame;
+track.addEventListener(
+  "scroll",
+  () => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(updateSlide);
+  },
+  { passive: true },
+);
+dots.forEach((dot) =>
+  dot.addEventListener("click", () => selectSlide(Number(dot.dataset.slide))),
+);
+arrows.forEach((arrow) =>
+  arrow.addEventListener("click", () =>
+    selectSlide(currentSlide + Number(arrow.dataset.direction)),
   ),
 );
-previewModes.forEach((button) =>
-  button.addEventListener("click", () =>
-    setPreviewMode(button.dataset.previewMode === "mini"),
-  ),
+track.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  selectSlide(currentSlide + (event.key === "ArrowRight" ? 1 : -1));
+});
+// Touch uses native scrolling; mouse users can drag the same surface.
+let drag;
+track.addEventListener("pointerdown", (event) => {
+  if (event.pointerType !== "mouse" || event.button !== 0) return;
+  drag = { x: event.clientX, scroll: track.scrollLeft, id: event.pointerId };
+  track.setPointerCapture(event.pointerId);
+});
+track.addEventListener("pointermove", (event) => {
+  if (!drag || Math.abs(event.clientX - drag.x) < 6) return;
+  track.classList.add("is-dragging");
+  track.scrollLeft = drag.scroll + drag.x - event.clientX;
+});
+function finishDrag() {
+  if (!drag) return;
+  const index = Math.round(track.scrollLeft / track.clientWidth);
+  drag = undefined;
+  track.classList.remove("is-dragging");
+  selectSlide(index);
+}
+track.addEventListener("pointerup", finishDrag);
+track.addEventListener("pointercancel", finishDrag);
+track.addEventListener("lostpointercapture", finishDrag);
+window.addEventListener("resize", () =>
+  track.scrollTo({
+    left: currentSlide * track.clientWidth,
+    behavior: "instant",
+  }),
 );
+updateSlide();

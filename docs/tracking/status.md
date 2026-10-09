@@ -7,7 +7,7 @@
 - 즐겨찾기·음량·마지막 채널·테마·미니 모드 저장
 - 압정 고정·드래그·로그인 시 실행. 시작은 무음
 - 내부 이름 `motungi-radio`, 앱 ID `io.github.devsejong.motungiradio`
-- [소개 사이트](https://devsejong.github.io/motungi-radio-site/) 공개. 앱 소스는 비공개
+- [소개 사이트](https://devsejong.github.io/motungi-radio/) 공개. 앱 소스와 홈페이지는 같은 공개 저장소에서 관리
 
 ## 이번 변경
 

@@ -1,6 +1,6 @@
 # 소개 사이트
 
-[공개 페이지](https://devsejong.github.io/motungi-radio-site/) · [저장소](https://github.com/devsejong/motungi-radio-site)
+[공개 페이지](https://devsejong.github.io/motungi-radio/) · [저장소](https://github.com/devsejong/motungi-radio-site)
 
 원본은 `site/`, 배포 체크아웃은 `/Users/sejong/Workspace/motungi-radio-site`다. GitHub Pages는 `main` 루트를 사용한다.
 

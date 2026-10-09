@@ -1,6 +1,6 @@
 # 설치·업데이트
 
-[홈페이지](https://devsejong.github.io/motungi-radio-site/) 또는 [GitHub Releases](https://github.com/devsejong/motungi-radio-site/releases/tag/v0.2.1)에서 무료 시험판을 받습니다. GitHub 로그인은 필요 없습니다. 이전 한국 라디오 시험본과는 별도 설정을 사용합니다.
+[홈페이지](https://devsejong.github.io/motungi-radio/) 또는 [GitHub Releases](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.1)에서 무료 시험판을 받습니다. GitHub 로그인은 필요 없습니다. 이전 한국 라디오 시험본과는 별도 설정을 사용합니다.
 
 | 환경 | 0.2.1 설치파일 |
 | --- | --- |

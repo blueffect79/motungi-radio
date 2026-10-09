@@ -9,3 +9,6 @@ src-tauri/gen/
 release-artifacts/
 dist-packages/
 artifacts/
+*.p12
+*.p8
+certificate-base64.txt

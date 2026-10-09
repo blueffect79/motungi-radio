@@ -12,9 +12,11 @@
 
 ## 설치
 
-macOS 13 이상(Apple Silicon·Intel), Windows 10/11 x64를 목표로 합니다. 정식 배포 전 시험 중이며 최신 이름의 설치파일은 아직 생성하지 않았습니다.
+macOS 13 이상(Apple Silicon·Intel), Windows 10/11 x64를 목표로 합니다. Mac·Windows 무료 시험판을 GitHub Releases에서 제공합니다. Linux x64 시험판은 Ubuntu·Mint를 우선 대상으로 준비합니다.
 
-[홈페이지](https://devsejong.github.io/motungi-radio-site/) · [설치 안내](docs/install.md) · [지원 채널](docs/station-support.md) · [검증 기록](docs/verification.md)
+[홈페이지](https://devsejong.github.io/motungi-radio/) · [설치 안내](docs/install.md) · [지원 채널](docs/station-support.md) · [검증 기록](docs/verification.md)
+
+홈페이지 코드는 `site/`에서 앱과 함께 관리하고 GitHub Pages로 배포합니다.
 
 ## 개발
 
