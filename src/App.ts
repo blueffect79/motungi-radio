@@ -51,8 +51,7 @@ export async function mountApp(root: HTMLElement) {
     actionError = "",
     panel = false,
     regionsOpen = false,
-    ready = false,
-    displayId: string | null = null;
+    ready = false;
   const settings = new SettingsController(undefined, () => render());
   const autostart = new AutostartController(undefined, () => render());
   const player = new PlayerController({
@@ -67,6 +66,9 @@ export async function mountApp(root: HTMLElement) {
     footer = node("footer"),
     footerName = node("strong"),
     footerStatus = node("span", undefined, "play-status"),
+    footerProgram = node("div", undefined, "current-program"),
+    footerProgramTitle = node("strong"),
+    footerProgramTime = node("span", undefined, "program-time"),
     footerError = node("p", undefined, "error");
   const control = button(
     "재생",
@@ -87,17 +89,27 @@ export async function mountApp(root: HTMLElement) {
   volume.oninput = () => player.setVolume(Number(volume.value));
   volumeLabel.append(volume);
   footerError.setAttribute("role", "alert");
-  footer.append(footerName, footerStatus, control, volumeLabel, footerError);
+  footerProgram.append(footerProgramTitle, footerProgramTime);
+  footerProgram.setAttribute("aria-label", "현재 프로그램");
+  footer.append(
+    footerName,
+    footerStatus,
+    control,
+    footerProgram,
+    volumeLabel,
+    footerError,
+  );
   shell.append(footer);
   root.replaceChildren(shell);
   let poller: ProgramPoller | undefined;
-  function program(id: string) {
-    const p = currentProgram(
+  function programState(id: string) {
+    return currentProgram(
       programs.find((p) => p.stationId === id) ?? unavailable(id),
     );
-    return p.status === "available"
-      ? `${p.title} · ${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))} (한국 시간)${p.sourceKind === "schedule" ? " · 편성표 기준" : ""}`
-      : "프로그램 정보 확인 불가";
+  }
+  function program(id: string) {
+    const p = programState(id);
+    return p.status === "available" ? p.title! : "프로그램 정보 확인 불가";
   }
   function favorite(id: string) {
     void settings.update((s) => ({
@@ -108,7 +120,6 @@ export async function mountApp(root: HTMLElement) {
     }));
   }
   async function region(id: string) {
-    displayId = id;
     await settings.update((s) => ({ ...s, tbnStationId: id }));
     if (changeRegion(stations, player.state, id)) void player.select(id);
     render();
@@ -119,7 +130,6 @@ export async function mountApp(root: HTMLElement) {
       group ? `TBN 교통방송 · ${row.station?.region ?? row.name}` : row.name,
       `${row.name} 재생`,
       () => {
-        displayId = row.id;
         void player.select(row.id);
       },
       `station-${group ? "group-" : ""}${row.id}`,
@@ -257,16 +267,6 @@ export async function mountApp(root: HTMLElement) {
           }
         }
       });
-      if (displayId) {
-        const selected = stations.find((s) => s.id === displayId);
-        const section = node("section", undefined, "selected");
-        section.append(
-          node("h2", "선택한 방송"),
-          node("strong", selected?.name ?? `${displayId} · 이용 불가`),
-          node("p", selected ? program(displayId) : "삭제된 채널입니다."),
-        );
-        main.append(section);
-      }
       if (infoError) main.append(node("p", infoError, "muted"));
     }
     const oldMain = shell.querySelector("main");
@@ -278,6 +278,16 @@ export async function mountApp(root: HTMLElement) {
     footerName.textContent =
       current?.name ??
       (state.stationId ? "이용 불가 채널" : "선택한 방송 없음");
+    const metadata = state.stationId ? programState(state.stationId) : null;
+    footerProgram.hidden = !state.stationId;
+    footerProgramTitle.textContent =
+      metadata?.status === "available"
+        ? metadata.title
+        : "프로그램 정보 확인 불가";
+    footerProgramTime.textContent =
+      metadata?.status === "available"
+        ? `${time.format(new Date(metadata.startsAt!))}–${time.format(new Date(metadata.endsAt!))} (한국 시간)${metadata.sourceKind === "schedule" ? " · 편성표 기준" : ""}`
+        : "";
     footerStatus.textContent = {
       idle: "방송을 선택하세요",
       stopped: "정지됨",
@@ -308,8 +318,7 @@ export async function mountApp(root: HTMLElement) {
   player.subscribe(render);
   render();
   await settings.load();
-  displayId = settings.settings.lastStationId;
-  player.restore(displayId, settings.settings.volume);
+  player.restore(settings.settings.lastStationId, settings.settings.volume);
   try {
     const result = await invoke<Result<Catalog>>("list_stations");
     if (result.ok) stations = result.data.stations;
