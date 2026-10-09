@@ -6,3 +6,5 @@ src-tauri/target/
 src-tauri/gen/
 *.tsbuildinfo
 .DS_Store
+release-artifacts/
+dist-packages/
