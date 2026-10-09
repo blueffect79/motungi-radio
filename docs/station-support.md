@@ -21,8 +21,8 @@
 - 방송사별 정확한 호스트 allowlist, HTTPS/443, 사용자정보 및 fragment 금지. API/HLS 리다이렉트도 같은 방송사 allowlist로 검증하며 최대3번. WBS는 리다이렉트 거부.
 - 각 HTTP 요청 전체10초 제한, 유한 API/HLS 응답256KiB 제한. WBS 라이브는 첫 chunk 후 종료. 사용자에게 원본 reqwest 오류·서명URL을 노출하지 않는다.
 - 방송사가 발행한 서명/토큰을 수정하거나 생성하지 않는다. MBC 토큰의 정확한 만료시간은 확인하지 않았으며 매 재생 시 신규 조회한다. resolved URL은 메모리에서만 사용, 카탈로그·설정·로그에 저장하지 않는다.
-- 실제 macOS reqwest rustls는 MBC에서 ConnectionReset 발생. HTTP/1 강제·UA 변경만으로 해결되지 않음. **native-tls feature + use_native_tls()**로 인증서 검증을 유지하며 MBC 포함32개 Rust resolver 성공. 부모 Cargo.toml에 native-tls 필요.
-- 최종 오디오 재생기의 HLS 후속 요청은 WKWebView 엔진이 수행한다. resolver는 최초 HLS까지만 런타임 검증하고, 개발 probe는 하위목록·첫 조각까지 확인한다.
+- 실제 macOS reqwest rustls는 MBC에서 ConnectionReset 발생. HTTP/1 강제·UA 변경만으로 해결되지 않음. **native-tls feature + use_native_tls()**로 인증서 검증을 유지하며 MBC 포함32개 Rust resolver 성공. 현재 Cargo.toml은 native-tls를 사용한다.
+- 최종 HLS 후속 요청은 네이티브 HLS를 지원하는 macOS에서는 WKWebView가, Windows WebView2에서는 번들 HLS.js가 수행한다. resolver는 최초 HLS까지만 런타임 검증하고, 개발 probe는 하위목록·첫 조각까지 확인한다.
 
 ## 검증 기록
 
@@ -30,17 +30,19 @@
 - GREEN: 호스트 위조/HTTP/포트/자격정보, 악성·손상 JSONP, 중복ID·미등록ID unavailable/한국어 메시지/retryable=false, 계약 envelope, EBS 문자열, 응답 크기 경계, 실제 로컬 timeout 테스트.
 - `cargo test --features reqwest/native-tls --lib radio::tests::live_resolver -- --ignored` 실제32개 resolver 성공 exit0. 이 검사는 외부 네트워크가 필요하며 기본 테스트에서는 ignored.
 - `python3 scripts/live-stations-check.py`: 공식 응답→HLS→하위목록→첫 오디오 조각만 bounded probe, ID/결과만 출력. FEBC를 포함한32개 지원 채널 검사. URL과 토큰은 출력·저장하지 않음.
-- `npm run build` exit0. 최종 전체 테스트 결과는 작업 완료 보고 참조.
+- `npm run build` exit0. 통합 앱 코드 91ffeb4에서 프런트 43개·네이티브 39개·패키지 5개 테스트가 통과했다. 실시간 검사 2개는 일반 네이티브 테스트에서 제외한다.
 - sandbox에서 소켓 listen/외부네트워크가 막힐 수 있다. 로컬 timeout 테스트와 live 검사는 권한 있는 실행 환경에서 수행. 네트워크 sandbox 실패를 방송사 장애로 해석하지 않는다.
 
-## 프로그램 정보 원천 단서
+## 프로그램 정보 원천과 확인 결과
 
 - FEBC `https://seoul.febc.net/api/stream/current?channelId=175` GET200 현재 프로그램 응답.
 - cpbc 공식 API `onair.info.title` 및 정보 필드.
 - EBS 공식 페이지 `/onair/cururentOnair.json` 호출(철자 원문 그대로), 편성표 `/schedule`.
 - CBS `https://cbs.co.kr/schedule/all/ajax` GET JSON: tv/fm/musicfm/joy4u.
 - WBS 공식 온에어 HTML `.tit` 제목과 방송시간 문자열.
-- MBC mini 공식 JS의 편성/현재 방송 호출을 별도 확인할 것. 임의 프로그램 제목을 만들지 않는다.
+- MBC https://miniapi.imbc.com/Schedule/schedulelist 편성표의 STFM/FM4U/CHAM을 서울 표준FM/FM4U/올댓뮤직에 대응시켰다. 세 채널의 현재 구간 확인을 마쳤으며 편성표 기준으로 표시한다.
+- KBS static.api.kbs.co.kr/mediafactory/v1/schedule/onair_now, SBS static.apis.sbs.co.kr/radio-api/gorealra/1.0/main/section/common, BBS 공식 온에어 HTML의 ProgramNamePage/BroadCastTimePage를 사용한다.
+- 현재 정보 총 18개 채널 확인. TBN 13개는 정확한 지역 어댑터가 있으나 네이티브 TLS 조회 시간 초과로 확인 불가다. KBS 한민족은 외부 채널 26과 내부 응답 27의 불일치로 확인 불가이며 임의로 치환하지 않는다.
 
 MBC 재링크 관련 고지가 존재하며 앱 재배포·외부 플레이어 사용에 대한 명시적 허용은 별도 확인 필요하다. 이번 결과는 공식 공개 연결의 기술적 검증이며 배포 허가의 증명이 아니다. 개인 중개 서버나 인증 우회는 사용하지 않았다.
 
