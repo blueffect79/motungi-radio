@@ -1,0 +1,293 @@
+{
+  "version": 1,
+  "stations": [
+    {
+      "id": "mbc-sfm",
+      "providerId": "mbc",
+      "name": "MBC 표준FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://mini.imbc.com/",
+      "streamKey": "sfm"
+    },
+    {
+      "id": "mbc-mfm",
+      "providerId": "mbc",
+      "name": "MBC FM4U",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://mini.imbc.com/",
+      "streamKey": "mfm"
+    },
+    {
+      "id": "mbc-chm",
+      "providerId": "mbc",
+      "name": "MBC 올댓뮤직",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://mini.imbc.com/",
+      "streamKey": "chm"
+    },
+    {
+      "id": "kbs-21",
+      "providerId": "kbs",
+      "name": "KBS 1라디오",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "21"
+    },
+    {
+      "id": "kbs-22",
+      "providerId": "kbs",
+      "name": "KBS 2라디오",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "22"
+    },
+    {
+      "id": "kbs-23",
+      "providerId": "kbs",
+      "name": "KBS 3라디오",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "23"
+    },
+    {
+      "id": "kbs-24",
+      "providerId": "kbs",
+      "name": "KBS 1FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "24"
+    },
+    {
+      "id": "kbs-25",
+      "providerId": "kbs",
+      "name": "KBS 2FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "25"
+    },
+    {
+      "id": "kbs-26",
+      "providerId": "kbs",
+      "name": "KBS 한민족방송",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://radio.kbs.co.kr/",
+      "streamKey": "26"
+    },
+    {
+      "id": "sbs-powerpc",
+      "providerId": "sbs",
+      "name": "SBS 파워FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://www.sbs.co.kr/radio/",
+      "streamKey": "powerpc/powerfm"
+    },
+    {
+      "id": "sbs-lovepc",
+      "providerId": "sbs",
+      "name": "SBS 러브FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://www.sbs.co.kr/radio/",
+      "streamKey": "lovepc/lovefm"
+    },
+    {
+      "id": "cpbc-seoul",
+      "providerId": "cpbc",
+      "name": "cpbc 가톨릭평화방송",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://www.cpbc.co.kr/",
+      "streamKey": "radio"
+    },
+    {
+      "id": "ebs-fm",
+      "providerId": "ebs",
+      "name": "EBS FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://www.ebs.co.kr/onair?channelCodeString=radio",
+      "streamKey": "fm"
+    },
+    {
+      "id": "cbs-standard",
+      "providerId": "cbs",
+      "name": "CBS 표준FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://cbs.co.kr/onair/fm",
+      "streamKey": "cbs981"
+    },
+    {
+      "id": "cbs-music",
+      "providerId": "cbs",
+      "name": "CBS 음악FM",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://cbs.co.kr/onair/musicFm",
+      "streamKey": "cbs939"
+    },
+    {
+      "id": "cbs-joy4u",
+      "providerId": "cbs",
+      "name": "CBS JOY4U",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://cbs.co.kr/onair/joy4u",
+      "streamKey": "cbscmc"
+    },
+    {
+      "id": "bbs-seoul",
+      "providerId": "bbs",
+      "name": "BBS 불교방송",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://www.bbs.or.kr/HOME2/?ACT=ONAIR&pType=RADIO",
+      "streamKey": "radio"
+    },
+    {
+      "id": "febc-seoul",
+      "providerId": "febc",
+      "name": "FEBC 서울극동방송",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://seoul.febc.net/",
+      "streamKey": "unavailable"
+    },
+    {
+      "id": "wbs-seoul",
+      "providerId": "wbs",
+      "name": "WBS 원음방송",
+      "region": "서울",
+      "groupId": null,
+      "officialPageUrl": "https://wbsi.kr/",
+      "streamKey": "seoul"
+    },
+    {
+      "id": "tbn-busan",
+      "providerId": "tbn",
+      "name": "TBN 부산",
+      "region": "부산",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=2",
+      "streamKey": "busan"
+    },
+    {
+      "id": "tbn-gwangju",
+      "providerId": "tbn",
+      "name": "TBN 전남광주",
+      "region": "전남광주",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=3",
+      "streamKey": "gwangju"
+    },
+    {
+      "id": "tbn-daegu",
+      "providerId": "tbn",
+      "name": "TBN 대구",
+      "region": "대구",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=4",
+      "streamKey": "daegu"
+    },
+    {
+      "id": "tbn-daejeon",
+      "providerId": "tbn",
+      "name": "TBN 대전",
+      "region": "대전",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=5",
+      "streamKey": "daejeon"
+    },
+    {
+      "id": "tbn-gyeongin",
+      "providerId": "tbn",
+      "name": "TBN 경인",
+      "region": "경인",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=6",
+      "streamKey": "gyeongin"
+    },
+    {
+      "id": "tbn-gangwon",
+      "providerId": "tbn",
+      "name": "TBN 강원",
+      "region": "강원",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=7",
+      "streamKey": "gangwon"
+    },
+    {
+      "id": "tbn-jeonbuk",
+      "providerId": "tbn",
+      "name": "TBN 전북",
+      "region": "전북",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=8",
+      "streamKey": "jeonbuk"
+    },
+    {
+      "id": "tbn-ulsan",
+      "providerId": "tbn",
+      "name": "TBN 울산",
+      "region": "울산",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=9",
+      "streamKey": "ulsan"
+    },
+    {
+      "id": "tbn-gyeongnam",
+      "providerId": "tbn",
+      "name": "TBN 경남",
+      "region": "경남",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=10",
+      "streamKey": "gyeongnam"
+    },
+    {
+      "id": "tbn-kyungbuk",
+      "providerId": "tbn",
+      "name": "TBN 경북",
+      "region": "경북",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=11",
+      "streamKey": "kyungbuk"
+    },
+    {
+      "id": "tbn-jeju",
+      "providerId": "tbn",
+      "name": "TBN 제주",
+      "region": "제주",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=12",
+      "streamKey": "jeju"
+    },
+    {
+      "id": "tbn-chungbuk",
+      "providerId": "tbn",
+      "name": "TBN 충북",
+      "region": "충북",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=13",
+      "streamKey": "chungbuk"
+    },
+    {
+      "id": "tbn-chungnam",
+      "providerId": "tbn",
+      "name": "TBN 충남",
+      "region": "충남",
+      "groupId": "tbn",
+      "officialPageUrl": "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=14",
+      "streamKey": "chungnam"
+    }
+  ]
+}
