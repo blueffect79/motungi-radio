@@ -6,11 +6,11 @@
 |---|---|---|
 | MBC | 서울 표준FM, FM4U, 올댓뮤직 | [mini](https://mini.imbc.com/), [공식 webapp JS](https://miniwebapp.imbc.com/static/js/main.6c55a947.js)의 sminiplay.imbc.com/aacplay.ashx. sfm/mfm/chm + protocol=M3U8 + agent=webapp. 고정 callback `__aacplay` JSONP를 JSON 데이터로만 파싱. API·HLS·오디오조각200, 실제 Rust resolver 3개 성공. |
 | KBS | 1·2·3라디오, 1·2FM, 한민족 | [공식 라디오](https://radio.kbs.co.kr/), cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/21~26의 channel_item.service_url. API·HLS·조각200. 한민족 CDN은 hanminjokradio.gscdn.kbs.co.kr. World/인터넷 부가채널은 연결·카탈로그 별도 미확인으로 이번 등록 제외. |
-| SBS | 파워FM, 러브FM | [공식 라디오](https://www.sbs.co.kr/radio/), apis.sbs.co.kr/play-api/1.0/livestream/{powerpc/powerfm,lovepc/lovefm}?protocol=hls. 공식 응답의 radiolive.sbs.co.kr HTTP 주소를 검증된 동일 호스트 HTTPS로 변경, 서명은 그대로 유지. HLS·조각200. 고릴라 부가 음악채널은 이번 연결 미확인. |
+| SBS | 파워FM, 러브FM | [공식 라디오](https://www.sbs.co.kr/radio/), apis.sbs.co.kr/play-api/1.0/livestream/{powerpc/powerfm,lovepc/lovefm}?protocol=hls&ssl=Y. ssl=Y 옵션으로 공식 서버가 HTTPS URL을 직접 반환하며 응답 URL을 그대로 사용. HLS·조각200. 고릴라 부가 음악채널은 이번 연결 미확인. |
 | EBS | FM | [공식 온에어](https://www.ebs.co.kr/onair?channelCodeString=radio) 현재 HTML src의 liveotu.ebs.co.kr/fm/ 서명 URL을 매번 읽음. JS 실행 없이 허용된 URL 문자열만 추출. HLS·조각200. 반디 외국어는 별도 확인 전 등록 제외. |
 | CBS | 표준FM, 음악FM, JOY4U | [공식 onair](https://cbs.co.kr/onair/fm)의 onairUrl. 현재 m-aac.cbs.co.kr/mweb_{cbs981,cbs939,cbscmc}/_definst_/{key}.stream/playlist.m3u8. 3개 HLS·조각200. www.cbs.co.kr 홈페이지 연결종료와 구 aac.cbs.co.kr DNS 실패는 현재 스트림 실패가 아님. |
 | BBS | 서울 불교방송 | [공식 온에어](https://www.bbs.or.kr/HOME2/?ACT=ONAIR&pType=RADIO)의 source src, bbslive.clouducs.com/bbsradio-mlive/radio.stream/playlist.m3u8. HLS·AAC 조각200. 구 bbsradio-live/livestream 경로는 실패. |
-| cpbc | 서울 가톨릭평화방송 | [공식](https://www.cpbc.co.kr/), [공식 API](https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio)의 onair.source.mediasource.mediaurl. cdn-radio-seoul.cpbc.co.kr의 동일 경로를 HTTPS 사용. HLS·조각200. |
+| cpbc | 서울 가톨릭평화방송 | [공식](https://www.cpbc.co.kr/), [공식 API](https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio?ssl=Y)의 onair.source.mediasource.mediaurl. ssl=Y 옵션으로 공식 서버가 cdn-radio-seoul.cpbc.co.kr HTTPS URL을 직접 반환하며 그대로 사용. HLS·조각200. |
 | FEBC | 서울극동방송(미확인) | [공식 서울](https://seoul.febc.net/) 현재 채널 확인. 과거 후보 mlive2.febc.net/live/seoulfm/playlist.m3u8는 HTTPS HLS200이지만 현재 공식 플레이어와 연결 관계를 확인하지 못함. 접근 불가라고 단정하지 않으며 확인 전 unavailable 반환. |
 | WBS | 원음방송 서울 | [공식 온에어](https://wbsi.kr/onair_radio.php)의 audio data-stream=https://wbsradio.kr/wbs-seoul. HTTP200 audio/mpeg, 실제 MPEG 데이터 수신 확인. 무한 라이브 다운로드를 하지 않고 첫 chunk까지만 검증. 구 www.wbs.co.kr TLS 오류는 현 서비스 실패가 아님. |
 | TBN | 부산·전남광주·대구·대전·경인·강원·전북·울산·경남·경북·제주·충북·충남 | [공식 플레이어](https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=1)의 현재 hls.loadSource www.tbn.it.kr/{지역}/myStream/playlist.m3u8. 공식13지역 목록과 onload 키 대조. 전13지역 HLS·조각200. 2026-05-04 URL변경 주석 확인. |
@@ -27,7 +27,7 @@
 ## 검증 기록
 
 - RED: 기능 작성 전 `rejects_foreign_host` 테스트 추가. `cargo test --offline --lib radio` exit101, `validate_url` 미구현(E0425) 확인.
-- GREEN: 호스트 위조/HTTP/포트/자격정보, 악성·손상 JSONP, 중복ID, 계약 envelope, EBS 문자열, 응답 크기 경계, 실제 로컬 timeout 테스트.
+- GREEN: 호스트 위조/HTTP/포트/자격정보, 악성·손상 JSONP, 중복ID·미등록ID unavailable/한국어 메시지/retryable=false, 계약 envelope, EBS 문자열, 응답 크기 경계, 실제 로컬 timeout 테스트.
 - `cargo test --features reqwest/native-tls --lib radio::tests::live_resolver -- --ignored` 실제31개 resolver 성공 exit0. 이 검사는 외부 네트워크가 필요하며 기본 테스트에서는 ignored.
 - `python3 scripts/live-stations-check.py`: 공식 응답→HLS→하위목록→첫 오디오 조각만 bounded probe, ID/결과만 출력. FEBC는 UNVERIFIED. URL과 토큰은 출력·저장하지 않음.
 - `npm run build` exit0. 최종 전체 테스트 결과는 작업 완료 보고 참조.
@@ -42,3 +42,5 @@
 - MBC mini 공식 JS의 편성/현재 방송 호출을 별도 확인할 것. 임의 프로그램 제목을 만들지 않는다.
 
 MBC 재링크 관련 고지가 존재하며 앱 재배포·외부 플레이어 사용에 대한 명시적 허용은 별도 확인 필요하다. 이번 결과는 공식 공개 연결의 기술적 검증이며 배포 허가의 증명이 아니다. 개인 중개 서버나 인증 우회는 사용하지 않았다.
+
+후속 검토 반영: SBS·cpbc API 모두 ssl=Y의 HTTPS 직접 반환을 실측하여 URL scheme 변환을 제거했다. 서명·경로·scheme 모두 응답 원문 유지. 미등록ID 직접 resolver 테스트를 추가했다.

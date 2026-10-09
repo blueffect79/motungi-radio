@@ -286,7 +286,7 @@ pub async fn resolve_stream(station_id: &str) -> Result<ResolvedStream, AppError
     }
     let p = station.provider_id.as_str();
     let url=match p {
- "cpbc"=>{let body=fetch("https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio",p).await?;let v:serde_json::Value=serde_json::from_str(&body).map_err(|_|invalid())?;let raw=v.pointer("/onair/source/mediasource/mediaurl").and_then(|x|x.as_str()).ok_or_else(invalid)?;raw.replacen("http://cdn-radio-seoul.cpbc.co.kr/","https://cdn-radio-seoul.cpbc.co.kr/",1)},
+ "cpbc"=>{let body=fetch("https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio?ssl=Y",p).await?;let v:serde_json::Value=serde_json::from_str(&body).map_err(|_|invalid())?;let raw=v.pointer("/onair/source/mediasource/mediaurl").and_then(|x|x.as_str()).ok_or_else(invalid)?;raw.to_owned()},
  "ebs"=>{let body=fetch("https://www.ebs.co.kr/onair?channelCodeString=radio",p).await?;parse_ebs(&body)?},
  "wbs"=>{probe_mp3("https://wbsradio.kr/wbs-seoul",p).await?;return Ok(ResolvedStream{station_id:station.id,url:"https://wbsradio.kr/wbs-seoul".into(),format:StreamFormat::Mp3,resolved_at:chrono::Utc::now().to_rfc3339()})},
  "bbs"=>"https://bbslive.clouducs.com/bbsradio-mlive/radio.stream/playlist.m3u8".into(),
@@ -294,7 +294,7 @@ pub async fn resolve_stream(station_id: &str) -> Result<ResolvedStream, AppError
  "tbn"=>format!("https://www.tbn.it.kr/{}/myStream/playlist.m3u8",station.stream_key),
  "mbc"=>parse_mbc(&fetch(&format!("https://sminiplay.imbc.com/aacplay.ashx?channel={}&protocol=M3U8&agent=webapp&callback=__aacplay",station.stream_key),p).await?)?,
  "kbs"=>parse_kbs(&fetch(&format!("https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/{}",station.stream_key),p).await?)?,
- "sbs"=>{let body=fetch(&format!("https://apis.sbs.co.kr/play-api/1.0/livestream/{}?protocol=hls",station.stream_key),p).await?;let raw=body.trim();if let Some(rest)=raw.strip_prefix("http://radiolive.sbs.co.kr/"){format!("https://radiolive.sbs.co.kr/{rest}")}else{raw.into()}},_=>return Err(invalid())};
+ "sbs"=>{let body=fetch(&format!("https://apis.sbs.co.kr/play-api/1.0/livestream/{}?protocol=hls&ssl=Y",station.stream_key),p).await?;body.trim().to_owned()},_=>return Err(invalid())};
     validate_url(&url, p)?;
     let manifest = fetch(&url, p).await?;
     if !manifest.trim_start().starts_with("#EXTM3U") {
@@ -342,6 +342,18 @@ mod tests {
         ] {
             assert!(parse_mbc(bad).is_err())
         }
+    }
+    #[test]
+    fn unknown_station_is_non_retryable_unavailable() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(resolve_stream("not-a-registered-station"));
+        let error = match result {
+            Err(error) => error,
+            Ok(_) => panic!("unknown station resolved"),
+        };
+        assert_eq!(error.code, ErrorCode::Unavailable);
+        assert_eq!(error.message, "등록되지 않은 채널입니다.");
+        assert!(!error.retryable);
     }
     #[test]
     fn catalog_ids_and_duplicates() {

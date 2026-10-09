@@ -25,8 +25,8 @@ def check(s):
   if p=='mbc':
    b=get(f'https://sminiplay.imbc.com/aacplay.ashx?channel={k}&protocol=M3U8&agent=webapp&callback=__aacplay',p).decode();m=re.fullmatch(r'__aacplay\((.*)\);?',b.strip(),re.S);u=json.loads(m.group(1))['AACLiveURL']
   elif p=='kbs':u=json.loads(get(f'https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/{k}',p))['channel_item'][0]['service_url']
-  elif p=='sbs':u=get(f'https://apis.sbs.co.kr/play-api/1.0/livestream/{k}?protocol=hls',p).decode().strip().replace('http://radiolive.sbs.co.kr/','https://radiolive.sbs.co.kr/',1)
-  elif p=='cpbc':u=json.loads(get('https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio',p))['onair']['source']['mediasource']['mediaurl'].replace('http://cdn-radio-seoul.cpbc.co.kr/','https://cdn-radio-seoul.cpbc.co.kr/',1)
+  elif p=='sbs':u=get(f'https://apis.sbs.co.kr/play-api/1.0/livestream/{k}?protocol=hls&ssl=Y',p).decode().strip()
+  elif p=='cpbc':u=json.loads(get('https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio?ssl=Y',p))['onair']['source']['mediasource']['mediaurl']
   elif p=='ebs':u=re.search(r'https://liveotu\.ebs\.co\.kr/fm/[^\s\x22\x27<>]+',get('https://www.ebs.co.kr/onair?channelCodeString=radio',p).decode()).group().replace('&amp;','&')
   elif p=='wbs':
    assert get('https://wbsradio.kr/wbs-seoul',p,True);return s['id']+' OK mp3-data'
