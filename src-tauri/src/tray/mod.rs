@@ -149,7 +149,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     TrayIconBuilder::with_id("radio")
         .icon(icon)
         .icon_as_template(cfg!(target_os = "macos"))
-        .tooltip("한국 라디오")
+        .tooltip("모퉁이 라디오")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -238,9 +238,9 @@ pub fn set_tray_playing(playing: bool, app: tauri::AppHandle) -> Result<(), Stri
     tray.set_icon(Some(status_icon(playing)))
         .map_err(|_| "아이콘을 변경할 수 없습니다.")?;
     tray.set_tooltip(Some(if playing {
-        "한국 라디오 · 재생 중"
+        "모퉁이 라디오 · 재생 중"
     } else {
-        "한국 라디오 · 일시정지"
+        "모퉁이 라디오 · 일시정지"
     }))
     .map_err(|_| "아이콘 상태를 변경할 수 없습니다.".to_string())
 }

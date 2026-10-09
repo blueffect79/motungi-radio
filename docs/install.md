@@ -4,9 +4,9 @@
 
 | 환경 | 파일 이름 |
 | --- | --- |
-| macOS 13 이상 Apple Silicon | radiokorea-버전-macos-arm64.dmg |
-| macOS 13 이상 Intel | radiokorea-버전-macos-x64.dmg |
-| Windows 10/11 x64 | radiokorea-버전-windows-x64.exe |
+| macOS 13 이상 Apple Silicon | motungi-radio-버전-macos-arm64.dmg |
+| macOS 13 이상 Intel | motungi-radio-버전-macos-x64.dmg |
+| Windows 10/11 x64 | motungi-radio-버전-windows-x64.exe |
 
 ## 파일 확인
 

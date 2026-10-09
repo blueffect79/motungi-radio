@@ -329,9 +329,9 @@ export async function mountApp(root: HTMLElement) {
           ? "설정"
           : panel === "schedule"
             ? `${stations.find((s) => s.id === scheduleId)?.name ?? "방송"} 편성표`
-            : "한국 라디오",
+            : "모퉁이 라디오",
       );
-      heading.title = pinned ? "드래그해서 플레이어 이동" : "한국 라디오";
+      heading.title = pinned ? "드래그해서 플레이어 이동" : "모퉁이 라디오";
       heading.onpointerdown = (event) => {
         if (!pinned || event.button !== 0) return;
         void invoke("start_player_drag").catch(() => {

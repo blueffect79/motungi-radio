@@ -168,7 +168,7 @@ async fn probe_mp3(raw: &str, provider: &str) -> Result<(), AppError> {
     let mut r = reqwest::Client::builder()
         .use_native_tls()
         .http1_only()
-        .user_agent("RadioKorea/0.1")
+        .user_agent("MotungiRadio/0.2.1")
         .timeout(REQUEST_TIMEOUT)
         .redirect(reqwest::redirect::Policy::none())
         .build()
@@ -210,7 +210,7 @@ async fn fetch(raw: &str, provider: &str) -> Result<String, AppError> {
     let client = reqwest::Client::builder()
         .use_native_tls()
         .http1_only()
-        .user_agent("RadioKorea/0.1")
+        .user_agent("MotungiRadio/0.2.1")
         .timeout(REQUEST_TIMEOUT)
         .redirect(reqwest::redirect::Policy::custom(move |a| {
             if a.previous().len() >= 3 || validate_url(a.url().as_str(), &p).is_err() {

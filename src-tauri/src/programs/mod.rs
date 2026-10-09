@@ -436,7 +436,7 @@ async fn fetch(raw: &str) -> Result<Value, AppError> {
     }
     let client = reqwest::Client::builder()
         .use_native_tls()
-        .user_agent("RadioKorea/0.1")
+        .user_agent("MotungiRadio/0.2.1")
         .http1_only()
         .timeout(Duration::from_secs(10))
         .redirect(reqwest::redirect::Policy::custom(|a| {

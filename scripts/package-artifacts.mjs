@@ -16,7 +16,7 @@ const source = candidates[0];
 const bytes = readFileSync(source);
 if (bytes.length < 1024 || (extension === '.exe' && bytes.subarray(0, 2).toString() !== 'MZ') || (extension === '.dmg' && bytes.subarray(-512, -508).toString() !== 'koly')) throw new Error('설치파일 크기 또는 형식이 올바르지 않습니다.');
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
-const name = `radiokorea-${version}-${platform}${extension}`;
+const name = `motungi-radio-${version}-${platform}${extension}`;
 mkdirSync(output, { recursive: true });
 if (readdirSync(output).length) throw new Error('다른 빌드와 섞이지 않도록 빈 출력 폴더를 사용하세요.');
 copyFileSync(source, join(output, name));
