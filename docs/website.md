@@ -31,3 +31,13 @@ GitHub Pages 소스는 `main` 브랜치의 루트이며 `.nojekyll`을 사용한
 - 캡처: `artifacts/site/github-pages-light.jpg`, `github-pages-dark.jpg`, `github-pages-mobile.jpg`
 
 사이트 배포는 앱 공개 배포나 Windows 실기기 설치·청취 완료를 뜻하지 않는다.
+
+## 리서치 기반 UI 개편 — 2026-10-09
+
+[UI 비교와 선정 근거](website-design-research.md)를 바탕으로 Sleeve의 데스크톱 제품 쇼케이스와 Doppler의 플랫폼별 설치 정보 구조를 적용했다. 가운데 제목·대형 데스크톱 장면, 전체/미니 전환 컨트롤, 사용 장면별 기능 설명으로 재구성했다. 방송 정보는 예시이고 공개 다운로드 준비 상태를 유지한다.
+
+사이트 소스: `d0838e2beff2d5eecf93891ef639389fb3b96059`. [Pages 실행 37918744201](https://github.com/devsejong/radiokorea-site/actions/runs/37918744201).
+
+로컬 브라우저에서 실제 렌더 너비 320·390·800·1280px의 가로 넘침, 프로그램 행 넘침, 쇼케이스 안 플레이어 잘림 검사를 통과했다. 전체/미니 전환 시 목록 숨김·복원과 세 컨트롤의 선택 상태 갱신, 라이트/다크 전환을 확인했다. 모바일 제목의 단어 줄바꿈과 미니 설명 화면을 보정했다. JavaScript 구문과 HTML 자산·내부 앵커 검사를 통과했다. 앱 코드나 설치파일 변경은 없다.
+
+최종 Pages 실행은 성공했고 build 상태 `built`를 확인했다. 공개 주소의 HTML·CSS·JavaScript·SVG 바이트가 로컬 원본과 일치한다. 공개 브라우저에서 새 제목·쇼케이스 렌더, 전체/미니 선택 상태, 라이트/다크 전환, 설치 안내·FAQ, 390px 모바일 가로 넘침 및 프로그램 행 잘림을 확인했다. 공개 페이지 콘솔 오류·경고 없음. 최종 캡처는 `artifacts/site/research-showcase-light.jpg`, `research-showcase-dark.jpg`, `research-showcase-mobile.jpg`이다.

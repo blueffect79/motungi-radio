@@ -17,7 +17,7 @@ function applyTheme(theme) {
     .querySelector("use")
     .setAttribute("href", theme === "dark" ? "#sun" : "#moon");
   document.querySelector('meta[name="theme-color"]').content =
-    theme === "dark" ? "#11131a" : "#f7f8fc";
+    theme === "dark" ? "#121317" : "#fafafa";
 }
 applyTheme(
   ["light", "dark"].includes(rememberedTheme)
@@ -39,10 +39,28 @@ systemDark.addEventListener("change", (event) => {
   if (!rememberedTheme) applyTheme(event.matches ? "dark" : "light");
 });
 const miniButton = document.querySelector("#mini-toggle");
-miniButton.addEventListener("click", () => {
-  const mini = document
-    .querySelector(".app-window")
-    .classList.toggle("is-mini");
+const previewModes = document.querySelectorAll("[data-preview-mode]");
+function setPreviewMode(mini) {
+  document.querySelector(".app-window").classList.toggle("is-mini", mini);
+  document
+    .querySelector(".showcase-desktop")
+    .classList.toggle("mini-scene", mini);
   miniButton.setAttribute("aria-pressed", String(mini));
   miniButton.textContent = mini ? "전체" : "미니";
-});
+  previewModes.forEach((button) =>
+    button.setAttribute(
+      "aria-pressed",
+      String((button.dataset.previewMode === "mini") === mini),
+    ),
+  );
+}
+miniButton.addEventListener("click", () =>
+  setPreviewMode(
+    !document.querySelector(".app-window").classList.contains("is-mini"),
+  ),
+);
+previewModes.forEach((button) =>
+  button.addEventListener("click", () =>
+    setPreviewMode(button.dataset.previewMode === "mini"),
+  ),
+);

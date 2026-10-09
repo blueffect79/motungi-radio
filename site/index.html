@@ -8,8 +8,8 @@
       content="한국 라디오 — Mac 메뉴 막대와 Windows 트레이에서 듣는 무료 한국 라디오 앱. 현재 프로그램, 편성표, 즐겨찾기와 미니 플레이어를 한곳에."
     />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f7f8fc" />
-    <title>한국 라디오 — 작업은 계속. 라디오는 곁에.</title>
+    <meta name="theme-color" content="#fafafa" />
+    <title>한국 라디오 — 당신의 하루에, 라디오 하나.</title>
     <link rel="icon" href="icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
     <script src="app.js" defer></script>
@@ -81,11 +81,12 @@
     <main id="main">
       <section class="hero wrap">
         <div class="hero-copy">
-          <span class="eyebrow"><span></span> YOUR LITTLE RADIO COMPANION</span>
-          <h1>작업은 계속.<br />라디오는 <em>곁에.</em></h1>
+          <span class="eyebrow"
+            ><span></span> 한국 채널을 위한 무료 PC 라디오</span
+          >
+          <h1>당신의 하루에, <em>라디오 하나.</em></h1>
           <p class="hero-description">
-            이 방송, 저 방송. 앱을 옮겨 다닐 필요 없이.<br />한국 라디오를 작은
-            창 하나에 담았습니다.
+            Mac 메뉴 막대와 Windows 트레이에서, 익숙한 방송을 한곳에.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#install"
@@ -99,85 +100,113 @@
           </div>
         </div>
         <div class="hero-visual">
-          <div class="desktop-bar">
-            <span class="desktop-label">당신의 데스크톱</span
-            ><span class="tray-radio"
-              ><svg><use href="#radio" /></svg><i></i></span
-            ><span class="desktop-time">14:00</span>
-          </div>
-          <div class="app-window" aria-label="한국 라디오 인터페이스 예시">
-            <div class="app-toolbar">
-              <strong>한국 라디오</strong>
-              <div>
-                <button id="mini-toggle" type="button" aria-pressed="false">
-                  미니</button
-                ><span>설정</span><svg><use href="#pin" /></svg>
-              </div>
+          <div class="showcase-desktop">
+            <div class="showcase-caption" aria-hidden="true">
+              <span>GOOD COMPANY, ALL DAY.</span>
+              <p>오늘의 배경음은,<br />좋아하는 목소리.</p>
             </div>
-            <div class="player-card">
-              <div class="program-content">
-                <div class="program-art" aria-hidden="true">
-                  <span>ON<br />AIR</span>
-                  <div class="art-wave">
-                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <div class="showcase-mini" aria-hidden="true">
+              <div class="mini-demo">
+                <div class="mini-cover">
+                  <svg><use href="#radio" /></svg>
+                </div>
+                <div><small>MBC FM4U</small><strong>오후의 음악</strong></div>
+                <svg class="mini-play"><use href="#play" /></svg>
+              </div>
+              <span>한 채널을 오래 듣는 날엔, 더 작게.</span>
+            </div>
+            <div class="desktop-bar">
+              <span class="desktop-label">한국 라디오</span
+              ><span class="tray-radio"
+                ><svg><use href="#radio" /></svg><i></i></span
+              ><span class="desktop-time">14:00</span>
+            </div>
+            <div class="app-window" aria-label="한국 라디오 인터페이스 예시">
+              <div class="app-toolbar">
+                <strong>한국 라디오</strong>
+                <div>
+                  <button id="mini-toggle" type="button" aria-pressed="false">
+                    미니</button
+                  ><span>설정</span><svg><use href="#pin" /></svg>
+                </div>
+              </div>
+              <div class="player-card">
+                <div class="program-content">
+                  <div class="program-art" aria-hidden="true">
+                    <span>ON<br />AIR</span>
+                    <div class="art-wave">
+                      <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                  </div>
+                  <div class="program-copy">
+                    <small>MBC FM4U · 14:00–16:00</small>
+                    <h2>오후의 음악</h2>
+                    <p>다음 16:00 · 함께하는 오후 <span>›</span></p>
                   </div>
                 </div>
-                <div class="program-copy">
-                  <small>MBC FM4U · 14:00–16:00</small>
-                  <h2>오후의 음악</h2>
-                  <p>다음 16:00 · 함께하는 오후 <span>›</span></p>
+                <div class="player-controls">
+                  <div>
+                    <svg><use href="#prev" /></svg><small>MBC 표준FM</small>
+                  </div>
+                  <span class="play-icon"
+                    ><svg><use href="#play" /></svg
+                  ></span>
+                  <div>
+                    <svg><use href="#next" /></svg><small>MBC 올댓뮤직</small>
+                  </div>
                 </div>
               </div>
-              <div class="player-controls">
-                <div>
-                  <svg><use href="#prev" /></svg><small>MBC 표준FM</small>
+              <div class="channel-list">
+                <div class="channel-tabs">
+                  <span>전체 채널</span><span>즐겨찾기</span>
                 </div>
-                <span class="play-icon"
-                  ><svg><use href="#play" /></svg
-                ></span>
-                <div>
-                  <svg><use href="#next" /></svg><small>MBC 올댓뮤직</small>
+                <div class="channel">
+                  <span class="channel-cover">MBC</span>
+                  <div>
+                    <strong>MBC 표준FM</strong><small>이야기가 있는 시간</small>
+                  </div>
+                  <span class="schedule-label">편성표</span
+                  ><svg><use href="#star" /></svg>
                 </div>
-              </div>
-            </div>
-            <div class="channel-list">
-              <div class="channel-tabs">
-                <span>전체 채널</span><span>즐겨찾기</span>
-              </div>
-              <div class="channel">
-                <span class="channel-cover">MBC</span>
-                <div>
-                  <strong>MBC 표준FM</strong><small>이야기가 있는 시간</small>
+                <div class="channel selected">
+                  <span class="channel-cover selected-cover">FM4U</span>
+                  <div><strong>MBC FM4U</strong><small>오후의 음악</small></div>
+                  <span class="schedule-label">편성표</span
+                  ><svg class="filled-star"><use href="#star" /></svg>
                 </div>
-                <span class="schedule-label">편성표</span
-                ><svg><use href="#star" /></svg>
-              </div>
-              <div class="channel selected">
-                <span class="channel-cover selected-cover">FM4U</span>
-                <div><strong>MBC FM4U</strong><small>오후의 음악</small></div>
-                <span class="schedule-label">편성표</span
-                ><svg class="filled-star"><use href="#star" /></svg>
-              </div>
-              <div class="channel">
-                <span class="channel-cover">KBS</span>
-                <div>
-                  <strong>KBS 1라디오</strong><small>뉴스와 시사</small>
+                <div class="channel">
+                  <span class="channel-cover">KBS</span>
+                  <div>
+                    <strong>KBS 1라디오</strong><small>뉴스와 시사</small>
+                  </div>
+                  <span class="schedule-label">편성표</span
+                  ><svg><use href="#star" /></svg>
                 </div>
-                <span class="schedule-label">편성표</span
-                ><svg><use href="#star" /></svg>
-              </div>
-              <div class="channel">
-                <span class="channel-cover">SBS</span>
-                <div>
-                  <strong>SBS 파워FM</strong><small>음악이 흐르는 오후</small>
+                <div class="channel">
+                  <span class="channel-cover">SBS</span>
+                  <div>
+                    <strong>SBS 파워FM</strong><small>음악이 흐르는 오후</small>
+                  </div>
+                  <span class="schedule-label">편성표</span
+                  ><svg><use href="#star" /></svg>
                 </div>
-                <span class="schedule-label">편성표</span
-                ><svg><use href="#star" /></svg>
               </div>
             </div>
           </div>
+          <div
+            class="preview-controls"
+            role="group"
+            aria-label="플레이어 미리보기 모드"
+          >
+            <button type="button" data-preview-mode="full" aria-pressed="true">
+              전체 플레이어
+            </button>
+            <button type="button" data-preview-mode="mini" aria-pressed="false">
+              미니 플레이어
+            </button>
+          </div>
           <div class="preview-note">
-            UI 미리보기 · 프로그램과 시간은 예시입니다
+            직접 전환해보세요 · UI와 프로그램 정보는 예시입니다
           </div>
         </div>
       </section>
@@ -194,58 +223,102 @@
           <h2>작아서 더 편한 라디오.</h2>
           <p>필요한 정보와 버튼만, 손이 닿는 곳에.</p>
         </div>
-        <div class="feature-grid">
-          <article class="feature-card wide">
-            <div class="feature-number">01 / 곁에 두기</div>
-            <h3>메뉴 막대에서,<br />트레이에서 바로.</h3>
-            <p>
-              아이콘을 누르면 작은 플레이어가 열립니다.<br />압정으로 고정하고
-              원하는 위치로 옮겨두세요.
-            </p>
-            <div class="mini-demo">
-              <div class="mini-cover">
-                <svg><use href="#radio" /></svg>
-              </div>
-              <div><small>MBC FM4U</small><strong>오후의 음악</strong></div>
-              <svg class="mini-play"><use href="#play" /></svg>
-            </div>
-            <span class="feature-footnote"
-              >한 채널을 오래 듣는 날엔 미니 플레이어로.</span
-            >
-          </article>
-          <article class="feature-card">
-            <div class="feature-number">02 / 다음도 알기</div>
-            <h3>지금 누구의 시간인지.<br />다음은 언제인지.</h3>
-            <p>
-              현재 프로그램과 다음 방송을 확인하고,<br />날짜별 편성표에서
-              하루의 흐름을 살펴보세요.
-            </p>
-            <div class="schedule-demo">
-              <div class="past"><span>12:00</span>점심의 이야기</div>
-              <div class="now"><span>14:00</span>오후의 음악 <b>NOW</b></div>
-              <div><span>16:00</span>함께하는 오후</div>
-            </div>
-            <span class="feature-footnote"
-              >방송사가 제공하는 정보에 따라 표시됩니다.</span
-            >
-          </article>
-          <article class="feature-card">
-            <div class="feature-number">03 / 내 취향대로</div>
-            <h3>흰색도, 검정색도.<br />좋아하는 채널도.</h3>
-            <p>
-              라이트·다크·시스템 테마를 지원합니다.<br />즐겨찾기와 마지막
-              채널은 이 PC에 기억합니다.
-            </p>
-            <div class="theme-demo">
-              <span class="light-chip"
-                ><svg><use href="#sun" /></svg> Light</span
-              ><span class="dark-chip"
-                ><svg><use href="#moon" /></svg> Dark</span
+        <div class="feature-stories">
+          <article class="feature-story">
+            <div class="story-copy">
+              <span class="feature-number">01 / 작은 창, 편한 청취</span>
+              <h3>작업은 그대로.<br />라디오는 가까이.</h3>
+              <p>
+                메뉴 막대나 트레이에서 한 번에 열고,<br />압정으로 고정해 원하는
+                자리에 두세요.<br />자주 듣는 채널은 즐겨찾기에 담아두고요.
+              </p>
+              <span class="feature-footnote"
+                >창을 숨겨도 재생은 이어집니다.</span
               >
             </div>
-            <span class="feature-footnote"
-              >위쪽 달 아이콘으로 이 페이지의 테마도 바꿔보세요.</span
-            >
+            <div class="story-visual compact-scene">
+              <div class="scene-tag">
+                <svg><use href="#pin" /></svg> 좋아하는 자리에 고정
+              </div>
+              <div class="mini-demo">
+                <div class="mini-cover">
+                  <svg><use href="#radio" /></svg>
+                </div>
+                <div>
+                  <small>MBC FM4U · 14:00–16:00</small
+                  ><strong>오후의 음악</strong
+                  ><small>다음 16:00 · 함께하는 오후</small>
+                </div>
+                <svg class="mini-play"><use href="#play" /></svg>
+              </div>
+              <span class="scene-caption"
+                >작업 공간을 아껴주는 미니 플레이어</span
+              >
+            </div>
+          </article>
+          <article class="feature-story reverse">
+            <div class="story-copy">
+              <span class="feature-number">02 / 방송의 흐름을 한눈에</span>
+              <h3>지금의 이야기.<br />다음의 기대.</h3>
+              <p>
+                현재 프로그램과 시작·종료 시간을 보고,<br />다음 방송까지 미리
+                확인하세요.<br />하루 편성은 날짜별로 살펴볼 수 있습니다.
+              </p>
+              <span class="feature-footnote"
+                >방송사가 제공하는 정보에 따라 표시됩니다.</span
+              >
+            </div>
+            <div class="story-visual schedule-scene">
+              <div class="schedule-sheet">
+                <div class="sheet-heading">
+                  <strong>오늘의 편성표</strong><span>예시 편성</span>
+                </div>
+                <div class="schedule-demo">
+                  <div class="past">
+                    <span>12:00</span>
+                    <div>점심의 이야기<small>12:00 – 14:00</small></div>
+                  </div>
+                  <div class="now">
+                    <span>14:00</span>
+                    <div>오후의 음악<small>14:00 – 16:00</small></div>
+                    <b>방송 중</b>
+                  </div>
+                  <div>
+                    <span>16:00</span>
+                    <div>함께하는 오후<small>16:00 – 18:00</small></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="feature-story">
+            <div class="story-copy">
+              <span class="feature-number">03 / 나의 데스크톱에 맞게</span>
+              <h3>밝은 낮에도.<br />조용한 밤에도.</h3>
+              <p>
+                흰색, 검정색, 시스템 테마까지.<br />음량과 마지막 채널은 이 PC에
+                기억합니다.<br />다시 켜면 내가 듣던 채널부터 만나세요.
+              </p>
+              <span class="feature-footnote"
+                >앱 실행만으로 소리가 자동 재생되지는 않습니다.</span
+              >
+            </div>
+            <div class="story-visual appearance-scene">
+              <div class="appearance-card appearance-light">
+                <svg><use href="#sun" /></svg><span>Light</span>
+                <div class="appearance-lines"><i></i><i></i></div>
+                <div class="appearance-play">
+                  <svg><use href="#play" /></svg>
+                </div>
+              </div>
+              <div class="appearance-card appearance-dark">
+                <svg><use href="#moon" /></svg><span>Dark</span>
+                <div class="appearance-lines"><i></i><i></i></div>
+                <div class="appearance-play">
+                  <svg><use href="#play" /></svg>
+                </div>
+              </div>
+            </div>
           </article>
         </div>
       </section>

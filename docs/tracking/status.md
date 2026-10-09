@@ -1,5 +1,9 @@
 # 현재 상태
 
+## GitHub Pages 리서치 기반 개편 — 2026-10-09
+
+Sleeve·Raycast·Doppler 공식 사이트를 비교하고, Sleeve의 큰 데스크톱 제품 장면과 Doppler의 플랫폼별 설치 정보 구조를 적용했다. 전체/미니 전환 컨트롤과 장면별 기능 설명, 라이트/다크 테마를 구현했다. 비교·선정 근거는 `docs/website-design-research.md`, 배포·검증 기록은 `docs/website.md`에 남긴다. 사이트 소스 `d0838e2`, Pages 실행 37918744201 성공 및 공개 주소 소스 일치·화면 검증 완료. 로컬 320·390·800·1280px에서 가로 넘침과 플레이어 잘림 없음. 공개 다운로드는 계속 준비 상태로 안내한다.
+
 ## GitHub Pages 소개 사이트 — 2026-10-09
 
 [공개 소개 페이지](https://devsejong.github.io/radiokorea-site/)를 별도 공개 저장소 `devsejong/radiokorea-site`에 배포했다. 기능·설치 안내·FAQ, 라이트/다크 테마와 미니 모드 예시를 제공한다. 앱 소스는 비공개로 유지하며 설치파일은 공개하지 않았다. 현재 0.2.1 시험 상태와 공개 다운로드 준비 상태를 명시한다.
