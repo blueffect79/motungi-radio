@@ -41,6 +41,18 @@ async function wait(check) {
 }
 const execute = (script, args = []) =>
   request(`/session/${session}/execute/sync`, "POST", { script, args });
+async function screenshot() {
+  let pixels;
+  // GTK may return a blank frame immediately after resizing the WebKit surface.
+  await wait(async () => {
+    pixels = Buffer.from(
+      await request(`/session/${session}/screenshot`),
+      "base64",
+    );
+    return pixels.length > 1000;
+  });
+  return pixels;
+}
 const click = async (label) => {
   const element = await request(`/session/${session}/element`, "POST", {
     using: "css selector",
@@ -82,7 +94,7 @@ try {
   );
   writeFileSync(
     `dist-packages/linux-x64/proof/${proofLabel}-player.png`,
-    Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
+    await screenshot(),
   );
   await click("미니 플레이어");
   await wait(() =>
@@ -92,7 +104,7 @@ try {
   );
   writeFileSync(
     `dist-packages/linux-x64/proof/${proofLabel}-mini.png`,
-    Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
+    await screenshot(),
   );
   await click("설정");
   await wait(() =>
@@ -113,7 +125,7 @@ try {
   );
   writeFileSync(
     `dist-packages/linux-x64/proof/${proofLabel}-settings.png`,
-    Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
+    await screenshot(),
   );
   if (process.env.LINUX_LIVE_PROBE === "1") {
     await click("돌아가기");
@@ -134,7 +146,7 @@ try {
     );
     writeFileSync(
       `dist-packages/linux-x64/proof/${proofLabel}-live.png`,
-      Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
+      await screenshot(),
     );
     await click("방송 정지");
     await delay(2000);

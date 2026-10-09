@@ -9,6 +9,8 @@
 
 ## 로컬 빌드
 
+Developer ID 서명·Apple 공증 배포는 [Mac 서명·공증](macos-signing.md)의 전용 빌드 명령을 사용한다. 아래 일반 빌드 및 현재 Actions 빌드는 임시 서명이다.
+
 빌드는 대상 운영체제에서 수행한다. macOS에서 Windows 설치 검증을 대신하지 않는다. Rust target을 먼저 설치한다.
 
 ```sh
