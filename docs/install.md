@@ -39,6 +39,8 @@ Get-FileHash .\파일이름.exe -Algorithm SHA256
 
 ## Linux 시험판
 
+[Linux 설치파일](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.1-linux.1)
+
 Ubuntu 22.04 이상·Linux Mint 21 이상, Intel/AMD 64비트부터 제공합니다. `.deb`는 패키지 관리자로 설치하고, `.AppImage`는 실행 권한을 부여한 뒤 실행합니다. 다른 배포판·Wayland는 미검증입니다.
 
 ```sh

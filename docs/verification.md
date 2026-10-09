@@ -1,8 +1,19 @@
 # 검증 기록과 직접 사용 시험
 
+## Linux 시험판 — 2026-10-10
+
+소스 `165b9c0002c1d9142a8b905e2b5f3907a8abed99`. [빌드 37995950870](https://github.com/devsejong/motungi-radio/actions/runs/37995950870), [실행 37996577897](https://github.com/devsejong/motungi-radio/actions/runs/37996577897) 성공. 프런트 50개·네이티브 46개·형식 6개 통과. Ubuntu 22.04의 실제 WebKit/IPC, `.deb` 설치 및 AppImage 실행, 무음 시작, 미니 200–360px, 설정 640px·음량 100%, EBS FM playing 이벤트·5초 유지·정지 후 무재생을 확인했다. 가상 화면과 가상 음원 출력이며 사람의 청취, 물리 트레이·로그인·절전·Wayland는 미검증이다.
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.1-linux-x64.deb` | `fd8b8e74e42ebbfff3fc2e828ca1a4cceaefd1fc54a4578aaa1d6a8888bc1beb` |
+| `motungi-radio-0.2.1-linux-x64.AppImage` | `0cfa1490d13039779f0e8fd72762da3a1a39b2bed713671eff529af956268ed8` |
+
+[공개 다운로드](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.1-linux.1). 내부 패키지명 `motungi-radio`, 앱 목록 이름 모퉁이 라디오, amd64 ELF와 다운로드 사본 해시를 확인했다.
+
 ## 공개 시험판 0.2.1 — 2026-10-09
 
-[GitHub Releases](https://github.com/devsejong/motungi-radio-site/releases/tag/v0.2.1)에 Mac 2종·Windows x64 설치파일과 통합 SHA256SUMS.txt를 공개했다. 소스는 `a0bab4ea21869a072571f954872d39874f5c7b0c`, 빌드는 [Actions 37927624430](https://github.com/devsejong/motungi-radio/actions/runs/37927624430)이며 세 작업 모두 성공했다.
+[GitHub Releases](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.1)에 Mac 2종·Windows x64 설치파일과 통합 SHA256SUMS.txt를 공개했다. 소스는 `a0bab4ea21869a072571f954872d39874f5c7b0c`, 빌드는 [Actions 37927624430](https://github.com/devsejong/motungi-radio/actions/runs/37927624430)이며 세 작업 모두 성공했다.
 
 각 대상 프런트 50개·네이티브 46개·패키지 5개 테스트 통과(네이티브 실시간 검사 3개 제외). 실제 바이너리 CPU·설치파일 형식·SHA256 검사 통과. 두 DMG는 로컬에서 체크섬·내부 앱 ID·버전·CPU 및 ad-hoc 서명 무결성도 확인했다. 공개 파일 4개를 인증 없이 HTTP 200으로 내려받아 원본 해시와 대조했다.
 
