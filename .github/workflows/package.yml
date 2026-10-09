@@ -62,7 +62,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: inputs.platform == 'all' || inputs.platform == matrix.platform
         with:
-          name: radiokorea-${{ matrix.name }}-${{ github.sha }}
+          name: motungi-radio-${{ matrix.name }}-${{ github.sha }}
           path: dist-packages/${{ matrix.name }}/
           if-no-files-found: error
           retention-days: 14

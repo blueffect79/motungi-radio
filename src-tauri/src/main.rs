@@ -1,4 +1,4 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 fn main() {
-    radiokorea_lib::run();
+    motungi_radio_lib::run();
 }

@@ -2,7 +2,7 @@ const root = document.documentElement;
 const themeButton = document.querySelector(".theme-toggle");
 let rememberedTheme;
 try {
-  rememberedTheme = localStorage.getItem("radiokorea-site-theme");
+  rememberedTheme = localStorage.getItem("motungi-radio-site-theme");
 } catch {
   /* Theme remains available without storage. */
 }
@@ -30,7 +30,7 @@ themeButton.addEventListener("click", () => {
   rememberedTheme = root.dataset.theme === "dark" ? "light" : "dark";
   applyTheme(rememberedTheme);
   try {
-    localStorage.setItem("radiokorea-site-theme", rememberedTheme);
+    localStorage.setItem("motungi-radio-site-theme", rememberedTheme);
   } catch {
     /* No persistent preference required. */
   }

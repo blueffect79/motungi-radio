@@ -3,7 +3,7 @@
 한국 채널을 방송사 구분 없이 듣는 무료 PC 앱이다. Tauri·TypeScript·Rust로 Mac 메뉴 막대와 Windows 트레이의 작은 창을 공유한다. 계정·운영 서버 없이 공식 방송사에 직접 연결한다.
 
 ```text
-radiokorea/
+motungi-radio/
 ├── AGENTS.md → 프로젝트 작업 기준
 ├── CLAUDE.md → 같은 작업 기준
 ├── docs/

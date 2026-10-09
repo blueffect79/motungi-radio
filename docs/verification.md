@@ -6,7 +6,7 @@
 
 Mac arm64·x64 DMG는 로컬 릴리스 빌드와 DMG 체크섬 검사를 통과했다. 최종 DMG를 읽기 전용으로 마운트하여 내부 앱 버전 0.2.1, 실제 대상 CPU, `codesign --verify --deep --strict` 무결성 검사를 확인했다. ad-hoc 서명이며 Developer ID 서명·공증은 받지 않았다.
 
-Windows x64 NSIS EXE는 [GitHub Actions 37914476217](https://github.com/devsejong/radiokorea/actions/runs/37914476217)에서 같은 소스로 생성했다. 프런트 44개·네이티브 46개·패키지 5개 테스트, 실제 앱 AMD64 PE32+ 검사, EXE 형식·SHA256 검사와 artifact 업로드가 통과했다. 실시간 네이티브 테스트 3개는 제외됐다. 로컬 다운로드 사본의 EXE 형식과 SHA256도 확인했다. Windows는 코드 서명 전이다. 이 실행의 Mac 단계는 생략됐고 위 Mac 파일은 로컬 빌드 결과다.
+Windows x64 NSIS EXE는 [GitHub Actions 37914476217](https://github.com/devsejong/motungi-radio/actions/runs/37914476217)에서 같은 소스로 생성했다. 프런트 44개·네이티브 46개·패키지 5개 테스트, 실제 앱 AMD64 PE32+ 검사, EXE 형식·SHA256 검사와 artifact 업로드가 통과했다. 실시간 네이티브 테스트 3개는 제외됐다. 로컬 다운로드 사본의 EXE 형식과 SHA256도 확인했다. Windows는 코드 서명 전이다. 이 실행의 Mac 단계는 생략됐고 위 Mac 파일은 로컬 빌드 결과다.
 
 | 대상 | 파일 | SHA256 |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Windows x64 NSIS EXE는 [GitHub Actions 37914476217](https://github.com/devsejon
 | macos-x64 | `radiokorea-0.2.1-macos-x64.dmg` | `43270ca9d542927ecfb42dec894837611d40de7929112bf093a93bb57419dd4e` |
 | windows-x64 | `radiokorea-0.2.1-windows-x64.exe` | `6e8629a0cebf652672013134213aa90498b265eef362c989efeace9acf3c8913` |
 
-파일은 `release-artifacts/0.2.1-4b7a65f/`의 대상별 폴더에 보관한다. 루트의 `build-provenance.json`과 `SHA256SUMS.txt`에 소스·빌드·체크섬을 기록했다. Windows [artifact 11608819910](https://github.com/devsejong/radiokorea/actions/runs/37914476217/artifacts/11608819910)은 접근 권한이 필요하며 보관 기간은 14일이다. 소스 브랜치를 푸시했으며 공개 Releases 발행이나 저장소 공개 전환은 하지 않았다.
+파일은 `release-artifacts/0.2.1-4b7a65f/`의 대상별 폴더에 보관한다. 루트의 `build-provenance.json`과 `SHA256SUMS.txt`에 소스·빌드·체크섬을 기록했다. Windows [artifact 11608819910](https://github.com/devsejong/motungi-radio/actions/runs/37914476217/artifacts/11608819910)은 접근 권한이 필요하며 보관 기간은 14일이다. 소스 브랜치를 푸시했으며 공개 Releases 발행이나 저장소 공개 전환은 하지 않았다.
 
 이번 0.2.1 DMG/EXE로 실제 설치·청취·업그레이드·로그인·절전 시험은 수행하지 않았다. 로컬 Mac에 설치된 0.2.0 앱은 `a9df600` 기준으로 이번 설치본과 같은 기능 코드를 포함하지만 버전 메타데이터와 설치파일은 다르다. Intel Mac 및 Windows 11 Intel의 실기기 시험은 사용자 확인이 남아 있다.
 
@@ -24,7 +24,7 @@ Windows x64 NSIS EXE는 [GitHub Actions 37914476217](https://github.com/devsejon
 
 Mac arm64·x64 DMG는 로컬 릴리스 빌드, DMG 체크섬, 읽기 전용으로 마운트한 내부 앱의 0.2.0 버전·실제 CPU 아키텍처·서명 무결성 검사를 통과했다. Mac은 ad-hoc 서명이며 Developer ID 서명·공증은 받지 않았다.
 
-Windows x64 NSIS EXE는 [GitHub Actions 37904725710](https://github.com/devsejong/radiokorea/actions/runs/37904725710)에서 성공했다. 프런트 40개·네이티브 43개·패키지 5개 테스트, 실제 앱 AMD64 PE32+ 검사, EXE 형식·SHA256 검사와 artifact 업로드를 통과했다. 네이티브 실시간 테스트 3개는 기본 실행에서 제외됐다. 다운로드 사본의 SHA256도 일치한다. Windows는 코드 서명 전이다. 같은 실행의 Mac 단계는 생략됐으며 위 Mac 파일은 로컬 빌드 결과다.
+Windows x64 NSIS EXE는 [GitHub Actions 37904725710](https://github.com/devsejong/motungi-radio/actions/runs/37904725710)에서 성공했다. 프런트 40개·네이티브 43개·패키지 5개 테스트, 실제 앱 AMD64 PE32+ 검사, EXE 형식·SHA256 검사와 artifact 업로드를 통과했다. 네이티브 실시간 테스트 3개는 기본 실행에서 제외됐다. 다운로드 사본의 SHA256도 일치한다. Windows는 코드 서명 전이다. 같은 실행의 Mac 단계는 생략됐으며 위 Mac 파일은 로컬 빌드 결과다.
 
 | 대상 | 파일 | SHA256 |
 | --- | --- | --- |
@@ -50,9 +50,9 @@ Windows x64 NSIS EXE는 [GitHub Actions 37904725710](https://github.com/devsejon
 | 설치파일 검사 코드 | `91ffeb4`에서 `node --test scripts/check-binary-architecture.test.mjs`: 5개 통과, 종료 코드 0. `node scripts/check-package.mjs` 메타데이터 사전 검증 종료 코드 0 | 자동 검증 통과. 파일 검사 코드의 테스트이며 설치파일 자체의 성공 판정은 별도 |
 | 스트림 원천 | 32개 채널의 실제 네이티브 resolver 및 HLS/미디어 바이트 응답 성공 | 네트워크 응답 확인. 소리 출력, 디코딩 지속성, 30분 재생을 확인한 것은 아님 |
 | 프로그램 원천 | 18개 현재 프로그램 확인, 14개 확인 불가 | TBN 13개는 네이티브 TLS 요청 시간 초과, KBS 한민족은 응답 채널 불일치. 확인 불가를 정상 프로그램 정보로 간주하지 않음 |
-| 0.1.0 설치파일 | `91ffeb4` 기준 Mac arm64·Intel DMG 생성·내부 바이너리·서명 일관성·해시 검증 통과. Windows x64 EXE도 [빌드 성공](https://github.com/devsejong/radiokorea/actions/runs/37873884953), 실제 앱 AMD64 PE32+·설치파일 형식·해시 확인 | 파일별 결과는 아래 표에 기록. 실제 설치·화면·청취를 확인한 것은 아님. 이전 취소 실행은 성공 근거에서 제외 |
+| 0.1.0 설치파일 | `91ffeb4` 기준 Mac arm64·Intel DMG 생성·내부 바이너리·서명 일관성·해시 검증 통과. Windows x64 EXE도 [빌드 성공](https://github.com/devsejong/motungi-radio/actions/runs/37873884953), 실제 앱 AMD64 PE32+·설치파일 형식·해시 확인 | 파일별 결과는 아래 표에 기록. 실제 설치·화면·청취를 확인한 것은 아님. 이전 취소 실행은 성공 근거에서 제외 |
 | 실기기 | 사용자 직접 확인 예정 | Mac 화면·청취 및 Windows 설치·실행 미검증 |
-| 공개 배포 | [GitHub 저장소](https://github.com/devsejong/radiokorea)는 비공개 검증 단계. MBC 재링크 고지 관련 공개 조건 미해결 | 공개 릴리스 완료 아님. 저장소·빌드 기록 접근에는 권한 필요 |
+| 공개 배포 | [GitHub 저장소](https://github.com/devsejong/motungi-radio)는 비공개 검증 단계. MBC 재링크 고지 관련 공개 조건 미해결 | 공개 릴리스 완료 아님. 저장소·빌드 기록 접근에는 권한 필요 |
 
 자동 테스트·원천 응답·파일 검사는 실제 설치·청취의 증거와 구분한다. 원천 확인 결과는 이후 방송사 변경으로 달라질 수 있다.
 

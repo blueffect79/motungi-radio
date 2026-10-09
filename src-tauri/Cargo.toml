@@ -1,12 +1,12 @@
 [package]
-name = "radiokorea"
+name = "motungi-radio"
 version = "0.2.1"
 description = "모퉁이 라디오 — 한국 채널 메뉴 막대·트레이 플레이어"
 edition = "2021"
 license = "MIT"
 
 [lib]
-name = "radiokorea_lib"
+name = "motungi_radio_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

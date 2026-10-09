@@ -5,7 +5,7 @@ mod tests {
     fn path() -> std::path::PathBuf {
         std::env::temp_dir()
             .join(format!(
-                "radiokorea-settings-{}-{}",
+                "motungi-radio-settings-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
