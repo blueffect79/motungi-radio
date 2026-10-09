@@ -40,6 +40,7 @@ jobs:
         run: |
           npm ci
           node scripts/check-package.mjs
+          node --test scripts/check-binary-architecture.test.mjs
       - name: Rust stable 준비
         if: inputs.platform == 'all' || inputs.platform == matrix.platform
         run: |
