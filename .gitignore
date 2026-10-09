@@ -1,0 +1,8 @@
+.dryforge/
+.local-tools/
+node_modules
+dist/
+src-tauri/target/
+src-tauri/gen/
+*.tsbuildinfo
+.DS_Store
