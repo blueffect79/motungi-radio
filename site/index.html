@@ -85,7 +85,7 @@
         >모퉁이라디오</a
       >
       <nav aria-label="주요 메뉴">
-        <a href="#features">기능</a><a href="#install">설치 안내</a
+        <a href="#downloads">다운로드</a
         ><button
           class="theme-toggle"
           type="button"
@@ -105,15 +105,53 @@
           <p class="hero-description">
             Mac 메뉴 막대와 Windows 트레이에서, 익숙한 방송을 한곳에.
           </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#install"
-              >설치 안내 <svg><use href="#arrow" /></svg></a
-            ><a class="text-link" href="#features"
-              >어떤 앱인가요? <span>↓</span></a
+          <div
+            class="downloads"
+            id="downloads"
+            role="group"
+            aria-label="앱 다운로드"
+          >
+            <button
+              class="download-button"
+              type="button"
+              disabled
+              aria-describedby="download-status"
+              aria-label="Mac Apple Silicon 다운로드 준비 중"
             >
+              <span class="download-arrow" aria-hidden="true">↓</span>
+              <span
+                ><strong>Mac 다운로드</strong><small>Apple Silicon</small></span
+              >
+            </button>
+            <button
+              class="download-button"
+              type="button"
+              disabled
+              aria-describedby="download-status"
+              aria-label="Mac Intel 다운로드 준비 중"
+            >
+              <span class="download-arrow" aria-hidden="true">↓</span>
+              <span><strong>Mac 다운로드</strong><small>Intel</small></span>
+            </button>
+            <button
+              class="download-button"
+              type="button"
+              disabled
+              aria-describedby="download-status"
+              aria-label="Windows 다운로드 준비 중"
+            >
+              <span class="download-arrow" aria-hidden="true">↓</span>
+              <span
+                ><strong>Windows 다운로드</strong
+                ><small>Intel · AMD x64</small></span
+              >
+            </button>
           </div>
+          <p class="download-status" id="download-status">
+            공개 다운로드 준비 중
+          </p>
           <div class="hero-notes">
-            <span>Mac & Windows</span><span>무료</span><span>로그인 없이</span>
+            <span>무료</span><span>로그인 없이</span>
           </div>
         </div>
         <div class="hero-visual">
@@ -232,187 +270,6 @@
           ><span>CBS</span><span>TBN 경인</span><span>종교방송</span>
         </div>
       </div>
-      <section class="features wrap" id="features">
-        <div class="section-heading">
-          <span class="eyebrow">SMALL WINDOW, GOOD COMPANY</span>
-          <h2>작아서 더 편한 라디오.</h2>
-          <p>필요한 정보와 버튼만, 손이 닿는 곳에.</p>
-        </div>
-        <div class="feature-stories">
-          <article class="feature-story">
-            <div class="story-copy">
-              <span class="feature-number">01 / 작은 창, 편한 청취</span>
-              <h3>작업은 그대로.<br />라디오는 가까이.</h3>
-              <p>
-                메뉴 막대나 트레이에서 한 번에 열고,<br />압정으로 고정해 원하는
-                자리에 두세요.<br />자주 듣는 채널은 즐겨찾기에 담아두고요.
-              </p>
-              <span class="feature-footnote"
-                >창을 숨겨도 재생은 이어집니다.</span
-              >
-            </div>
-            <div class="story-visual compact-scene">
-              <div class="scene-tag">
-                <svg><use href="#pin" /></svg> 좋아하는 자리에 고정
-              </div>
-              <div class="mini-demo">
-                <div class="mini-cover">
-                  <svg><use href="#radio" /></svg>
-                </div>
-                <div>
-                  <small>MBC FM4U · 14:00–16:00</small
-                  ><strong>오후의 음악</strong
-                  ><small>다음 16:00 · 함께하는 오후</small>
-                </div>
-                <svg class="mini-play"><use href="#play" /></svg>
-              </div>
-              <span class="scene-caption"
-                >작업 공간을 아껴주는 미니 플레이어</span
-              >
-            </div>
-          </article>
-          <article class="feature-story reverse">
-            <div class="story-copy">
-              <span class="feature-number">02 / 방송의 흐름을 한눈에</span>
-              <h3>지금의 이야기.<br />다음의 기대.</h3>
-              <p>
-                현재 프로그램과 시작·종료 시간을 보고,<br />다음 방송까지 미리
-                확인하세요.<br />하루 편성은 날짜별로 살펴볼 수 있습니다.
-              </p>
-              <span class="feature-footnote"
-                >방송사가 제공하는 정보에 따라 표시됩니다.</span
-              >
-            </div>
-            <div class="story-visual schedule-scene">
-              <div class="schedule-sheet">
-                <div class="sheet-heading">
-                  <strong>오늘의 편성표</strong><span>예시 편성</span>
-                </div>
-                <div class="schedule-demo">
-                  <div class="past">
-                    <span>12:00</span>
-                    <div>점심의 이야기<small>12:00 – 14:00</small></div>
-                  </div>
-                  <div class="now">
-                    <span>14:00</span>
-                    <div>오후의 음악<small>14:00 – 16:00</small></div>
-                    <b>방송 중</b>
-                  </div>
-                  <div>
-                    <span>16:00</span>
-                    <div>함께하는 오후<small>16:00 – 18:00</small></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-          <article class="feature-story">
-            <div class="story-copy">
-              <span class="feature-number">03 / 나의 데스크톱에 맞게</span>
-              <h3>밝은 낮에도.<br />조용한 밤에도.</h3>
-              <p>
-                흰색, 검정색, 시스템 테마까지.<br />음량과 마지막 채널은 이 PC에
-                기억합니다.<br />다시 켜면 내가 듣던 채널부터 만나세요.
-              </p>
-              <span class="feature-footnote"
-                >앱 실행만으로 소리가 자동 재생되지는 않습니다.</span
-              >
-            </div>
-            <div class="story-visual appearance-scene">
-              <div class="appearance-card appearance-light">
-                <svg><use href="#sun" /></svg><span>Light</span>
-                <div class="appearance-lines"><i></i><i></i></div>
-                <div class="appearance-play">
-                  <svg><use href="#play" /></svg>
-                </div>
-              </div>
-              <div class="appearance-card appearance-dark">
-                <svg><use href="#moon" /></svg><span>Dark</span>
-                <div class="appearance-lines"><i></i><i></i></div>
-                <div class="appearance-play">
-                  <svg><use href="#play" /></svg>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-      <section class="install-section wrap" id="install">
-        <div class="section-heading">
-          <span class="eyebrow">GET READY TO LISTEN</span>
-          <h2>내 PC 한켠에, 모퉁이라디오.</h2>
-          <p>현재 버전 <strong>0.2.1</strong> · 비공개 시험 중</p>
-        </div>
-        <div class="install-grid">
-          <article class="install-card">
-            <span class="os-mark">macOS</span>
-            <h3>Mac에서 듣기</h3>
-            <p>macOS 13 이상<br />Apple Silicon / Intel 각각 제공</p>
-            <div class="availability">DMG · 시험 중</div>
-            <ol>
-              <li>사용 중인 Mac에 맞는 DMG를 받습니다.</li>
-              <li>기존 앱을 종료하고 Applications로 복사합니다.</li>
-              <li>메뉴 막대의 라디오 아이콘을 눌러 시작합니다.</li>
-            </ol>
-          </article>
-          <article class="install-card">
-            <span class="os-mark">Windows</span>
-            <h3>Windows에서 듣기</h3>
-            <p>
-              Windows 10 / 11 x64 목표<br />Intel / AMD · Windows ARM 미지원
-            </p>
-            <div class="availability">EXE · 시험 중</div>
-            <ol>
-              <li>x64용 EXE를 받습니다.</li>
-              <li>기존 앱을 종료하고 설치기를 실행합니다.</li>
-              <li>트레이의 라디오 아이콘을 눌러 시작합니다.</li>
-            </ol>
-          </article>
-        </div>
-        <div class="release-notice">
-          <strong>공개 다운로드는 준비 중입니다.</strong>
-          <p>
-            공개 배포 전 시험 중입니다. Mac 공증·Windows 코드 서명은 준비
-            중입니다.
-          </p>
-        </div>
-      </section>
-      <section class="faq wrap">
-        <h2>궁금한 점</h2>
-        <details>
-          <summary>어떤 채널을 들을 수 있나요?</summary>
-          <p>MBC·KBS·SBS·EBS·종교방송·TBN 경인, 총 20개 채널입니다.</p>
-        </details>
-        <details>
-          <summary>무료인가요? 가입이 필요한가요?</summary>
-          <p>무료이며 가입 없이 사용합니다. 인터넷 연결이 필요합니다.</p>
-        </details>
-        <details>
-          <summary>방송사의 공식 앱인가요?</summary>
-          <p>공식 앱은 아닙니다. 각 방송사의 공식 스트림에 직접 연결합니다.</p>
-        </details>
-        <details>
-          <summary>프로그램 정보가 없을 때도 들을 수 있나요?</summary>
-          <p>
-            네. 정보 조회가 실패해도 재생은 계속됩니다. 편성표가 없으면 공식
-            페이지를 안내합니다.
-          </p>
-        </details>
-      </section>
     </main>
-    <footer class="footer wrap">
-      <a class="brand" href="#"
-        ><span class="brand-icon"
-          ><svg><use href="#radio" /></svg></span
-        >모퉁이라디오</a
-      >
-      <p>화면 한켠, 좋아하는 방송.</p>
-      <a
-        href="https://github.com/devsejong/motungi-radio-site"
-        target="_blank"
-        rel="noopener noreferrer"
-        >사이트 GitHub <svg><use href="#arrow" /></svg></a
-      ><small>방송 콘텐츠의 권리는 각 방송사와 권리자에게 있습니다.</small>
-    </footer>
   </body>
 </html>
