@@ -36,3 +36,16 @@ Get-FileHash .\파일이름.exe -Algorithm SHA256
 삭제 전 로그인 시 실행을 끕니다. Mac은 앱을 휴지통으로, Windows는 설정 → 설치된 앱에서 제거합니다. 설정 파일은 남을 수 있습니다.
 
 방송이 안 나오면 인터넷 연결과 방송사 공식 플레이어를 확인하세요. [시험 결과](verification.md)
+
+## Linux 시험판
+
+Ubuntu 22.04 이상·Linux Mint 21 이상, Intel/AMD 64비트부터 제공합니다. `.deb`는 패키지 관리자로 설치하고, `.AppImage`는 실행 권한을 부여한 뒤 실행합니다. 다른 배포판·Wayland는 미검증입니다.
+
+```sh
+sudo apt install ./motungi-radio-0.2.1-linux-x64.deb
+# 또는
+chmod +x motungi-radio-0.2.1-linux-x64.AppImage
+./motungi-radio-0.2.1-linux-x64.AppImage
+```
+
+Linux에서는 작업 표시줄의 일반 창으로 사용합니다. 트레이가 있으면 메뉴의 ‘열기’로 복원할 수 있습니다. 창은 외부 클릭으로 숨겨지지 않으며 닫기 시 최소화합니다. GNOME에서 트레이 확장이 없어도 작업 표시줄로 돌아올 수 있습니다. 절전 복귀는 systemd-logind 알림을 사용합니다. 실제 청취·로그인·절전과 데스크톱별 트레이 동작은 별도 시험이 필요합니다.

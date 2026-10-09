@@ -128,3 +128,41 @@ mod platform {
         }
     }
 }
+
+#[cfg(target_os = "linux")]
+mod platform {
+    use gio::{DBusConnection, SignalSubscriptionId};
+    use std::cell::RefCell;
+    thread_local! {
+        static OBSERVER: RefCell<Option<(DBusConnection, SignalSubscriptionId)>> = const { RefCell::new(None) };
+    }
+    pub fn register(app: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+        // Non-systemd environments can still run; only native wake recovery is unavailable.
+        let Ok(connection) = gio::bus_get_sync(gio::BusType::System, None::<&gio::Cancellable>)
+        else {
+            return Ok(());
+        };
+        let subscription = connection.signal_subscribe(
+            Some("org.freedesktop.login1"),
+            Some("org.freedesktop.login1.Manager"),
+            Some("PrepareForSleep"),
+            Some("/org/freedesktop/login1"),
+            None,
+            gio::DBusSignalFlags::NONE,
+            move |_, _, _, _, _, parameters| {
+                if parameters.get::<(bool,)>() == Some((false,)) {
+                    super::resumed(&app);
+                }
+            },
+        );
+        OBSERVER.with(|slot| *slot.borrow_mut() = Some((connection, subscription)));
+        Ok(())
+    }
+    pub fn unregister() {
+        OBSERVER.with(|slot| {
+            if let Some((connection, subscription)) = slot.borrow_mut().take() {
+                connection.signal_unsubscribe(subscription);
+            }
+        });
+    }
+}

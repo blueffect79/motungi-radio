@@ -16,7 +16,7 @@ struct PlayerWindowState {
 }
 
 fn hide_on_blur(pinned: bool) -> bool {
-    !pinned
+    !pinned && !cfg!(target_os = "linux")
 }
 
 #[derive(Default)]
@@ -103,6 +103,7 @@ pub fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
                 }
             }
         }
+        let _ = window.unminimize();
         let _ = window.show();
         let _ = window.set_focus();
     }
@@ -117,11 +118,16 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(PlayerWindowState::default());
     let state = Arc::new(Mutex::new(ToggleState::default()));
     if let Some(window) = app.get_webview_window("main") {
+        #[cfg(target_os = "linux")]
+        window.set_skip_taskbar(false)?;
         let handle = window.clone();
         let state = state.clone();
         window.on_window_event(move |event| match event {
             WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
+                #[cfg(target_os = "linux")]
+                let _ = handle.minimize();
+                #[cfg(not(target_os = "linux"))]
                 let _ = handle.hide();
             }
             WindowEvent::Focused(false) => {
@@ -151,7 +157,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .icon_as_template(cfg!(target_os = "macos"))
         .tooltip("모퉁이 라디오")
         .menu(&menu)
-        .show_menu_on_left_click(false)
+        .show_menu_on_left_click(cfg!(target_os = "linux"))
         .on_menu_event(|app, event| match event.id.as_ref() {
             "open" => show(
                 app,
@@ -284,7 +290,7 @@ mod tests {
     #[test]
     fn pinned_window_keeps_visibility_and_status_badge_changes() {
         assert!(!hide_on_blur(true));
-        assert!(hide_on_blur(false));
+        assert_eq!(hide_on_blur(false), !cfg!(target_os = "linux"));
         let playing = status_pixels(true);
         let stopped = status_pixels(false);
         assert_ne!(playing, stopped);
