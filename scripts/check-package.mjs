@@ -24,6 +24,8 @@ for (const path of [
 ])
   assert(read(path).length > 100, `문서 누락: ${path}`);
 const linux = JSON.parse(read("src-tauri/tauri.linux.conf.json"));
+assert.equal(linux.app.windows[0].resizable, true);
+assert.equal(linux.app.windows[0].minWidth, linux.app.windows[0].maxWidth);
 assert.match(linux.productName, /^[a-z0-9][a-z0-9+.-]+$/);
 assert(
   read("src-tauri/" + linux.bundle.linux.deb.desktopTemplate).includes(

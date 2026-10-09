@@ -10,5 +10,23 @@
         "desktopTemplate": "linux/motungi-radio.desktop"
       }
     }
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "모퉁이 라디오",
+        "width": 380,
+        "height": 640,
+        "minWidth": 380,
+        "minHeight": 200,
+        "resizable": true,
+        "visible": false,
+        "decorations": false,
+        "skipTaskbar": false,
+        "maxWidth": 380,
+        "maxHeight": 640
+      }
+    ]
   }
 }
