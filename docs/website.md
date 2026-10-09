@@ -8,6 +8,7 @@
 
 ```sh
 cp site/index.html site/style.css site/app.js site/icon.svg site/README.md site/LICENSE site/.nojekyll /Users/sejong/Workspace/motungi-radio-site/
+cp -R site/assets /Users/sejong/Workspace/motungi-radio-site/
 git -C /Users/sejong/Workspace/motungi-radio-site add .
 git -C /Users/sejong/Workspace/motungi-radio-site commit -m 'Update introduction site'
 git -C /Users/sejong/Workspace/motungi-radio-site push
@@ -19,4 +20,4 @@ Pages 실행 성공, 공개 자산 일치, 데스크톱·모바일 화면을 확
 
 ## 최신 확인
 
-2026-10-09 · 소스 `1797fad` · Pages 37929942183 성공. GitHub Releases v0.2.1의 Mac 2종·Windows 설치파일에 다운로드 버튼을 연결했다. 공개 HTML·CSS 일치, 인증 없는 파일 다운로드·SHA256 일치, 320·1280px 화면 확인. 캡처: `artifacts/public-release/0.2.1/homepage.jpg`.
+2026-10-09 · 소스 `d56c83a` · Pages 37930642765 성공. 1200×630 JPEG 공유 이미지와 Open Graph·X 카드의 제목·설명·대체 설명을 추가했다. 공개 HTML·이미지 HTTP 200 및 원본 일치, image/jpeg 확인. 서비스별 실제 공유 결과·기존 미리보기 캐시 갱신은 미확인이다. 이미지 원본: `site/assets/share-card.html`.
