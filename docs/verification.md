@@ -1,5 +1,11 @@
 # 검증 기록과 직접 사용 시험
 
+## Mac 0.2.2 서명 빌드 — 2026-10-10
+
+앱 소스 `76dc1ab`, 공증·검증 스크립트 `46eac92`. Apple Silicon·Intel DMG 생성 완료. 최종 이미지 내부의 0.2.2 버전·앱 ID·대상 CPU·Developer ID Application 서명·hardened runtime와 서명 무결성을 확인했다. 프런트 50개·네이티브 46개·설치파일 형식 테스트 6개 통과.
+
+Apple 공증 상태는 아직 `In Progress`다. 제출 ID: Apple Silicon `ea3e2011-481b-4d59-93f9-f7dc3b41f82a`, Intel `d5ad84cb-52a8-4a17-b703-884fb5adcae2`. 승인 후 DMG에 확인표를 첨부하고 Gatekeeper 검증·최종 해시를 기록한다. 공개 다운로드는 여전히 0.2.1이며, 0.2.2를 공증 완료로 표시하지 않는다.
+
 ## Linux 시험판 — 2026-10-10
 
 소스 `165b9c0002c1d9142a8b905e2b5f3907a8abed99`. [빌드 37995950870](https://github.com/devsejong/motungi-radio/actions/runs/37995950870), [실행 37996892130](https://github.com/devsejong/motungi-radio/actions/runs/37996892130) 성공. 프런트 50개·네이티브 46개·형식 6개 통과. Ubuntu 22.04의 실제 WebKit/IPC, `.deb` 설치 및 AppImage 실행, 무음 시작, 미니 200–360px, 설정 640px·음량 100%, EBS FM playing 이벤트·5초 유지·정지 후 무재생을 확인했다. 가상 화면과 가상 음원 출력이며 사람의 청취, 물리 트레이·로그인·절전·Wayland는 미검증이다.
