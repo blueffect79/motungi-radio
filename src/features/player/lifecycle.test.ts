@@ -1,0 +1,8 @@
+import {it,expect,vi} from 'vitest';
+import {bindPlaybackLifecycle} from './lifecycle';
+it('wake gap and online reconnect once, while hidden/focus do not reconnect; cleanup removes work',()=>{
+ vi.useFakeTimers();const target=new EventTarget();const resume=vi.fn(async()=>{});const cleanup=bindPlaybackLifecycle({resume},target);
+ target.dispatchEvent(new Event('visibilitychange'));target.dispatchEvent(new Event('focus'));vi.advanceTimersByTime(15_000);expect(resume).not.toHaveBeenCalled();
+ vi.setSystemTime(Date.now()+120_000);vi.advanceTimersByTime(15_000);expect(resume).toHaveBeenCalledTimes(1);vi.advanceTimersByTime(60_000);expect(resume).toHaveBeenCalledTimes(1);
+ target.dispatchEvent(new Event('online'));expect(resume).toHaveBeenCalledTimes(2);cleanup();target.dispatchEvent(new Event('online'));vi.advanceTimersByTime(150_000);expect(resume).toHaveBeenCalledTimes(2);vi.useRealTimers();
+});
