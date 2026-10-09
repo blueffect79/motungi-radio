@@ -107,6 +107,7 @@ fn hosts(provider: &str) -> &'static [&'static str] {
         "wbs" => &["wbsradio.kr"],
         "cbs" => &["m-aac.cbs.co.kr"],
         "bbs" => &["bbslive.clouducs.com"],
+        "febc" => &["mlive3.febc.net"],
         _ => &[],
     }
 }
@@ -289,6 +290,7 @@ pub async fn resolve_stream(station_id: &str) -> Result<ResolvedStream, AppError
  "cpbc"=>{let body=fetch("https://apis.cpbc.co.kr/play-api/2.0/onair/channel/radio?ssl=Y",p).await?;let v:serde_json::Value=serde_json::from_str(&body).map_err(|_|invalid())?;let raw=v.pointer("/onair/source/mediasource/mediaurl").and_then(|x|x.as_str()).ok_or_else(invalid)?;raw.to_owned()},
  "ebs"=>{let body=fetch("https://www.ebs.co.kr/onair?channelCodeString=radio",p).await?;parse_ebs(&body)?},
  "wbs"=>{probe_mp3("https://wbsradio.kr/wbs-seoul",p).await?;return Ok(ResolvedStream{station_id:station.id,url:"https://wbsradio.kr/wbs-seoul".into(),format:StreamFormat::Mp3,resolved_at:chrono::Utc::now().to_rfc3339()})},
+ "febc"=>"https://mlive3.febc.net/live5/seoulfm/playlist.m3u8".into(),
  "bbs"=>"https://bbslive.clouducs.com/bbsradio-mlive/radio.stream/playlist.m3u8".into(),
  "cbs"=>format!("https://m-aac.cbs.co.kr/mweb_{0}/_definst_/{0}.stream/playlist.m3u8",station.stream_key),
  "tbn"=>format!("https://www.tbn.it.kr/{}/myStream/playlist.m3u8",station.stream_key),
@@ -354,6 +356,28 @@ mod tests {
         assert_eq!(error.code, ErrorCode::Unavailable);
         assert_eq!(error.message, "등록되지 않은 채널입니다.");
         assert!(!error.retryable);
+    }
+    #[test]
+    fn febc_uses_current_official_player_and_stream_host() {
+        let station = list_stations()
+            .unwrap()
+            .stations
+            .into_iter()
+            .find(|s| s.id == "febc-seoul")
+            .unwrap();
+        assert_eq!(station.stream_key, "seoulfm");
+        assert_eq!(
+            station.official_page_url,
+            "https://seoul.febc.net/radio/schedule/live/1"
+        );
+        assert!(validate_url(
+            "https://mlive3.febc.net/live5/seoulfm/playlist.m3u8",
+            "febc"
+        )
+        .is_ok());
+        assert!(
+            validate_url("https://mlive2.febc.net/live/seoulfm/playlist.m3u8", "febc").is_err()
+        );
     }
     #[test]
     fn catalog_ids_and_duplicates() {

@@ -3,7 +3,7 @@
 import concurrent.futures, json, re, urllib.request, urllib.parse
 from pathlib import Path
 CATALOG=json.loads((Path(__file__).resolve().parents[1]/'resources/stations.json').read_text())
-HOSTS={'mbc':{'sminiplay.imbc.com','minisw.imbc.com','minimw.imbc.com','minicw.imbc.com'},'kbs':{'cfpwwwapi.kbs.co.kr',*[f'{s}.gscdn.kbs.co.kr' for s in ['1radio','2radio','3radio','1fm','2fm','hanminjokradio']]},'sbs':{'apis.sbs.co.kr','radiolive.sbs.co.kr'},'cpbc':{'apis.cpbc.co.kr','cdn-radio-seoul.cpbc.co.kr'},'ebs':{'www.ebs.co.kr','liveotu.ebs.co.kr'},'tbn':{'www.tbn.it.kr'},'wbs':{'wbsradio.kr'},'cbs':{'m-aac.cbs.co.kr'},'bbs':{'bbslive.clouducs.com'}}
+HOSTS={'mbc':{'sminiplay.imbc.com','minisw.imbc.com','minimw.imbc.com','minicw.imbc.com'},'kbs':{'cfpwwwapi.kbs.co.kr',*[f'{s}.gscdn.kbs.co.kr' for s in ['1radio','2radio','3radio','1fm','2fm','hanminjokradio']]},'sbs':{'apis.sbs.co.kr','radiolive.sbs.co.kr'},'cpbc':{'apis.cpbc.co.kr','cdn-radio-seoul.cpbc.co.kr'},'ebs':{'www.ebs.co.kr','liveotu.ebs.co.kr'},'tbn':{'www.tbn.it.kr'},'wbs':{'wbsradio.kr'},'cbs':{'m-aac.cbs.co.kr'},'bbs':{'bbslive.clouducs.com'},'febc':{'mlive3.febc.net'}}
 def valid(url,p):
  u=urllib.parse.urlsplit(url)
  if u.scheme!='https' or u.hostname not in HOSTS[p] or u.username or u.password or u.port not in (None,443):raise ValueError('host-policy')
@@ -30,6 +30,7 @@ def check(s):
   elif p=='ebs':u=re.search(r'https://liveotu\.ebs\.co\.kr/fm/[^\s\x22\x27<>]+',get('https://www.ebs.co.kr/onair?channelCodeString=radio',p).decode()).group().replace('&amp;','&')
   elif p=='wbs':
    assert get('https://wbsradio.kr/wbs-seoul',p,True);return s['id']+' OK mp3-data'
+  elif p=='febc':u='https://mlive3.febc.net/live5/seoulfm/playlist.m3u8'
   elif p=='bbs':u='https://bbslive.clouducs.com/bbsradio-mlive/radio.stream/playlist.m3u8'
   elif p=='cbs':u=f'https://m-aac.cbs.co.kr/mweb_{k}/_definst_/{k}.stream/playlist.m3u8'
   elif p=='tbn':u=f'https://www.tbn.it.kr/{k}/myStream/playlist.m3u8'
