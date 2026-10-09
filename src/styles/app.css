@@ -95,8 +95,13 @@ h1 {
   letter-spacing: -0.5px;
   margin: 0;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 header button {
+  flex-shrink: 0;
   font-size: 11px;
   border: 0;
   background: transparent;
@@ -171,9 +176,10 @@ p {
   font-size: 19px;
   line-height: 1.4;
   letter-spacing: -0.7px;
-  overflow-wrap: anywhere;
-  max-height: 80px;
-  overflow: auto;
+  min-width: 0;
+  white-space: nowrap;
+  height: 1.4em;
+  overflow: hidden;
   margin: 8px 0;
 }
 .current-station {
@@ -221,9 +227,9 @@ p {
   font-size: 11px;
   line-height: 1.55;
   color: var(--muted);
-  overflow-wrap: anywhere;
-  max-height: 51px;
-  overflow: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .current-station,
 .current-station .program-time {
@@ -469,7 +475,6 @@ main > button {
 }
 .mini .current-title {
   font-size: 16px;
-  max-height: 46px;
 }
 .mini .hero-bottom {
   margin-top: 9px;
@@ -554,4 +559,96 @@ header.draggable h1:active {
 }
 .mini.shell {
   height: auto;
+}
+
+/* Only the current program title moves; supporting labels stay compact. */
+.title-track,
+.title-text {
+  display: block;
+}
+.title-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title-copy[hidden] {
+  display: none;
+}
+.flowing .title-track {
+  display: inline-flex;
+  width: max-content;
+  gap: 32px;
+  animation: title-flow-right var(--title-duration) linear 1.5s infinite;
+}
+.flowing .title-text,
+.flowing .title-copy {
+  flex-shrink: 0;
+  width: max-content;
+  white-space: nowrap;
+}
+.current-title:hover .title-track {
+  animation-play-state: paused;
+}
+@keyframes title-flow-right {
+  from {
+    transform: translateX(calc(-1 * var(--title-cycle)));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.current-station,
+.station-copy strong,
+.schedule-row strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.station-copy {
+  flex: 1;
+}
+.thumbnail,
+.schedule-button,
+.favorite {
+  flex-shrink: 0;
+}
+.schedule-row strong {
+  min-width: 0;
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flowing .title-track {
+    display: block;
+    width: 100%;
+    animation: none;
+    transform: none;
+  }
+  .flowing .title-text {
+    width: 100%;
+  }
+  .flowing .title-copy {
+    display: none;
+  }
+}
+
+main h2 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.current-station {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.station-label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.current-station .program-time {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

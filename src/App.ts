@@ -19,6 +19,7 @@ import {
   currentProgram,
   unavailable,
 } from "./features/programs";
+import { flowingTitle } from "./features/programs/marquee";
 import { channelRows } from "./features/channels/model";
 function node<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -108,8 +109,10 @@ export async function mountApp(root: HTMLElement) {
     heroText = node("div", undefined, "hero-copy"),
     title = node("strong", undefined, "current-title"),
     stationName = node("span", undefined, "current-station"),
+    stationLabel = node("span", undefined, "station-label"),
     airtime = node("span", undefined, "program-time"),
     error = node("p", undefined, "error");
+  const titleFlow = flowingTitle(title);
   const control = button(
     "재생",
     "방송 재생",
@@ -403,13 +406,14 @@ export async function mountApp(root: HTMLElement) {
       current = stations.find((s) => s.id === state.stationId),
       p = state.stationId ? program(state.stationId) : null;
     artwork(cover, current, p ?? undefined);
-    title.textContent =
+    titleFlow.update(
       p?.status === "available"
-        ? p.title
+        ? (p.title ?? "프로그램 정보 확인 불가")
         : current
           ? "프로그램 정보 확인 불가"
-          : "듣고 싶은 방송을 골라보세요";
-    stationName.textContent =
+          : "듣고 싶은 방송을 골라보세요",
+    );
+    stationLabel.textContent =
       current?.name ??
       (state.stationId ? "이용 불가 채널" : "내 곁의 작은 라디오");
     airtime.textContent =
@@ -417,7 +421,11 @@ export async function mountApp(root: HTMLElement) {
         ? `${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))}`
         : "실시간 라디오";
     const busy = ["playing", "loading"].includes(state.status);
-    stationName.append(document.createTextNode(" · "), airtime);
+    stationName.replaceChildren(
+      stationLabel,
+      document.createTextNode(" · "),
+      airtime,
+    );
     control.replaceChildren(
       glyph(busy ? "M7 5h4v14H7zM14 5h4v14h-4z" : "M8 4l13 8-13 8z"),
     );
@@ -431,6 +439,9 @@ export async function mountApp(root: HTMLElement) {
     const adjacent = neighbors();
     previousChannelName.textContent = adjacent.previous?.name ?? "이전 채널";
     nextChannelName.textContent = adjacent.next?.name ?? "다음 채널";
+    previousChannelName.title = previousChannelName.textContent;
+    nextChannelName.title = nextChannelName.textContent;
+    stationName.title = stationName.textContent ?? "";
     previousChannel.disabled = !adjacent.previous;
     nextChannel.disabled = !adjacent.next;
     previousChannel.setAttribute(
@@ -566,8 +577,10 @@ export async function mountApp(root: HTMLElement) {
       main.append(section);
     } else if (panel === "schedule") {
       const station = stations.find((s) => s.id === scheduleId);
+      const scheduleHeading = node("h2", station?.name ?? "편성표");
+      scheduleHeading.title = scheduleHeading.textContent ?? "편성표";
       main.append(
-        node("h2", station?.name ?? "편성표"),
+        scheduleHeading,
         node(
           "p",
           "편성표 기준 · 한국 시간 · 방송사 사정에 따라 변경될 수 있습니다.",
@@ -619,13 +632,15 @@ export async function mountApp(root: HTMLElement) {
             undefined,
             `schedule-row${current ? " current" : past ? " past" : ""}`,
           );
+        const entryTitle = node("strong", entry.title);
+        entryTitle.title = entry.title;
         item.append(
           node(
             "span",
             `${time.format(new Date(entry.startsAt))}–${time.format(new Date(entry.endsAt))}`,
             "program-time",
           ),
-          node("strong", entry.title),
+          entryTitle,
           node(
             "span",
             current ? "현재 방송" : past ? "방송 종료" : "예정",
@@ -698,6 +713,7 @@ export async function mountApp(root: HTMLElement) {
             "program",
           ),
         );
+        copy.title = `${row.name} · ${copy.querySelector(".program")?.textContent ?? ""}`;
         choose.append(thumb, copy);
         const schedule = button(
           "편성표",
@@ -830,6 +846,7 @@ export async function mountApp(root: HTMLElement) {
     clearInterval(timer);
     poller?.stop();
     lifecycle();
+    titleFlow.dispose();
     player.dispose();
     document.removeEventListener("visibilitychange", refresh);
     window.removeEventListener("focus", refresh);
