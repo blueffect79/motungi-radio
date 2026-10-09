@@ -1,5 +1,23 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.1 설치파일 — 2026-10-09
+
+빌드 소스는 `4b7a65f024829fe4a669c04b7497205cc7fb12c4` (`codex/player-redesign`)이다. 플레이어 제목·다음 프로그램, 중앙 재생/정지와 이전·다음 채널, 압정 고정·드래그, 날짜별 편성표, 기본 음량 100%, Retina 메뉴바 아래 배치 수정을 포함한다. 이후 문서 커밋은 빌드 소스가 아니다.
+
+Mac arm64·x64 DMG는 로컬 릴리스 빌드와 DMG 체크섬 검사를 통과했다. 최종 DMG를 읽기 전용으로 마운트하여 내부 앱 버전 0.2.1, 실제 대상 CPU, `codesign --verify --deep --strict` 무결성 검사를 확인했다. ad-hoc 서명이며 Developer ID 서명·공증은 받지 않았다.
+
+Windows x64 NSIS EXE는 [GitHub Actions 37914476217](https://github.com/devsejong/radiokorea/actions/runs/37914476217)에서 같은 소스로 생성했다. 프런트 44개·네이티브 46개·패키지 5개 테스트, 실제 앱 AMD64 PE32+ 검사, EXE 형식·SHA256 검사와 artifact 업로드가 통과했다. 실시간 네이티브 테스트 3개는 제외됐다. 로컬 다운로드 사본의 EXE 형식과 SHA256도 확인했다. Windows는 코드 서명 전이다. 이 실행의 Mac 단계는 생략됐고 위 Mac 파일은 로컬 빌드 결과다.
+
+| 대상 | 파일 | SHA256 |
+| --- | --- | --- |
+| macos-arm64 | `radiokorea-0.2.1-macos-arm64.dmg` | `2d5c30109f0c2e24258531989518fc04d373fff22c9f9d0be7f51f40ea990351` |
+| macos-x64 | `radiokorea-0.2.1-macos-x64.dmg` | `43270ca9d542927ecfb42dec894837611d40de7929112bf093a93bb57419dd4e` |
+| windows-x64 | `radiokorea-0.2.1-windows-x64.exe` | `6e8629a0cebf652672013134213aa90498b265eef362c989efeace9acf3c8913` |
+
+파일은 `release-artifacts/0.2.1-4b7a65f/`의 대상별 폴더에 보관한다. 루트의 `build-provenance.json`과 `SHA256SUMS.txt`에 소스·빌드·체크섬을 기록했다. Windows [artifact 11608819910](https://github.com/devsejong/radiokorea/actions/runs/37914476217/artifacts/11608819910)은 접근 권한이 필요하며 보관 기간은 14일이다. 소스 브랜치를 푸시했으며 공개 Releases 발행이나 저장소 공개 전환은 하지 않았다.
+
+이번 0.2.1 DMG/EXE로 실제 설치·청취·업그레이드·로그인·절전 시험은 수행하지 않았다. 로컬 Mac에 설치된 0.2.0 앱은 `a9df600` 기준으로 이번 설치본과 같은 기능 코드를 포함하지만 버전 메타데이터와 설치파일은 다르다. Intel Mac 및 Windows 11 Intel의 실기기 시험은 사용자 확인이 남아 있다.
+
 ## 0.2.0 설치파일 — 2026-10-09
 
 빌드 소스는 `162aa69393dbe7d879fc21e4f0753ac3d8a6f28c` (`codex/player-redesign`)이다. 아래 설치파일은 같은 소스의 UI 개편을 포함한다. 이후 문서 커밋은 설치파일의 빌드 소스가 아니다.
