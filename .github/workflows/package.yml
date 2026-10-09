@@ -1,0 +1,67 @@
+name: 설치파일 검증 빌드
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 빌드할 운영체제
+        type: choice
+        default: all
+        options: [all, windows, macos]
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: macos, runner: macos-15, target: aarch64-apple-darwin, bundle: dmg, name: macos-arm64 }
+          - { platform: macos, runner: macos-15-intel, target: x86_64-apple-darwin, bundle: dmg, name: macos-x64 }
+          - { platform: windows, runner: windows-2025, target: x86_64-pc-windows-msvc, bundle: nsis, name: windows-x64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        with:
+          node-version: '22'
+          cache: npm
+      - name: 의존성 및 패키지 사전검증
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: |
+          npm ci
+          node scripts/check-package.mjs
+      - name: Rust stable 준비
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add ${{ matrix.target }}
+      - name: 프런트엔드 검증
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: npm run verify
+      - name: 네이티브 단위검증
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: cargo test --locked --manifest-path src-tauri/Cargo.toml --target ${{ matrix.target }}
+      - name: 설치파일 빌드
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }}
+      - name: 설치파일 형식 및 SHA256 검증
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        run: node scripts/package-artifacts.mjs ${{ matrix.target }} src-tauri/target/${{ matrix.target }}/release/bundle dist-packages/${{ matrix.name }}
+      - uses: actions/upload-artifact@v7.0.2
+        if: inputs.platform == 'all' || inputs.platform == matrix.platform
+        with:
+          name: radiokorea-${{ matrix.name }}-${{ github.sha }}
+          path: dist-packages/${{ matrix.name }}/
+          if-no-files-found: error
+          retention-days: 14
