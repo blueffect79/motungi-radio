@@ -215,3 +215,29 @@ it("keeps current program and Korean airtime visible in permanent footer through
     "새 프로그램 tbn-5",
   );
 });
+it("preserves focus in the all-stations row when the same channel is also a favorite", async () => {
+  stations.push({
+    ...stations[0],
+    id: "other",
+    name: "다른 방송",
+    groupId: null as unknown as string,
+  });
+  saved.favoriteIds = ["other"];
+  try {
+    dispose = await mountApp(root);
+    await tick();
+    for (const label of ["다른 방송 재생", "다른 방송 즐겨찾기 해제"]) {
+      const matches = () =>
+        Array.from(root.querySelectorAll<HTMLButtonElement>("button")).filter(
+          (b) => b.getAttribute("aria-label") === label,
+        );
+      expect(matches()).toHaveLength(2);
+      matches()[1].focus();
+      window.dispatchEvent(new Event("focus"));
+      await tick();
+      expect(document.activeElement).toBe(matches()[1]);
+    }
+  } finally {
+    stations.pop();
+  }
+});

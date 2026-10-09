@@ -124,7 +124,11 @@ export async function mountApp(root: HTMLElement) {
     if (changeRegion(stations, player.state, id)) void player.select(id);
     render();
   }
-  function stationRow(row: ChannelRow, group = false) {
+  function stationRow(
+    row: ChannelRow,
+    source: "favorites" | "all",
+    group = false,
+  ) {
     const item = node("div", undefined, "station");
     const choose = button(
       group ? `TBN 교통방송 · ${row.station?.region ?? row.name}` : row.name,
@@ -132,7 +136,7 @@ export async function mountApp(root: HTMLElement) {
       () => {
         void player.select(row.id);
       },
-      `station-${group ? "group-" : ""}${row.id}`,
+      `station-${source}-${row.id}`,
     );
     choose.className = "station-choice";
     choose.disabled = !row.available;
@@ -155,7 +159,7 @@ export async function mountApp(root: HTMLElement) {
         settings.settings.favoriteIds.includes(row.id) ? "★" : "☆",
         `${row.name} 즐겨찾기 ${settings.settings.favoriteIds.includes(row.id) ? "해제" : "추가"}`,
         () => favorite(row.id),
-        `favorite-${group ? "group-" : ""}${row.id}`,
+        `favorite-${source}-${row.id}`,
       ),
     );
     return item;
@@ -225,14 +229,16 @@ export async function mountApp(root: HTMLElement) {
       main.append(node("h2", "즐겨찾기"));
       if (!rows.favorites.length)
         main.append(node("p", "별을 눌러 즐겨찾기를 추가하세요.", "muted"));
-      rows.favorites.forEach((row) => main.append(stationRow(row)));
+      rows.favorites.forEach((row) =>
+        main.append(stationRow(row, "favorites")),
+      );
       rows.removed.forEach((id) =>
         main.append(node("p", `${id} · 마지막 채널 이용 불가`, "error")),
       );
       main.append(node("h2", "전체 방송"));
       rows.all.forEach((row) => {
         const group = row.station?.groupId === "tbn";
-        main.append(stationRow(row, group));
+        main.append(stationRow(row, "all", group));
         if (group) {
           const toggle = button(
             regionsOpen ? "지역 선택 닫기" : "지역 선택",
