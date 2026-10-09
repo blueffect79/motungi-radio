@@ -1,13 +1,22 @@
 // Runs the installed Linux app through Tauri/WebKit's real WebDriver bridge.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { resolve, join } from "node:path";
+import { tmpdir } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 const application = resolve(process.argv[2]);
+const temporary = mkdtempSync(join(tmpdir(), "motungi-linux-"));
+const proofLabel = process.argv[3] ?? "deb";
 const driver = spawn("tauri-driver", [], {
   stdio: "inherit",
-  env: { ...process.env, TAURI_WEBVIEW_AUTOMATION: "true" },
+  env: {
+    ...process.env,
+    TAURI_WEBVIEW_AUTOMATION: "true",
+    APPIMAGE_EXTRACT_AND_RUN: "1",
+    XDG_CONFIG_HOME: join(temporary, "config"),
+    XDG_DATA_HOME: join(temporary, "data"),
+  },
 });
 let session;
 async function request(path, method = "GET", body) {
@@ -72,13 +81,13 @@ try {
     "시작은 무음",
   );
   writeFileSync(
-    "dist-packages/linux-x64/proof/player.png",
+    `dist-packages/linux-x64/proof/${proofLabel}-player.png`,
     Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
   );
   await click("미니 플레이어");
   await wait(() => execute('return !!document.querySelector(".mini")'));
   writeFileSync(
-    "dist-packages/linux-x64/proof/mini.png",
+    `dist-packages/linux-x64/proof/${proofLabel}-mini.png`,
     Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
   );
   await click("설정");
@@ -97,9 +106,43 @@ try {
     "가로 넘침 없음",
   );
   writeFileSync(
-    "dist-packages/linux-x64/proof/settings.png",
+    `dist-packages/linux-x64/proof/${proofLabel}-settings.png`,
     Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
   );
+  if (process.env.LINUX_LIVE_PROBE === "1") {
+    await click("돌아가기");
+    await click("기본 플레이어");
+    await click("EBS FM 재생");
+    await wait(() =>
+      execute(
+        `return document.querySelector('button[aria-label="방송 정지"]')?.title === "방송 정지" && !document.querySelector('.connecting')`,
+      ),
+    );
+    await delay(5000);
+    assert.equal(
+      await execute(
+        `return document.querySelector('button[aria-label="방송 정지"]')?.title === "방송 정지"`,
+      ),
+      true,
+      "실시간 재생 상태 유지",
+    );
+    writeFileSync(
+      `dist-packages/linux-x64/proof/${proofLabel}-live.png`,
+      Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
+    );
+    await click("방송 정지");
+    await delay(2000);
+    assert.equal(
+      await execute(
+        `return !!document.querySelector('button[aria-label="방송 재생"]')`,
+      ),
+      true,
+      "정지 후 재생하지 않음",
+    );
+    console.log(
+      "EBS FM 실제 스트리밍 playing 이벤트·5초 유지·정지 검사 통과 (가상 음원 출력, 사람의 청취 아님).",
+    );
+  }
   console.log(
     "Linux 설치본: 실제 IPC 채널 로드, 무음 시작, 미니 모드, 설정·기본 음량·화면 크기 검사 통과. 실제 청취·트레이·로그인·절전 미검증.",
   );
