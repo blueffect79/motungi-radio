@@ -1,6 +1,7 @@
 export type ErrorCode = 'network' | 'timeout' | 'unavailable' | 'invalid_response' | 'unsupported_format' | 'os_registration' | 'storage';
 export interface AppError { code: ErrorCode; message: string; retryable: boolean }
 export type Result<T> = { ok: true; data: T } | { ok: false; error: AppError };
+/** streamKey is an opaque resolver key; "unavailable" marks an unverified official connection. Never persist resolved URLs. */
 export interface Station { id: string; providerId: string; name: string; region: string | null; groupId: 'tbn' | null; officialPageUrl: string; streamKey: string }
 export interface Catalog { version: number; stations: Station[] }
 export interface ResolvedStream { stationId: string; url: string; format: 'hls' | 'aac' | 'mp3'; resolvedAt: string }
