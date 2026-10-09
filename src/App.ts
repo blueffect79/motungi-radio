@@ -45,13 +45,13 @@ const time = new Intl.DateTimeFormat("ko-KR", {
   minute: "2-digit",
   hour12: false,
 });
-const dayKey = (value: string | number) =>
-  new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(value));
+const dayFormat = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Seoul",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const dayKey = (value: string | number) => dayFormat.format(new Date(value));
 const dateLabel = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   month: "numeric",
@@ -74,7 +74,7 @@ export function safeArtwork(raw?: string | null) {
 }
 export async function mountApp(root: HTMLElement) {
   let stations: Catalog["stations"] = [],
-    programs: ProgramState[] = [],
+    programs = new Map<string, ProgramState>(),
     ready = false,
     disposed = false;
   let panel: "channels" | "settings" | "schedule" = "channels",
@@ -113,6 +113,7 @@ export async function mountApp(root: HTMLElement) {
     airtime = node("span", undefined, "program-time"),
     error = node("p", undefined, "error");
   const titleFlow = flowingTitle(title);
+  stationName.append(stationLabel, document.createTextNode(" · "), airtime);
   const control = button(
     "재생",
     "방송 재생",
@@ -249,9 +250,7 @@ export async function mountApp(root: HTMLElement) {
     });
   }
   function program(id: string) {
-    return currentProgram(
-      programs.find((p) => p.stationId === id) ?? unavailable(id),
-    );
+    return currentProgram(programs.get(id) ?? unavailable(id));
   }
   function artwork(
     target: HTMLElement,
@@ -408,9 +407,9 @@ export async function mountApp(root: HTMLElement) {
     artwork(cover, current, p ?? undefined);
     titleFlow.update(
       p?.status === "available"
-        ? (p.title ?? "프로그램 정보 확인 불가")
+        ? (p.title ?? "프로그램 정보 없음")
         : current
-          ? "프로그램 정보 확인 불가"
+          ? "프로그램 정보 없음"
           : "듣고 싶은 방송을 골라보세요",
     );
     stationLabel.textContent =
@@ -421,11 +420,7 @@ export async function mountApp(root: HTMLElement) {
         ? `${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))}`
         : "실시간 라디오";
     const busy = ["playing", "loading"].includes(state.status);
-    stationName.replaceChildren(
-      stationLabel,
-      document.createTextNode(" · "),
-      airtime,
-    );
+
     control.replaceChildren(
       glyph(busy ? "M7 5h4v14H7zM14 5h4v14h-4z" : "M8 4l13 8-13 8z"),
     );
@@ -464,10 +459,15 @@ export async function mountApp(root: HTMLElement) {
         .filter(Boolean)
         .join(" / ");
     error.hidden = !error.textContent;
-    const nextSlot = schedules
-      .get(state.stationId ?? "")
-      ?.entries.filter((e) => Date.parse(e.startsAt) > Date.now())
-      .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))[0];
+    const now = Date.now();
+    const nextSlot = (
+      schedules.get(state.stationId ?? "")?.entries ?? []
+    ).reduce<Schedule["entries"][number] | undefined>((next, entry) => {
+      const start = Date.parse(entry.startsAt);
+      return start > now && (!next || start < Date.parse(next.startsAt))
+        ? entry
+        : next;
+    }, undefined);
     next.textContent = nextSlot
       ? `다음 ${dayKey(nextSlot.startsAt) !== dayKey(Date.now()) ? "내일 " : ""}${time.format(new Date(nextSlot.startsAt))} · ${nextSlot.title}  ›`
       : pending.has(state.stationId ?? "")
@@ -553,11 +553,7 @@ export async function mountApp(root: HTMLElement) {
       section.append(
         appearance,
         label,
-        node(
-          "p",
-          "앱을 열거나 로그인해도 자동으로 재생하지 않습니다.",
-          "muted",
-        ),
+        node("p", "실행 시 자동 재생하지 않습니다.", "muted"),
       );
       const settingsError = node(
         "p",
@@ -579,14 +575,7 @@ export async function mountApp(root: HTMLElement) {
       const station = stations.find((s) => s.id === scheduleId);
       const scheduleHeading = node("h2", station?.name ?? "편성표");
       scheduleHeading.title = scheduleHeading.textContent ?? "편성표";
-      main.append(
-        scheduleHeading,
-        node(
-          "p",
-          "편성표 기준 · 한국 시간 · 방송사 사정에 따라 변경될 수 있습니다.",
-          "muted",
-        ),
-      );
+      main.append(scheduleHeading, node("p", "편성표 · 한국 시간", "muted"));
       const allEntries = schedules.get(scheduleId ?? "")?.entries ?? [];
       const dates = [
         ...new Set(allEntries.map((e) => dayKey(e.startsAt))),
@@ -615,15 +604,9 @@ export async function mountApp(root: HTMLElement) {
         (e) => dayKey(e.startsAt) === scheduleDate,
       );
       if (pending.has(scheduleId ?? ""))
-        main.append(node("p", "편성표를 불러오는 중입니다.", "muted"));
+        main.append(node("p", "편성표 불러오는 중…", "muted"));
       else if (!entries.length)
-        main.append(
-          node(
-            "p",
-            "다음 프로그램 정보를 확인할 수 없습니다. 공식 페이지에서 편성표를 확인해 주세요.",
-            "muted",
-          ),
-        );
+        main.append(node("p", "편성 정보가 없습니다.", "muted"));
       for (const entry of entries) {
         const past = Date.parse(entry.endsAt) <= Date.now(),
           current = !past && Date.parse(entry.startsAt) <= Date.now(),
@@ -653,10 +636,10 @@ export async function mountApp(root: HTMLElement) {
         entries.length &&
         !entries.some((e) => Date.parse(e.startsAt) > Date.now())
       )
-        main.append(node("p", "이후 편성은 아직 확인할 수 없습니다.", "muted"));
+        main.append(node("p", "이후 편성 미제공", "muted"));
       if (station)
         main.append(
-          button("공식 페이지에서 편성표 확인 ↗", "공식 편성표 확인", () => {
+          button("공식 편성표 ↗", "공식 편성표 확인", () => {
             void invoke("open_station_page", { stationId: station.id }).catch(
               () => {
                 actionError = "공식 페이지를 열 수 없습니다.";
@@ -701,14 +684,15 @@ export async function mountApp(root: HTMLElement) {
         choose.className = "station-choice";
         choose.disabled = !row.available;
         const thumb = node("div", undefined, "cover thumbnail");
-        artwork(thumb, row.station, program(row.id), true);
+        const rowProgram = program(row.id);
+        artwork(thumb, row.station, rowProgram, true);
         const copy = node("span", undefined, "station-copy");
         copy.append(
           node("strong", row.name),
           node(
             "span",
             row.available
-              ? (program(row.id).title ?? "프로그램 정보 확인 불가")
+              ? (rowProgram.title ?? "프로그램 정보 없음")
               : "이용 불가 · 삭제된 채널",
             "program",
           ),
@@ -806,15 +790,14 @@ export async function mountApp(root: HTMLElement) {
         stationIds,
       });
       if (!r.ok) {
-        infoError =
-          "프로그램 정보를 갱신하지 못했습니다. 방송 재생은 계속됩니다.";
+        infoError = "정보 갱신 실패 · 재생은 유지됩니다.";
         throw new Error();
       }
       infoError = "";
       return r.data;
     },
     (values) => {
-      programs = values;
+      programs = new Map(values.map((value) => [value.stationId, value]));
       render();
     },
   );

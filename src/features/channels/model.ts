@@ -6,8 +6,9 @@ export type ChannelRow = {
   station?: Station;
 };
 export function channelRows(stations: Station[], settings: Settings) {
+  const byId = new Map(stations.map((station) => [station.id, station]));
   const row = (id: string): ChannelRow => {
-    const station = stations.find((s) => s.id === id);
+    const station = byId.get(id);
     return { id, name: station?.name ?? id, available: !!station, station };
   };
   const regions = stations.filter((s) => s.groupId === "tbn");
@@ -26,7 +27,7 @@ export function channelRows(stations: Station[], settings: Settings) {
     regions,
     removed:
       settings.lastStationId &&
-      !stations.some((s) => s.id === settings.lastStationId) &&
+      !byId.has(settings.lastStationId) &&
       !settings.favoriteIds.includes(settings.lastStationId)
         ? [settings.lastStationId]
         : [],

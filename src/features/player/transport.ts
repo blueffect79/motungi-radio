@@ -1,4 +1,5 @@
-import Hls from "hls.js";
+import type Hls from "hls.js";
+type HlsConstructor = typeof import("hls.js").default;
 import type { ResolvedStream } from "../../shared/contracts";
 import type { Transport, TransportEvents } from "./controller";
 /** A single audio element is reused. URLs only live in this transport / browser media memory. */
@@ -11,7 +12,11 @@ export class HtmlAudioTransport implements Transport {
     if (this.watchdog !== undefined) clearTimeout(this.watchdog);
     this.watchdog = undefined;
   }
-  constructor(private readonly audio: HTMLAudioElement = new Audio()) {
+  constructor(
+    private readonly audio: HTMLAudioElement = new Audio(),
+    private readonly loadHls: () => Promise<HlsConstructor> = () =>
+      import("hls.js").then((module) => module.default),
+  ) {
     audio.preload = "none";
   }
   setVolume(volume: number) {
@@ -90,24 +95,29 @@ export class HtmlAudioTransport implements Transport {
       stream.format === "hls" &&
       !this.audio.canPlayType("application/vnd.apple.mpegurl")
     ) {
-      if (!Hls.isSupported()) {
-        error(true);
-        return;
-      }
-      // Bundled hls.js only. Worker off avoids runtime script/worker loading and CSP relaxation.
-      const hls = new Hls({
-        enableWorker: false,
-        manifestLoadingMaxRetry: 1,
-        levelLoadingMaxRetry: 1,
-        fragLoadingMaxRetry: 1,
-      });
-      this.hls = hls;
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) error();
-      });
-      hls.on(Hls.Events.MANIFEST_PARSED, play);
-      hls.loadSource(stream.url);
-      hls.attachMedia(this.audio);
+      void this.loadHls()
+        .then((Hls) => {
+          if (!active()) return;
+          if (!Hls.isSupported()) {
+            error(true);
+            return;
+          }
+          // Local bundle only; keep workers off for the existing CSP.
+          const hls = new Hls({
+            enableWorker: false,
+            manifestLoadingMaxRetry: 1,
+            levelLoadingMaxRetry: 1,
+            fragLoadingMaxRetry: 1,
+          });
+          this.hls = hls;
+          hls.on(Hls.Events.ERROR, (_event, data) => {
+            if (data.fatal) error();
+          });
+          hls.on(Hls.Events.MANIFEST_PARSED, play);
+          hls.loadSource(stream.url);
+          hls.attachMedia(this.audio);
+        })
+        .catch(() => error());
     } else {
       this.audio.src = stream.url;
       play();

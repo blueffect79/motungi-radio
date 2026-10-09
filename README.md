@@ -1,35 +1,24 @@
 # 모퉁이 라디오
 
-**화면 한쪽, 좋아하는 방송.**
-
-한국 라디오 방송을 메뉴 막대(macOS) 또는 알림 영역(Windows)에서 선택하는 무료 데스크톱 앱입니다. 공식 방송 소스를 조회하며 인터넷 연결이 필요합니다. 방송사의 공식 앱이 아니며 방송 콘텐츠를 소유하지 않습니다.
-
-목표 환경은 macOS 13 이상 Apple Silicon/Intel 및 Windows 10/11 x64입니다. Mac 두 아키텍처의 DMG와 Windows x64 NSIS EXE 시험본을 생성했습니다. 현재는 비공개 시험 단계이며, 빌드 성공과 실제 설치·청취 성공은 구분합니다. 공개 다운로드가 있다고 가정하지 마세요.
-
-- [앱 소개 사이트](https://devsejong.github.io/motungi-radio-site/) · [사이트 운영 안내](docs/website.md)
-- [설치·업데이트 안내](docs/install.md)
-- [릴리스 검증 체크리스트](docs/release-checklist.md)
-- [방송 지원 범위](docs/station-support.md)
-- [직접 사용 시험과 검증 기록](docs/verification.md)
+화면 한쪽, 좋아하는 방송. Mac 메뉴 막대·Windows 트레이에서 듣는 무료 한국 라디오 앱입니다.
 
 ## 기능
 
-- 메뉴 막대·트레이의 작은 창에서 20개 한국 라디오 채널 선택. TBN은 경인만 제공
-- 채널명·방송 시간·현재 프로그램·이미지와 다음 프로그램 표시
-- 중앙 재생/정지 버튼, 이전·다음 채널과 이동 대상 채널명 표시
-- 채널별 편성표에서 다음 프로그램 확인. 정보 미제공 원천은 공식 페이지 연결
-- 라이트·다크·시스템 테마와 미니 플레이어, 압정 고정과 제목 드래그
-- 메뉴바 아이콘 아래 기본 창 배치, 재생/일시정지 아이콘 배지
-- 설정 안의 음량·음소거. 새 설정의 기본 음량 100%, 기존 설정값 유지
-- 즐겨찾기·음량·마지막 채널·테마·플레이어 모드를 해당 PC에 저장
-- 로그인 시 자동 실행 설정. 앱을 다시 열거나 자동 실행해도 재생은 직접 시작
-- 창을 숨겨도 청취 유지, 명시적 앱 종료로 재생 종료
+- 20개 채널: MBC·KBS·SBS·EBS·종교방송·TBN 경인
+- 현재·다음 프로그램, 이미지, 날짜별 편성표
+- 즐겨찾기, 음량, 마지막 채널 기억
+- 미니 플레이어, 압정 고정, 라이트·다크 테마
+- 로그인 시 실행. 재생은 직접 시작합니다.
 
-계정·청취 이력 수집·운영 서버는 없습니다. macOS와 Windows의 실제 설치·청취 결과는 시험 기록에서 별도로 관리합니다.
+## 설치
+
+macOS 13 이상(Apple Silicon·Intel), Windows 10/11 x64를 목표로 합니다. 정식 배포 전 시험 중이며 최신 이름의 설치파일은 아직 생성하지 않았습니다.
+
+[홈페이지](https://devsejong.github.io/motungi-radio-site/) · [설치 안내](docs/install.md) · [지원 채널](docs/station-support.md) · [검증 기록](docs/verification.md)
 
 ## 개발
 
-Node.js 22, npm, Rust stable 및 [Tauri 운영체제별 개발 도구](https://v2.tauri.app/start/prerequisites/)가 필요합니다. Windows에는 MSVC C++ 빌드 도구와 WebView2, macOS에는 Xcode Command Line Tools가 필요합니다.
+Node.js 22, Rust stable, [Tauri 개발 도구](https://v2.tauri.app/start/prerequisites/)가 필요합니다.
 
 ```sh
 npm ci
@@ -38,14 +27,8 @@ cargo test --locked --manifest-path src-tauri/Cargo.toml
 npm run tauri -- dev
 ```
 
-빌드·설치 검증 절차는 릴리스 체크리스트를 따릅니다. Actions는 수동 실행으로 각 운영체제 설치파일과 SHA256을 artifact에 보관하며 공개 릴리스를 자동 발행하지 않습니다.
+[설계](docs/architecture.md) · [작업 기준](AGENTS.md) · [배포 검사](docs/release-checklist.md)
 
-## 권리와 현재 한계
+## 권리
 
-자체 작성 앱 코드는 [MIT](LICENSE)입니다. 방송 음원·방송사 로고·편성 데이터·외부 라이브러리는 각 권리자에게 권리가 있습니다. 특히 MBC 원천 클라이언트의 재링크 관련 고지가 있어 공개 배포 허가 확인이 남아 있습니다. 소스 접근 성공은 배포 허가를 의미하지 않습니다.
-
-이전 시험에서 공식 스트림 32개의 주소 조회와 미디어 조각 응답을 확인했습니다. 0.2.1 화면은 TBN 경인만 포함한 20개 채널을 제공합니다. 프로그램 정보와 편성표는 방송사 제공 상태에 따라 확인 불가로 표시될 수 있습니다. 새 버전의 실제 설치·청취·로그인 시 자동 실행·Windows 실기기 검증은 별도 확인이 필요합니다.
-
-## 프로젝트 이름
-
-표시 이름은 **모퉁이 라디오**, 영문 프로젝트·실행파일·설치파일 이름은 `motungi-radio`, Rust 라이브러리는 `motungi_radio_lib`다. 앱 식별자는 `io.github.devsejong.motungiradio`다. 정식 공개 전 이름을 통일했으며 이전 시험 앱과 다른 설정 경로를 사용한다. 이전 설치파일과 빌드 기록은 당시 이름을 보존한다.
+앱 코드는 [MIT](LICENSE). 방송 콘텐츠의 권리는 각 방송사에 있습니다. 공식 앱이 아니며 MBC 공개 배포 조건 확인이 남아 있습니다.

@@ -1,14 +1,10 @@
-# GitHub Pages 소개 사이트
+# 소개 사이트
 
-공개 주소: https://devsejong.github.io/motungi-radio-site/
+[공개 페이지](https://devsejong.github.io/motungi-radio-site/) · [저장소](https://github.com/devsejong/motungi-radio-site)
 
-사이트 저장소: https://github.com/devsejong/motungi-radio-site (공개)
+원본은 `site/`, 배포 체크아웃은 `/Users/sejong/Workspace/motungi-radio-site`다. GitHub Pages는 `main` 루트를 사용한다.
 
-앱 저장소 `devsejong/motungi-radio`는 비공개로 유지한다. 소개 사이트는 앱 소스·설치파일·공식 일시 URL·방송사 이미지 없이 정적 HTML/CSS/JavaScript와 자체 SVG만 포함한다. 프로그램 제목·시간은 예시로 표시한다. 설치파일 공개는 기존 방송사 이용 조건과 실기기 검증 절차를 따른다. 현재 페이지는 0.2.1 시험본 안내이며 공개 다운로드를 제공하지 않는다.
-
-## 수정과 배포
-
-이 프로젝트의 `site/`에 사이트 원본을 보관한다. 공개 사이트 체크아웃은 `/Users/sejong/Workspace/motungi-radio-site`다. 수정 후 아래 사이트 파일만 동기화하고 해당 사이트 저장소의 `main`에 푸시한다. 앱 프로젝트 전체를 복사하지 않는다.
+## 배포
 
 ```sh
 cp site/index.html site/style.css site/app.js site/icon.svg site/README.md site/LICENSE site/.nojekyll /Users/sejong/Workspace/motungi-radio-site/
@@ -17,35 +13,10 @@ git -C /Users/sejong/Workspace/motungi-radio-site commit -m 'Update introduction
 git -C /Users/sejong/Workspace/motungi-radio-site push
 ```
 
-GitHub Pages 소스는 `main` 브랜치의 루트이며 `.nojekyll`을 사용한다. HTTPS가 적용됐다. 외부 폰트·운영 분석·방송 요청은 없다. 페이지 테마 선택만 브라우저 로컬 저장소에 기록한다.
+Pages 실행 성공, 공개 자산 일치, 데스크톱·모바일 화면을 확인한다. 소개 사이트에 앱 소스·설치파일·방송사 이미지·일시 스트림 URL을 올리지 않는다. 방송 정보는 예시다.
 
-## 검증 — 2026-10-09
+[이전 배포 기록](archive/website-2026-10-09.md)
 
-사이트 소스 `a0bc79a59bb35d5d88e0ab1cf6339a930a5f4191`, [Pages 실행 37917564465](https://github.com/devsejong/motungi-radio-site/actions/runs/37917564465). 초기 실행은 후속 포맷 커밋 배포로 대체됐다. 최종 Pages build 상태 `built`, 공개 페이지 HTTP 200 확인.
+## 최신 확인
 
-- JavaScript 구문, HTML 내부 링크와 로컬 자산 경로 검사 통과
-- 실제 공개 주소에서 스타일·스크립트 로드, 라이트/다크 테마, FAQ 열기와 설치 안내 이동 확인
-- 데스크톱 렌더 너비 964px, 모바일 433px 및 로컬 작은 화면 355px에서 가로 넘침 없음. 브라우저 viewport 요청 390/320px의 실제 렌더 너비는 각각 433/355px로 관측됐으며 요청 값 자체를 실측치로 보고하지 않음
-- 미니 모드 예시는 로컬에서 전체 채널 목록 숨김/복원과 버튼 상태 변경 확인
-- 실제 공개 주소 콘솔 오류·경고 없음
-- 캡처: `artifacts/site/github-pages-light.jpg`, `github-pages-dark.jpg`, `github-pages-mobile.jpg`
-
-사이트 배포는 앱 공개 배포나 Windows 실기기 설치·청취 완료를 뜻하지 않는다.
-
-## 리서치 기반 UI 개편 — 2026-10-09
-
-[UI 비교와 선정 근거](website-design-research.md)를 바탕으로 Sleeve의 데스크톱 제품 쇼케이스와 Doppler의 플랫폼별 설치 정보 구조를 적용했다. 가운데 제목·대형 데스크톱 장면, 전체/미니 전환 컨트롤, 사용 장면별 기능 설명으로 재구성했다. 방송 정보는 예시이고 공개 다운로드 준비 상태를 유지한다.
-
-사이트 소스: `d0838e2beff2d5eecf93891ef639389fb3b96059`. [Pages 실행 37918744201](https://github.com/devsejong/motungi-radio-site/actions/runs/37918744201).
-
-로컬 브라우저에서 실제 렌더 너비 320·390·800·1280px의 가로 넘침, 프로그램 행 넘침, 쇼케이스 안 플레이어 잘림 검사를 통과했다. 전체/미니 전환 시 목록 숨김·복원과 세 컨트롤의 선택 상태 갱신, 라이트/다크 전환을 확인했다. 모바일 제목의 단어 줄바꿈과 미니 설명 화면을 보정했다. JavaScript 구문과 HTML 자산·내부 앵커 검사를 통과했다. 앱 코드나 설치파일 변경은 없다.
-
-최종 Pages 실행은 성공했고 build 상태 `built`를 확인했다. 공개 주소의 HTML·CSS·JavaScript·SVG 바이트가 로컬 원본과 일치한다. 공개 브라우저에서 새 제목·쇼케이스 렌더, 전체/미니 선택 상태, 라이트/다크 전환, 설치 안내·FAQ, 390px 모바일 가로 넘침 및 프로그램 행 잘림을 확인했다. 공개 페이지 콘솔 오류·경고 없음. 최종 캡처는 `artifacts/site/research-showcase-light.jpg`, `research-showcase-dark.jpg`, `research-showcase-mobile.jpg`이다.
-
-## 모퉁이 라디오 이름 변경 — 2026-10-09
-
-브랜드·페이지 제목·플레이어 예시·설치 안내의 표시 이름을 모퉁이 라디오로 변경했다. 사이트 소스 `334649b`, Pages 실행 37924193770 성공. 공개 HTML은 원본과 바이트 일치하며 실제 브라우저 1280px·390px에서 새 이름과 가로 넘침 없음을 확인했다. 기존 사이트 URL·테마 저장 키·이전 설치파일 안내는 유지한다. 앱 이름 변경을 포함한 새 설치파일은 아직 생성하지 않았다. 캡처는 `artifacts/ui-brand/`에 보관한다.
-
-## 저장소·주소 통일 — 2026-10-09
-
-정식 공개 전 모든 이름을 바꾸기로 한 결정에 따라 사이트 저장소·체크아웃·페이지 주소·테마 저장 키를 `motungi-radio-site`로 변경했다. 이전 URL·테마 키 유지 방침은 취소한다. 소스 `709e700`, Pages 실행 37924681727 성공. 새 공개 주소의 HTML·JavaScript가 원본과 바이트 일치하며 실제 브라우저에서 새 URL과 저장소 링크·페이지 렌더를 확인했다. 캡처는 `artifacts/ui-brand/new-site-address.jpg`다.
+2026-10-09 · 소스 `5c67563` · Pages 37925550504 성공. 공개 HTML·CSS·JS 일치, 380·1280px 화면 넘침 없음. 반복 섹션·설명·미사용 CSS를 정리했다. 캡처: `artifacts/ui-cleanup/`.

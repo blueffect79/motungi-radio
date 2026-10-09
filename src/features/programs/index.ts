@@ -40,28 +40,23 @@ export class ProgramPoller {
     private publish: (values: ProgramState[]) => void,
     private now = Date.now,
   ) {}
+  private normalize(values: ProgramState[]) {
+    const now = this.now();
+    const byId = new Map(values.map((value) => [value.stationId, value]));
+    return this.ids.map((id) =>
+      currentProgram(byId.get(id) ?? unavailable(id, now), now),
+    );
+  }
   refresh(): Promise<void> {
     if (this.pending) return this.pending;
     if (this.stopped) return Promise.resolve();
     clearTimeout(this.timer);
-    this.values = this.ids.map((id) =>
-      currentProgram(
-        this.values.find((v) => v.stationId === id) ??
-          unavailable(id, this.now()),
-        this.now(),
-      ),
-    );
+    this.values = this.normalize(this.values);
     this.publish(this.values);
     this.pending = (async () => {
       try {
         const values = await this.fetch(this.ids);
-        this.values = this.ids.map((id) =>
-          currentProgram(
-            values.find((v) => v.stationId === id) ??
-              unavailable(id, this.now()),
-            this.now(),
-          ),
-        );
+        this.values = this.normalize(values);
         this.failures = 0;
       } catch {
         this.values = this.ids.map((id) => unavailable(id, this.now()));

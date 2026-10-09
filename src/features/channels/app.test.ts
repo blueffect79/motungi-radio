@@ -243,7 +243,7 @@ it("shows fallback and retains audio when schedule is unavailable", async () => 
   const stops = mock.stop.mock.calls.length;
   click("TBN 경인 편성표");
   await tick();
-  expect(root.textContent).toContain("다음 프로그램 정보를 확인할 수 없습니다");
+  expect(root.textContent).toContain("편성 정보가 없습니다");
   expect(root.querySelector('[aria-label="공식 편성표 확인"]')).toBeTruthy();
   expect(mock.stop).toHaveBeenCalledTimes(stops);
 });

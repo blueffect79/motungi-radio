@@ -155,3 +155,111 @@ describe("bounded startup and rebuffer watchdog", () => {
     vi.useRealTimers();
   });
 });
+
+describe("deferred HLS loading", () => {
+  const stream = {
+    stationId: "a",
+    url: "https://example.org/live.m3u8",
+    format: "hls" as const,
+    resolvedAt: "",
+  };
+  const events = () => ({ playing: vi.fn(), waiting: vi.fn(), error: vi.fn() });
+  function fixture() {
+    const instances: FakeHls[] = [];
+    class FakeHls {
+      static isSupported = () => true;
+      static Events = { ERROR: "error", MANIFEST_PARSED: "manifest" };
+      handlers = new Map<string, (...args: any[]) => void>();
+      destroy = vi.fn();
+      loadSource = vi.fn();
+      attachMedia = vi.fn();
+      constructor() {
+        instances.push(this);
+      }
+      on(name: string, handler: (...args: any[]) => void) {
+        this.handlers.set(name, handler);
+      }
+    }
+    let resolve!: (value: typeof import("hls.js").default) => void;
+    let reject!: (error: Error) => void;
+    const load = vi.fn(
+      () =>
+        new Promise<typeof import("hls.js").default>((yes, no) => {
+          resolve = yes;
+          reject = no;
+        }),
+    );
+    const audio = new FakeAudio();
+    audio.canPlayType.mockReturnValue("");
+    const transport = new HtmlAudioTransport(
+      audio as unknown as HTMLAudioElement,
+      load,
+    );
+    return {
+      audio,
+      transport,
+      load,
+      instances,
+      resolve: () =>
+        resolve(FakeHls as unknown as typeof import("hls.js").default),
+      reject: () => reject(new Error("load failed")),
+    };
+  }
+  it("loads HLS only when native playback is unavailable and waits for the manifest", async () => {
+    const f = fixture(),
+      e = events();
+    f.audio.canPlayType.mockReturnValue("maybe");
+    f.transport.start(stream, e);
+    expect(f.load).not.toHaveBeenCalled();
+    f.audio.canPlayType.mockReturnValue("");
+    f.transport.start(stream, e);
+    expect(f.load).toHaveBeenCalledOnce();
+    expect(f.instances).toHaveLength(0);
+    f.resolve();
+    await Promise.resolve();
+    expect(f.instances[0].loadSource).toHaveBeenCalledWith(stream.url);
+    expect(f.instances[0].attachMedia).toHaveBeenCalledWith(f.audio);
+    expect(f.audio.play).toHaveBeenCalledTimes(1);
+    f.instances[0].handlers.get("manifest")?.();
+    expect(f.audio.play).toHaveBeenCalledTimes(2);
+    f.transport.stop();
+    expect(f.instances[0].destroy).toHaveBeenCalledOnce();
+  });
+  it("a delayed import cannot replace a newer channel", async () => {
+    const f = fixture(),
+      old = events(),
+      next = events();
+    f.transport.start(stream, old);
+    f.transport.start(
+      {
+        ...stream,
+        stationId: "b",
+        format: "mp3",
+        url: "https://example.org/next",
+      },
+      next,
+    );
+    f.resolve();
+    await Promise.resolve();
+    expect(f.instances).toHaveLength(0);
+    expect(f.audio.src).toBe("https://example.org/next");
+    expect(old.error).not.toHaveBeenCalled();
+    f.transport.stop();
+  });
+  it("reports an active load failure but ignores failure after stop", async () => {
+    const f = fixture(),
+      first = events(),
+      stopped = events();
+    f.transport.start(stream, first);
+    f.reject();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(first.error).toHaveBeenCalledOnce();
+    f.transport.start(stream, stopped);
+    f.transport.stop();
+    f.reject();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(stopped.error).not.toHaveBeenCalled();
+  });
+});
