@@ -85,14 +85,20 @@ try {
     Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
   );
   await click("미니 플레이어");
-  await wait(() => execute('return !!document.querySelector(".mini")'));
+  await wait(() =>
+    execute(
+      'return !!document.querySelector(".mini") && innerHeight >= 200 && innerHeight <= 360',
+    ),
+  );
   writeFileSync(
     `dist-packages/linux-x64/proof/${proofLabel}-mini.png`,
     Buffer.from(await request(`/session/${session}/screenshot`), "base64"),
   );
   await click("설정");
   await wait(() =>
-    execute('return !!document.querySelector("input[aria-label=\\"음량\\"]")'),
+    execute(
+      'return !!document.querySelector("input[aria-label=\\"음량\\"]") && innerHeight >= 600',
+    ),
   );
   assert.equal(
     await execute(
