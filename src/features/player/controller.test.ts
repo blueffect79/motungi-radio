@@ -28,12 +28,12 @@ function setup() {
   return { player, transport, resolve, events: () => events! };
 }
 describe("player intent and event state", () => {
-  it("restores selection without autoplay; starts at volume 50", () => {
+  it("restores selection without autoplay; starts at volume 100", () => {
     const s = setup();
     s.player.restore("a");
     expect(s.player.state.status).toBe("stopped");
     expect(s.resolve).not.toHaveBeenCalled();
-    expect(s.transport.setVolume).toHaveBeenCalledWith(50);
+    expect(s.transport.setVolume).toHaveBeenCalledWith(100);
   });
   it("only actual playing event means playing, even muted", async () => {
     const s = setup();

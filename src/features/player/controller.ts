@@ -40,7 +40,7 @@ export class PlayerController {
   private pending?: AbortController;
   private listeners = new Set<(state: Playback) => void>();
   constructor(private readonly dependencies: PlayerDependencies) {
-    dependencies.transport.setVolume(50);
+    dependencies.transport.setVolume(100);
   }
   get state(): Playback {
     return { ...this.current };
@@ -62,7 +62,7 @@ export class PlayerController {
     this.current = { ...this.current, requestId: this.current.requestId + 1 };
     this.dependencies.transport.stop();
   }
-  restore(stationId: string | null, volume = 50) {
+  restore(stationId: string | null, volume = 100) {
     this.intent = false;
     this.invalidate();
     this.setVolume(volume, false);
@@ -75,7 +75,7 @@ export class PlayerController {
   setVolume(volume: number, persist = true) {
     const value = Number.isFinite(volume)
       ? Math.max(0, Math.min(100, volume))
-      : 50;
+      : 100;
     this.dependencies.transport.setVolume(value);
     if (persist) this.dependencies.persist?.({ volume: value });
   }

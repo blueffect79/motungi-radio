@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import type {
   Catalog,
   ProgramState,
@@ -45,6 +44,13 @@ const time = new Intl.DateTimeFormat("ko-KR", {
   minute: "2-digit",
   hour12: false,
 });
+const dayKey = (value: string | number) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
 const dateLabel = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   month: "numeric",
@@ -77,7 +83,11 @@ export async function mountApp(root: HTMLElement) {
     catalogError = "",
     infoError = "",
     actionError = "",
-    lastVolume = 50;
+    lastVolume = 100;
+  let pinned = false,
+    pinBusy = false,
+    scheduleDate = "",
+    scheduleFocusPending = false;
   const schedules = new Map<string, Schedule>(),
     pending = new Set<string>();
   const settings = new SettingsController(undefined, () => render());
@@ -149,7 +159,7 @@ export async function mountApp(root: HTMLElement) {
     () => {
       const v = Number(volume.value);
       if (v > 0) lastVolume = v;
-      volume.value = String(v > 0 ? 0 : lastVolume || 50);
+      volume.value = String(v > 0 ? 0 : lastVolume || 100);
       volume.dispatchEvent(new Event("input"));
     },
     "mute",
@@ -167,11 +177,20 @@ export async function mountApp(root: HTMLElement) {
     sizeQueue = Promise.resolve();
   function resize() {
     const compact = mode === "mini" && panel === "channels";
-    if (String(compact) === resized) return;
-    resized = String(compact);
+    const height = compact
+      ? Math.max(
+          200,
+          header.offsetHeight
+            ? Math.ceil(header.offsetHeight + hero.offsetHeight + 16)
+            : 240,
+        )
+      : 640;
+    const sizeKey = `${compact}:${height}`;
+    if (sizeKey === resized) return;
+    resized = sizeKey;
     sizeQueue = sizeQueue.then(async () => {
       try {
-        await invoke("set_player_size", { mini: compact });
+        await invoke("set_player_size", { mini: compact, height });
       } catch {
         actionError = "창 크기를 변경하지 못했습니다.";
         if (!disposed) render();
@@ -232,6 +251,8 @@ export async function mountApp(root: HTMLElement) {
   }
   function openSchedule(id: string) {
     scheduleId = id;
+    scheduleDate = dayKey(Date.now());
+    scheduleFocusPending = true;
     panel = "schedule";
     void loadSchedule(id, true);
     render();
@@ -249,9 +270,26 @@ export async function mountApp(root: HTMLElement) {
     const compact = mode === "mini" && panel === "channels";
     shell.classList.toggle("mini", compact);
     shell.classList.toggle("panel-open", panel !== "channels");
-    if (headerState !== `${panel}:${mode}`) {
-      headerState = `${panel}:${mode}`;
-      header.replaceChildren(node("h1", "한국 라디오"));
+    if (headerState !== `${panel}:${mode}:${pinned}:${pinBusy}:${scheduleId}`) {
+      headerState = `${panel}:${mode}:${pinned}:${pinBusy}:${scheduleId}`;
+      const heading = node(
+        "h1",
+        panel === "settings"
+          ? "설정"
+          : panel === "schedule"
+            ? `${stations.find((s) => s.id === scheduleId)?.name ?? "방송"} 편성표`
+            : "한국 라디오",
+      );
+      heading.title = pinned ? "드래그해서 플레이어 이동" : "한국 라디오";
+      heading.onpointerdown = (event) => {
+        if (!pinned || event.button !== 0) return;
+        void invoke("start_player_drag").catch(() => {
+          actionError = "창을 이동할 수 없습니다.";
+          render();
+        });
+      };
+      header.replaceChildren(heading);
+      header.classList.toggle("draggable", pinned);
       if (panel !== "channels")
         header.append(button("← 돌아가기", "돌아가기", showChannels));
       else
@@ -273,14 +311,44 @@ export async function mountApp(root: HTMLElement) {
           if (panel === "settings") void autostart.refresh();
           render();
         }),
-        button("−", "창 숨기기", () => {
-          void getCurrentWindow()
-            .hide()
-            .catch(() => {
-              actionError = "창을 숨길 수 없습니다.";
+        (() => {
+          const pin = button(
+            "",
+            pinned ? "플레이어 고정 해제" : "플레이어 고정",
+            () => {
+              if (pinBusy) return;
+              pinBusy = true;
               render();
-            });
-        }),
+              void invoke("set_player_pinned", { pinned: !pinned })
+                .then(() => {
+                  pinned = !pinned;
+                })
+                .catch(() => {
+                  actionError = "플레이어 고정을 변경할 수 없습니다.";
+                })
+                .finally(() => {
+                  pinBusy = false;
+                  render();
+                });
+            },
+            "pin",
+          );
+          pin.className = "pin-button";
+          pin.title = pinned ? "고정 해제" : "고정하고 드래그해서 이동";
+          pin.setAttribute("aria-pressed", String(pinned));
+          pin.disabled = pinBusy;
+          const svg = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg",
+          );
+          svg.setAttribute("viewBox", "0 0 24 24");
+          svg.setAttribute("aria-hidden", "true");
+          const path = document.createElementNS(svg.namespaceURI, "path");
+          path.setAttribute("d", "M8 3h8M9 3v6l-3 4v2h12v-2l-3-4V3M12 15v6");
+          svg.append(path);
+          pin.append(svg);
+          return pin;
+        })(),
       );
     }
     const state = player.state,
@@ -305,7 +373,7 @@ export async function mountApp(root: HTMLElement) {
     }[state.status];
     airtime.textContent =
       p?.status === "available"
-        ? `${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))}${p.sourceKind === "schedule" ? " · 편성표 기준" : " · 한국 시간"}`
+        ? `${time.format(new Date(p.startsAt!))}–${time.format(new Date(p.endsAt!))}`
         : "실시간 라디오";
     const busy = ["playing", "loading"].includes(state.status);
     control.textContent = busy ? "■ 정지" : "▶ 재생";
@@ -323,9 +391,10 @@ export async function mountApp(root: HTMLElement) {
     error.hidden = !error.textContent;
     const nextSlot = schedules
       .get(state.stationId ?? "")
-      ?.entries.find((e) => Date.parse(e.startsAt) > Date.now());
+      ?.entries.filter((e) => Date.parse(e.startsAt) > Date.now())
+      .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))[0];
     next.textContent = nextSlot
-      ? `다음 ${time.format(new Date(nextSlot.startsAt))} · ${nextSlot.title}  ›`
+      ? `다음 ${dayKey(nextSlot.startsAt) !== dayKey(Date.now()) ? "내일 " : ""}${time.format(new Date(nextSlot.startsAt))} · ${nextSlot.title}  ›`
       : pending.has(state.stationId ?? "")
         ? "다음 방송 확인 중…"
         : "다음 방송 · 편성표 보기  ›";
@@ -339,9 +408,6 @@ export async function mountApp(root: HTMLElement) {
         "input[type=checkbox]",
       );
       if (check) check.checked = autostart.enabled;
-      const os = main.querySelector(".os-state");
-      if (os)
-        os.textContent = `OS 등록 상태: ${autostart.enabled ? "켜짐" : "꺼짐"}`;
       main
         .querySelectorAll<HTMLButtonElement>(".appearance button")
         .forEach((b) =>
@@ -381,7 +447,7 @@ export async function mountApp(root: HTMLElement) {
       }
     if (panel === "settings") {
       const section = node("section", undefined, "settings");
-      section.append(node("h2", "내 취향대로"), volumeBox);
+      section.append(volumeBox);
       const appearance = node("div", undefined, "appearance");
       appearance.append(node("h3", "화면 모드"));
       for (const [value, label] of [
@@ -411,11 +477,6 @@ export async function mountApp(root: HTMLElement) {
       section.append(
         appearance,
         label,
-        node(
-          "p",
-          `OS 등록 상태: ${autostart.enabled ? "켜짐" : "꺼짐"}`,
-          "muted os-state",
-        ),
         node(
           "p",
           "앱을 열거나 로그인해도 자동으로 재생하지 않습니다.",
@@ -448,10 +509,33 @@ export async function mountApp(root: HTMLElement) {
           "muted",
         ),
       );
-      const entries =
-        schedules
-          .get(scheduleId ?? "")
-          ?.entries.filter((e) => Date.parse(e.endsAt) > Date.now()) ?? [];
+      const allEntries = schedules.get(scheduleId ?? "")?.entries ?? [];
+      const dates = [
+        ...new Set(allEntries.map((e) => dayKey(e.startsAt))),
+      ].sort();
+      if (!dates.includes(scheduleDate) && dates.length)
+        scheduleDate = dates.includes(dayKey(Date.now()))
+          ? dayKey(Date.now())
+          : dates[0];
+      const dateNav = node("nav", undefined, "schedule-dates");
+      dateNav.setAttribute("aria-label", "편성표 날짜");
+      for (const date of dates) {
+        const b = button(
+          `${dateLabel.format(new Date(`${date}T12:00:00+09:00`))}${date === dayKey(Date.now()) ? " · 오늘" : ""}`,
+          `${date} 편성표`,
+          () => {
+            scheduleDate = date;
+            main.scrollTop = 0;
+            render();
+          },
+        );
+        b.setAttribute("aria-pressed", String(date === scheduleDate));
+        dateNav.append(b);
+      }
+      main.append(dateNav);
+      const entries = allEntries.filter(
+        (e) => dayKey(e.startsAt) === scheduleDate,
+      );
       if (pending.has(scheduleId ?? ""))
         main.append(node("p", "편성표를 불러오는 중입니다.", "muted"));
       else if (!entries.length)
@@ -463,20 +547,25 @@ export async function mountApp(root: HTMLElement) {
           ),
         );
       for (const entry of entries) {
-        const current = Date.parse(entry.startsAt) <= Date.now(),
+        const past = Date.parse(entry.endsAt) <= Date.now(),
+          current = !past && Date.parse(entry.startsAt) <= Date.now(),
           item = node(
             "article",
             undefined,
-            `schedule-row${current ? " current" : ""}`,
+            `schedule-row${current ? " current" : past ? " past" : ""}`,
           );
         item.append(
           node(
             "span",
-            `${dateLabel.format(new Date(entry.startsAt))} ${time.format(new Date(entry.startsAt))}–${time.format(new Date(entry.endsAt))}`,
+            `${time.format(new Date(entry.startsAt))}–${time.format(new Date(entry.endsAt))}`,
             "program-time",
           ),
           node("strong", entry.title),
-          node("span", current ? "현재 방송" : "예정", "schedule-state"),
+          node(
+            "span",
+            current ? "현재 방송" : past ? "방송 종료" : "예정",
+            "schedule-state",
+          ),
         );
         main.append(item);
       }
@@ -577,15 +666,35 @@ export async function mountApp(root: HTMLElement) {
       if (infoError) main.append(node("p", infoError, "muted"));
     } else main.append(node("p", "방송 목록을 불러오는 중입니다."));
     main.scrollTop = scroll;
+    if (
+      panel === "schedule" &&
+      scheduleFocusPending &&
+      !pending.has(scheduleId ?? "")
+    ) {
+      const active = main.querySelector<HTMLElement>(".schedule-row.current");
+      if (active)
+        main.scrollTop = Math.max(0, active.offsetTop - main.offsetTop - 140);
+      else main.scrollTop = 0;
+      scheduleFocusPending = false;
+    }
     if (focused)
       Array.from(root.querySelectorAll<HTMLElement>("[data-key]"))
         .find((e) => e.dataset.key === focused)
         ?.focus({ preventScroll: true });
     if (ready) resize();
   }
-  let selectedId: string | null = null;
+  let selectedId: string | null = null,
+    trayPlaying: boolean | undefined;
+  let trayQueue = Promise.resolve<unknown>(undefined);
   player.subscribe(() => {
     render();
+    const playing = player.state.status === "playing";
+    if (playing !== trayPlaying) {
+      trayPlaying = playing;
+      trayQueue = trayQueue
+        .then(() => invoke("set_tray_playing", { playing }))
+        .catch(() => {});
+    }
     const id = player.state.stationId;
     if (ready && id && id !== selectedId) {
       selectedId = id;
@@ -594,7 +703,7 @@ export async function mountApp(root: HTMLElement) {
   });
   await settings.load();
   mode = settings.settings.playerMode ?? "full";
-  lastVolume = settings.settings.volume || 50;
+  lastVolume = settings.settings.volume || 100;
   player.restore(settings.settings.lastStationId, settings.settings.volume);
   try {
     const r = await invoke<Result<Catalog>>("list_stations");
@@ -642,9 +751,10 @@ export async function mountApp(root: HTMLElement) {
     const id = player.state.stationId;
     if (
       id &&
-      schedules
+      (schedules
         .get(id)
-        ?.entries.every((e) => Date.parse(e.endsAt) <= Date.now())
+        ?.entries.every((e) => Date.parse(e.endsAt) <= Date.now()) ||
+        Date.now() - Date.parse(schedules.get(id)?.fetchedAt ?? "") > 300000)
     )
       void loadSchedule(id, true);
   }, 60000);

@@ -103,10 +103,11 @@ pub fn plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry
     builder
         .plugin(tauri_plugin_single_instance::init(|app, args, _| {
             if !is_autostart(args) {
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
+                crate::tray::show(
+                    app,
+                    app.tray_by_id("radio")
+                        .and_then(|t| t.rect().ok().flatten()),
+                );
             }
         }))
         .plugin(tauri_plugin_autostart::init(
@@ -119,10 +120,5 @@ pub fn plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let path = app.path().app_config_dir()?.join("settings.json");
     app.manage(crate::settings::SettingsStore::new(path));
-    if !is_autostart(std::env::args()) {
-        if let Some(window) = app.get_webview_window("main") {
-            window.show()?;
-        }
-    }
     Ok(())
 }

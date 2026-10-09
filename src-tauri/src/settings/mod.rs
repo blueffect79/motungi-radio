@@ -19,7 +19,7 @@ mod tests {
         let s = restore(
             json!({"schemaVersion":1,"volume":101,"favoriteIds":["gone","gone",4],"lastStationId":"gone","tbnStationId":"gone"}),
         );
-        assert_eq!(s.volume, 50.0);
+        assert_eq!(s.volume, 100.0);
         assert_eq!(s.favorite_ids, vec!["gone"]);
         assert_eq!(s.last_station_id.as_deref(), Some("gone"));
         assert_eq!(s.tbn_station_id, None);
@@ -46,7 +46,7 @@ mod tests {
         std::fs::create_dir_all(p.parent().unwrap()).unwrap();
         std::fs::write(&p, r#"{"schemaVersion":2,"volume":30}"#).unwrap();
         let store = SettingsStore::new(p.clone());
-        assert_eq!(store.load().unwrap().volume, 50.0);
+        assert_eq!(store.load().unwrap().volume, 100.0);
         assert!(store.save(Settings::default()).is_err());
         assert!(std::fs::read_to_string(p).unwrap().contains(":2"));
     }
@@ -115,7 +115,7 @@ impl Default for Settings {
             appearance: system_appearance(),
             player_mode: full_mode(),
             favorite_ids: vec![],
-            volume: 50.0,
+            volume: 100.0,
             last_station_id: None,
             tbn_station_id: None,
         }

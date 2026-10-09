@@ -1,5 +1,8 @@
 use std::{
-    sync::{Arc, Mutex},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
     time::{Duration, Instant},
 };
 use tauri::{
@@ -7,6 +10,15 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager, PhysicalPosition, WindowEvent,
 };
+#[derive(Default)]
+struct PlayerWindowState {
+    pinned: AtomicBool,
+}
+
+fn hide_on_blur(pinned: bool) -> bool {
+    !pinned
+}
+
 #[derive(Default)]
 struct ToggleState {
     blurred: Option<Instant>,
@@ -46,12 +58,16 @@ fn clamped_position(
         py.clamp(wy, wy + (wh.saturating_sub(height)) as i32),
     )
 }
-fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
+pub fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
     if let Some(window) = app.get_webview_window("main") {
-        if let Some(rect) = rect {
+        if let Some(rect) = rect.filter(|_| {
+            !app.try_state::<PlayerWindowState>()
+                .is_some_and(|s| s.pinned.load(Ordering::SeqCst))
+        }) {
             let point = rect.position.to_physical::<i32>(1.0);
             if let Ok(Some(monitor)) = window.monitor_from_point(point.x as f64, point.y as f64) {
-                let scale = monitor.scale_factor();
+                // Tray rectangles already use physical pixels; applying monitor scaling twice shifts Retina placement.
+                let scale = 1.0;
                 let pos = rect.position.to_physical::<i32>(scale);
                 let size = rect.size.to_physical::<u32>(scale);
                 let work = monitor.work_area();
@@ -82,6 +98,7 @@ pub fn quit_app(app: tauri::AppHandle) {
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+    app.manage(PlayerWindowState::default());
     let state = Arc::new(Mutex::new(ToggleState::default()));
     if let Some(window) = app.get_webview_window("main") {
         let handle = window.clone();
@@ -92,6 +109,15 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 let _ = handle.hide();
             }
             WindowEvent::Focused(false) => {
+                if !hide_on_blur(
+                    handle
+                        .app_handle()
+                        .state::<PlayerWindowState>()
+                        .pinned
+                        .load(Ordering::SeqCst),
+                ) {
+                    return;
+                }
                 if let Ok(mut state) = state.lock() {
                     state.blurred = Some(Instant::now());
                 }
@@ -103,28 +129,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let open = MenuItem::with_id(app, "open", "열기", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&open, &quit])?;
-    // Transparent monochrome glyph supports macOS template tinting.
-    let mut pixels = vec![0u8; 22 * 22 * 4];
-    for y in 0usize..22 {
-        for x in 0usize..22 {
-            let body = (4..=18).contains(&y) && (2..=19).contains(&x);
-            let border = body && (x <= 3 || x >= 18 || y <= 5 || y >= 17);
-            let speaker = (8..=14).contains(&y) && (5..=10).contains(&x) && ((x + y) % 2 == 0);
-            let controls = (8..=9).contains(&y) && (13..=16).contains(&x)
-                || (12..=14).contains(&y) && (13..=15).contains(&x);
-            let antenna = y == 2 && (5..=17).contains(&x) || x == 5 && y == 3;
-            if border || speaker || controls || antenna {
-                pixels[(y * 22 + x) * 4 + 3] = 255;
-            }
-        }
-    }
-    let icon = if cfg!(target_os = "macos") {
-        tauri::image::Image::new_owned(pixels, 22, 22)
-    } else {
-        app.default_window_icon()
-            .ok_or("앱 아이콘을 찾을 수 없습니다")?
-            .clone()
-    };
+    let icon = status_icon(false);
     TrayIconBuilder::with_id("radio")
         .icon(icon)
         .icon_as_template(cfg!(target_os = "macos"))
@@ -168,11 +173,107 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             }
         })
         .build(app)?;
+    if !crate::desktop::is_autostart(std::env::args()) {
+        show(
+            app.handle(),
+            app.tray_by_id("radio")
+                .and_then(|t| t.rect().ok().flatten()),
+        );
+    }
     Ok(())
+}
+
+/// A radio glyph plus a separate play/pause badge, visible with macOS template tinting.
+fn status_pixels(playing: bool) -> Vec<u8> {
+    let mut pixels = vec![0u8; 30 * 22 * 4];
+    for y in 0usize..22 {
+        for x in 0usize..30 {
+            let body = (4..=18).contains(&y) && (2..=19).contains(&x);
+            let border = body && (x <= 3 || x >= 18 || y <= 5 || y >= 17);
+            let speaker = (8..=14).contains(&y) && (5..=10).contains(&x) && ((x + y) % 2 == 0);
+            let control = (8..=9).contains(&y) && (13..=16).contains(&x);
+            let antenna = y == 2 && (5..=17).contains(&x) || x == 5 && y == 3;
+            let badge = if playing {
+                (13..=19).contains(&y)
+                    && (23..=28).contains(&x)
+                    && x - 23 <= 3usize.saturating_sub(y.abs_diff(16))
+            } else {
+                (13..=19).contains(&y) && ((23..=24).contains(&x) || (27..=28).contains(&x))
+            };
+            if border || speaker || control || antenna || badge {
+                let i = (y * 30 + x) * 4;
+                if !cfg!(target_os = "macos") {
+                    pixels[i..i + 3].copy_from_slice(&[92, 145, 255]);
+                }
+                pixels[i + 3] = 255;
+            }
+        }
+    }
+    pixels
+}
+fn status_icon(playing: bool) -> tauri::image::Image<'static> {
+    tauri::image::Image::new_owned(status_pixels(playing), 30, 22)
+}
+#[tauri::command]
+pub fn set_tray_playing(playing: bool, app: tauri::AppHandle) -> Result<(), String> {
+    let tray = app
+        .tray_by_id("radio")
+        .ok_or("아이콘을 찾을 수 없습니다.")?;
+    tray.set_icon(Some(status_icon(playing)))
+        .map_err(|_| "아이콘을 변경할 수 없습니다.")?;
+    tray.set_tooltip(Some(if playing {
+        "한국 라디오 · 재생 중"
+    } else {
+        "한국 라디오 · 일시정지"
+    }))
+    .map_err(|_| "아이콘 상태를 변경할 수 없습니다.".to_string())
+}
+#[tauri::command]
+pub fn set_player_pinned(pinned: bool, app: tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or("창을 찾을 수 없습니다.")?;
+    window
+        .set_always_on_top(pinned)
+        .map_err(|_| "플레이어 고정을 변경할 수 없습니다.")?;
+    app.state::<PlayerWindowState>()
+        .pinned
+        .store(pinned, Ordering::SeqCst);
+    if !pinned {
+        show(
+            &app,
+            app.tray_by_id("radio")
+                .and_then(|t| t.rect().ok().flatten()),
+        );
+    }
+    Ok(())
+}
+#[tauri::command]
+pub fn start_player_drag(app: tauri::AppHandle) -> Result<(), String> {
+    if !app
+        .state::<PlayerWindowState>()
+        .pinned
+        .load(Ordering::SeqCst)
+    {
+        return Err("고정된 플레이어만 이동할 수 있습니다.".into());
+    }
+    app.get_webview_window("main")
+        .ok_or("창을 찾을 수 없습니다.")?
+        .start_dragging()
+        .map_err(|_| "창을 이동할 수 없습니다.".into())
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn pinned_window_keeps_visibility_and_status_badge_changes() {
+        assert!(!hide_on_blur(true));
+        assert!(hide_on_blur(false));
+        let playing = status_pixels(true);
+        let stopped = status_pixels(false);
+        assert_ne!(playing, stopped);
+        assert_eq!(&playing[..22 * 4], &stopped[..22 * 4]);
+    }
     #[test]
     fn blur_before_tray_click_does_not_reopen() {
         let now = Instant::now();
@@ -225,16 +326,37 @@ mod tests {
 
 /// Resize the existing webview, preserving the one audio controller.
 #[tauri::command]
-pub fn set_player_size(mini: bool, app: tauri::AppHandle) -> Result<(), String> {
+pub fn set_player_size(
+    mini: bool,
+    height: Option<u32>,
+    app: tauri::AppHandle,
+) -> Result<(), String> {
     let window = app
         .get_webview_window("main")
         .ok_or("창을 찾을 수 없습니다.")?;
     window
         .set_size(tauri::LogicalSize::new(
             380.0,
-            if mini { 270.0 } else { 640.0 },
+            if mini {
+                height.unwrap_or(240).clamp(200, 360) as f64
+            } else {
+                640.0
+            },
         ))
         .map_err(|_| "창 크기를 변경할 수 없습니다.")?;
+    if !app
+        .state::<PlayerWindowState>()
+        .pinned
+        .load(Ordering::SeqCst)
+    {
+        if window.is_visible().unwrap_or(false) {
+            show(
+                &app,
+                app.tray_by_id("radio")
+                    .and_then(|t| t.rect().ok().flatten()),
+            );
+        }
+    }
     if let (Ok(Some(monitor)), Ok(pos), Ok(size)) = (
         window.current_monitor(),
         window.outer_position(),

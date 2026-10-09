@@ -2,7 +2,7 @@
 import snapshot from "./metadata.json";
 let settings = {
   schemaVersion: 1,
-  volume: 50,
+  volume: 100,
   lastStationId: "mbc-mfm",
   tbnStationId: null,
   favoriteIds: ["mbc-mfm", "sbs-powerpc", "cbs-music"],
@@ -34,10 +34,16 @@ export async function invoke(command: string, args: any = {}): Promise<any> {
   if (command === "set_player_size") {
     document.documentElement.style.setProperty(
       "--preview-height",
-      args.mini ? "270px" : "640px",
+      args.mini ? `${args.height ?? 240}px` : "640px",
     );
     return;
   }
+  if (
+    ["set_player_pinned", "start_player_drag", "set_tray_playing"].includes(
+      command,
+    )
+  )
+    return;
   if (command === "resolve_stream")
     return {
       ok: false,

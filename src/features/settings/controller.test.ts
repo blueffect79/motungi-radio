@@ -34,8 +34,8 @@ describe("settings controller", () => {
             }
           : { ok: true, data: s },
     });
-    await c.update((s) => ({ ...s, volume: 100 }));
-    expect(c.settings.volume).toBe(50);
+    await c.update((s) => ({ ...s, volume: 20 }));
+    expect(c.settings.volume).toBe(100);
     expect(c.error?.code).toBe("storage");
     fail = false;
     await c.update((s) => ({ ...s, volume: 0 }));

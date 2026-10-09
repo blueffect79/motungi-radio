@@ -131,10 +131,16 @@ it("keeps playback through settings, schedule and mini transitions", async () =>
   await tick();
   expect(root.querySelector(".shell.mini")).toBeTruthy();
   expect(saved.playerMode).toBe("mini");
-  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", { mini: true });
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_player_size",
+    expect.objectContaining({ mini: true }),
+  );
   click("설정");
   await tick();
-  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", { mini: false });
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_player_size",
+    expect.objectContaining({ mini: false }),
+  );
   click("돌아가기");
   await tick();
   expect(root.querySelector(".shell.mini")).toBeTruthy();
@@ -249,4 +255,99 @@ it("rejects foreign artwork, credentials and deceptive host names", () => {
   ])
     expect(safeArtwork(url)).toBeNull();
   expect(safeArtwork("https://img.imbc.com/a.jpg")).toBeTruthy();
+});
+
+it("pins without changing playback and publishes actual tray playback state", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_tray_playing", {
+    playing: false,
+  });
+  expect(root.querySelector('[aria-label="창 숨기기"]')).toBeNull();
+  click("플레이어 고정");
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_pinned", {
+    pinned: true,
+  });
+  expect(
+    root.querySelector('[data-key="pin"]')?.getAttribute("aria-pressed"),
+  ).toBe("true");
+  click("방송 재생");
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_tray_playing", {
+    playing: true,
+  });
+  click("방송 정지");
+  await tick();
+  expect(
+    mock.invoke.mock.calls
+      .filter((c) => c[0] === "set_tray_playing")
+      .at(-1)?.[1],
+  ).toEqual({ playing: false });
+  click("플레이어 고정 해제");
+  await tick();
+  expect(root.querySelector("header")?.classList.contains("draggable")).toBe(
+    false,
+  );
+});
+it("shows past, current and next schedules by date without hiding past programs", async () => {
+  const original = mock.invoke.getMockImplementation()!;
+  const now = Date.now();
+  mock.invoke.mockImplementation((c, a) =>
+    c === "get_schedule"
+      ? Promise.resolve({
+          ok: true,
+          data: {
+            stationId: a.stationId,
+            fetchedAt: new Date(now).toISOString(),
+            entries: [
+              {
+                title: "지난 프로그램",
+                startsAt: new Date(now - 7200000).toISOString(),
+                endsAt: new Date(now - 3600000).toISOString(),
+              },
+              {
+                title: "현재 프로그램",
+                startsAt: new Date(now - 3600000).toISOString(),
+                endsAt: new Date(now + 3600000).toISOString(),
+              },
+              {
+                title: "다음 프로그램",
+                startsAt: new Date(now + 3600000).toISOString(),
+                endsAt: new Date(now + 7200000).toISOString(),
+              },
+            ],
+          },
+        })
+      : original(c, a),
+  );
+  dispose = await mountApp(root);
+  await tick();
+  expect(root.querySelector(".next-program")?.textContent).toContain(
+    "다음 프로그램",
+  );
+  expect(root.querySelector(".program-time")?.textContent).not.toContain(
+    "편성표 기준",
+  );
+  click("현재 채널 편성표");
+  await tick();
+  expect(root.querySelector(".schedule-row.past")?.textContent).toContain(
+    "지난 프로그램",
+  );
+  expect(root.querySelector(".schedule-row.current")?.textContent).toContain(
+    "현재 프로그램",
+  );
+  expect(root.querySelector('[aria-label="편성표 날짜"]')).toBeTruthy();
+});
+it("preserves saved volume and removes redundant settings copy", async () => {
+  saved.volume = 0;
+  dispose = await mountApp(root);
+  await tick();
+  click("설정");
+  await tick();
+  expect(root.querySelector<HTMLInputElement>("input[type=range]")?.value).toBe(
+    "0",
+  );
+  expect(root.textContent).not.toContain("내 취향대로");
+  expect(root.textContent).not.toContain("OS 등록 상태");
 });

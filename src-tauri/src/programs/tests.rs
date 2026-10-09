@@ -359,3 +359,16 @@ fn live_schedules() {
         }
     });
 }
+
+#[test]
+fn date_schedule_retains_past_programs_of_today() {
+    let v = serde_json::json!([
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"0900","EndTime":"1000","ProgramTitle":"지난 방송"},
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"1000","EndTime":"1100","ProgramTitle":"현재 방송"},
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"1100","EndTime":"1200","ProgramTitle":"다음 방송"}
+    ]);
+    let entries = schedule_entries("mbc-mfm", &v, at("2026-10-09T10:30:00+09:00"));
+    assert_eq!(entries.len(), 3);
+    assert_eq!(entries[0].title, "지난 방송");
+    assert_eq!(entries[2].title, "다음 방송");
+}

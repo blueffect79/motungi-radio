@@ -849,7 +849,8 @@ fn schedule_entries(id: &str, value: &Value, at: DateTime<FixedOffset>) -> Vec<S
         return vec![];
     }
     let mut slots = parse_slots(id, value, at, true);
-    slots.retain(|s| s.end > at && s.start < at + chrono::Duration::hours(24));
+    let midnight = time(at.date_naive(), "00:00").unwrap();
+    slots.retain(|s| s.end > midnight && s.start < midnight + chrono::Duration::days(2));
     slots.sort_by_key(|s| s.start);
     slots.dedup_by(|a, b| a.start == b.start && a.end == b.end && a.title == b.title);
     // Ambiguous overlapping schedules are not presented as a reliable next show.

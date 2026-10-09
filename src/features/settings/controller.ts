@@ -10,7 +10,7 @@ export const defaults = (): Settings => ({
   appearance: "system",
   playerMode: "full",
   favoriteIds: [],
-  volume: 50,
+  volume: 100,
   lastStationId: null,
   tbnStationId: null,
 });

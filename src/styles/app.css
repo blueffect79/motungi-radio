@@ -415,7 +415,7 @@ main > button {
 }
 .mini .now-playing {
   margin-bottom: 8px;
-  flex: 1;
+  flex: none;
   min-height: 0;
 }
 .mini .cover {
@@ -455,4 +455,58 @@ main > button {
   .program {
     max-width: 145px;
   }
+}
+
+header.draggable h1 {
+  cursor: grab;
+  user-select: none;
+}
+header.draggable h1:active {
+  cursor: grabbing;
+}
+.pin-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  transform: rotate(35deg);
+}
+.pin-button[aria-pressed="true"] {
+  background: var(--selected);
+  border-radius: 7px;
+}
+.pin-button[aria-pressed="true"] svg {
+  transform: none;
+}
+.schedule-dates {
+  display: flex;
+  gap: 6px;
+  overflow: auto;
+  padding: 8px 0 12px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+.schedule-dates button {
+  white-space: nowrap;
+  font-size: 12px;
+}
+.schedule-dates button[aria-pressed="true"] {
+  background: var(--selected);
+  border-color: var(--accent);
+}
+.schedule-row.past,
+.schedule-row.past .schedule-state {
+  color: var(--muted);
+}
+.schedule-row.past strong {
+  font-weight: 400;
+}
+.mini.shell {
+  height: auto;
 }
