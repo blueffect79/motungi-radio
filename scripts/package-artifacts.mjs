@@ -1,0 +1,23 @@
+import { createHash } from 'node:crypto';
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { basename, join, resolve } from 'node:path';
+
+const [target, input, output] = process.argv.slice(2);
+const formats = { 'aarch64-apple-darwin': ['macos-arm64', '.dmg'], 'x86_64-apple-darwin': ['macos-x64', '.dmg'], 'x86_64-pc-windows-msvc': ['windows-x64', '.exe'] };
+if (!formats[target] || !input || !output) throw new Error('사용법: node scripts/package-artifacts.mjs <target> <bundle-directory> <output-directory>');
+const [platform, extension] = formats[target];
+const walk = (directory) => readdirSync(directory).flatMap(name => { const path = join(directory, name); return statSync(path).isDirectory() ? walk(path) : [path]; });
+const candidates = walk(resolve(input)).filter(path => path.endsWith(extension));
+if (candidates.length !== 1) throw new Error(`설치파일이 정확히 하나여야 합니다: ${candidates.length}`);
+const source = candidates[0];
+const bytes = readFileSync(source);
+if (bytes.length < 1024 || (extension === '.exe' && bytes.subarray(0, 2).toString() !== 'MZ') || (extension === '.dmg' && bytes.subarray(-512, -508).toString() !== 'koly')) throw new Error('설치파일 크기 또는 형식이 올바르지 않습니다.');
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+const name = `radiokorea-${version}-${platform}${extension}`;
+mkdirSync(output, { recursive: true });
+if (readdirSync(output).length) throw new Error('다른 빌드와 섞이지 않도록 빈 출력 폴더를 사용하세요.');
+copyFileSync(source, join(output, name));
+const digest = createHash('sha256').update(bytes).digest('hex');
+writeFileSync(join(output, 'SHA256SUMS.txt'), `${digest}  ${name}\n`);
+if (createHash('sha256').update(readFileSync(join(output, name))).digest('hex') !== digest) throw new Error('복사 후 해시 검증 실패');
+console.log(`${basename(source)} -> ${name}\n${digest}`);
