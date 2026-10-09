@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,14 +8,18 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const target = process.argv[2];
 const targets = ["aarch64-apple-darwin", "x86_64-apple-darwin"];
 const checkOnly = process.argv[3] === "--check";
+const verifyExisting = process.argv[3] === "--verify-existing";
 const fail = (message) => {
-  console.error(message);
-  process.exit(1);
+  throw new Error(message);
 };
 if (process.platform !== "darwin") fail("Mac에서 실행하세요.");
-if (!targets.includes(target) || process.argv.length > (checkOnly ? 4 : 3)) {
+if (
+  !targets.includes(target) ||
+  process.argv.length > 4 ||
+  (process.argv[3] && !checkOnly && !verifyExisting)
+) {
   fail(
-    "사용법: node scripts/build-signed-macos.mjs <aarch64-apple-darwin|x86_64-apple-darwin> [--check]",
+    "사용법: node scripts/build-signed-macos.mjs <aarch64-apple-darwin|x86_64-apple-darwin> [--check|--verify-existing]",
   );
 }
 const identity = process.env.APPLE_SIGNING_IDENTITY;
@@ -65,29 +70,30 @@ if (checkOnly) {
 }
 
 // Explicit override prevents the default ad-hoc identity from reaching a release build.
-run(process.execPath, [
-  "scripts/desktop.mjs",
-  "build",
-  "--target",
-  target,
-  "--bundles",
-  "dmg",
-  "--config",
-  JSON.stringify({
-    bundle: { macOS: { signingIdentity: identity, hardenedRuntime: true } },
-  }),
-]);
+if (!verifyExisting)
+  run(process.execPath, [
+    "scripts/desktop.mjs",
+    "build",
+    "--target",
+    target,
+    "--bundles",
+    "dmg",
+    "--config",
+    JSON.stringify({
+      bundle: { macOS: { signingIdentity: identity, hardenedRuntime: true } },
+    }),
+  ]);
 const targetRoot = process.env.CARGO_TARGET_DIR
   ? resolve(root, process.env.CARGO_TARGET_DIR)
   : join(root, "src-tauri", "target");
 const bundle = join(targetRoot, target, "release", "bundle");
-const app = join(bundle, "macos", "모퉁이 라디오.app");
-run("codesign", ["--verify", "--deep", "--strict", app]);
+const dmgDir = join(bundle, "dmg");
+const dmgs = readdirSync(dmgDir).filter((name) => name.endsWith(".dmg"));
+if (dmgs.length !== 1) fail("공증 대상 DMG가 하나여야 합니다.");
+const dmg = join(dmgDir, dmgs[0]);
+run("hdiutil", ["verify", dmg]);
+run("codesign", ["--verify", "--strict", dmg]);
 if (keychainProfile && !appleIdAuth && !apiAuth) {
-  const dmgDir = join(bundle, "dmg");
-  const dmgs = readdirSync(dmgDir).filter((name) => name.endsWith(".dmg"));
-  if (dmgs.length !== 1) fail("공증 대상 DMG가 하나여야 합니다.");
-  const dmg = join(dmgDir, dmgs[0]);
   const response = run(
     "xcrun",
     [
@@ -115,8 +121,18 @@ if (keychainProfile && !appleIdAuth && !apiAuth) {
     "--verbose=2",
     dmg,
   ]);
-} else {
-  run("xcrun", ["stapler", "validate", app]);
 }
-run("spctl", ["--assess", "--type", "execute", "--verbose=2", app]);
+// Tauri removes the intermediate .app after packaging: verify the distributed copy.
+const mount = mkdtempSync(join(tmpdir(), "motungi-signed-"));
+run("hdiutil", ["attach", "-readonly", "-nobrowse", "-mountpoint", mount, dmg]);
+try {
+  const app = join(mount, "모퉁이 라디오.app");
+  run("codesign", ["--verify", "--deep", "--strict", app]);
+  if (!keychainProfile || appleIdAuth || apiAuth)
+    run("xcrun", ["stapler", "validate", app]);
+  run("spctl", ["--assess", "--type", "execute", "--verbose=2", app]);
+} finally {
+  run("hdiutil", ["detach", mount]);
+  rmSync(mount, { recursive: true });
+}
 console.log(`서명·공증·Gatekeeper 검증 완료: ${bundle}`);

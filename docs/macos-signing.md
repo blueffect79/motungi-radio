@@ -1,6 +1,6 @@
 # Mac 서명·공증
 
-현재 공개된 0.2.1은 임시 서명(ad-hoc)이며 Apple 공증을 받지 않았다. 아래 절차를 마친 새 설치파일부터 적용한다.
+현재 공개된 0.2.1은 임시 서명(ad-hoc)이며 Apple 공증을 받지 않았다. 0.2.2부터 Developer ID 서명·공증 설치파일을 별도로 생성한다.
 
 ## 개발자 등록
 
@@ -35,7 +35,7 @@ CI=true node scripts/build-signed-macos.mjs aarch64-apple-darwin
 CI=true node scripts/build-signed-macos.mjs x86_64-apple-darwin
 ```
 
-이 명령은 기본 임시 서명을 Developer ID로 덮어쓰고 Tauri의 공증을 실행한다. 빌드 후 코드 서명, 앱에 첨부된 공증 확인표, Gatekeeper 평가가 모두 성공해야 완료로 표시한다. `--check`는 사전조건 검사이며 Apple 인증의 유효성이나 실제 공증 성공을 보장하지 않는다.
+이 명령은 기본 임시 서명을 Developer ID로 덮어쓴다. 키체인 프로필 방식은 최종 DMG를 공증하고 확인표를 첨부한다. Tauri가 중간 앱을 정리하므로 최종 DMG를 읽기 전용으로 마운트해 내부 앱의 서명과 Gatekeeper 평가까지 검사한다. `--check`는 사전조건 검사이며 실제 공증 성공을 보장하지 않는다. 이미 생성된 DMG의 공증·검증만 이어가려면 `--verify-existing`을 사용한다.
 
 ## 배포
 
