@@ -1,3 +1,4 @@
+import { checkBinaryArchitecture } from './check-binary-architecture.mjs';
 import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -6,6 +7,8 @@ const [target, input, output] = process.argv.slice(2);
 const formats = { 'aarch64-apple-darwin': ['macos-arm64', '.dmg'], 'x86_64-apple-darwin': ['macos-x64', '.dmg'], 'x86_64-pc-windows-msvc': ['windows-x64', '.exe'] };
 if (!formats[target] || !input || !output) throw new Error('사용법: node scripts/package-artifacts.mjs <target> <bundle-directory> <output-directory>');
 const [platform, extension] = formats[target];
+const binary = resolve(input, '..', target === 'x86_64-pc-windows-msvc' ? 'radiokorea.exe' : 'radiokorea');
+checkBinaryArchitecture(readFileSync(binary), target);
 const walk = (directory) => readdirSync(directory).flatMap(name => { const path = join(directory, name); return statSync(path).isDirectory() ? walk(path) : [path]; });
 const candidates = walk(resolve(input)).filter(path => path.endsWith(extension));
 if (candidates.length !== 1) throw new Error(`설치파일이 정확히 하나여야 합니다: ${candidates.length}`);

@@ -25,13 +25,15 @@ $env:CI = 'true'
 npm run tauri -- build --target x86_64-pc-windows-msvc --bundles nsis
 ```
 
-기본 산출물은 `src-tauri/target/<target>/release/bundle/` 아래에 생성된다. CARGO_TARGET_DIR을 지정했다면 그 폴더 아래를 사용한다. 다음 스크립트는 실제 설치파일이 정확히 하나인지, DMG/PE 헤더와 크기를 확인하고 배포명으로 복사한 다음 해시를 재검증한다. 출력 폴더는 비어 있어야 한다.
+기본 산출물은 `src-tauri/target/<target>/release/bundle/` 아래에 생성된다. CARGO_TARGET_DIR을 지정했다면 그 폴더 아래를 사용한다. 다음 스크립트는 bundle 폴더 바로 위의 실제 radiokorea 실행파일(Windows는 radiokorea.exe)의 CPU가 target과 일치하는지 먼저 검증한다. Windows 앱은 AMD64 PE32+, Mac 앱은 arm64/x64 thin Mach-O여야 한다. NSIS 설치기 자체가 32비트인 것은 허용한다. 이후 실제 설치파일이 정확히 하나인지, DMG/PE 헤더와 크기를 확인하고 배포명으로 복사한 다음 해시를 재검증한다. 출력 폴더는 비어 있어야 한다.
 
 ```sh
 node scripts/package-artifacts.mjs aarch64-apple-darwin src-tauri/target/aarch64-apple-darwin/release/bundle /tmp/radiokorea-macos-arm64
 ```
 
 이는 형식·해시 검증이며 실행 가능성·안전성·설치 성공 보증이 아니다. macOS는 `hdiutil verify <dmg>` 및 `codesign --verify --deep --strict <app>`을 추가 확인하고 `codesign -dv --verbose=4 <app>`으로 ad-hoc임을 기록한다.
+
+아키텍처 검증의 잘못된 CPU·잘린 헤더 회귀 테스트는 `node --test scripts/check-binary-architecture.test.mjs`로 실행한다.
 
 ## GitHub Actions
 
