@@ -154,7 +154,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let icon = status_icon(false);
     TrayIconBuilder::with_id("radio")
         .icon(icon)
-        .icon_as_template(cfg!(target_os = "macos"))
+        .icon_as_template(false)
         .tooltip("모퉁이 라디오")
         .menu(&menu)
         .show_menu_on_left_click(cfg!(target_os = "linux"))
@@ -205,7 +205,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// A radio glyph plus a separate play/pause badge, visible with macOS template tinting.
+/// A blue radio glyph plus a separate play/pause badge on every platform.
 fn status_pixels(playing: bool) -> Vec<u8> {
     let mut pixels = vec![0u8; 30 * 22 * 4];
     for y in 0usize..22 {
@@ -224,9 +224,7 @@ fn status_pixels(playing: bool) -> Vec<u8> {
             };
             if border || speaker || control || antenna || badge {
                 let i = (y * 30 + x) * 4;
-                if !cfg!(target_os = "macos") {
-                    pixels[i..i + 3].copy_from_slice(&[92, 145, 255]);
-                }
+                pixels[i..i + 3].copy_from_slice(&[92, 145, 255]);
                 pixels[i + 3] = 255;
             }
         }

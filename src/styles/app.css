@@ -578,7 +578,7 @@ header.draggable h1:active {
   display: inline-flex;
   width: max-content;
   gap: 32px;
-  animation: title-flow-right var(--title-duration) linear 1.5s infinite;
+  animation: title-flow-left var(--title-duration) linear 1.5s infinite;
 }
 .flowing .title-text,
 .flowing .title-copy {
@@ -589,12 +589,12 @@ header.draggable h1:active {
 .current-title:hover .title-track {
   animation-play-state: paused;
 }
-@keyframes title-flow-right {
+@keyframes title-flow-left {
   from {
-    transform: translateX(calc(-1 * var(--title-cycle)));
+    transform: translateX(0);
   }
   to {
-    transform: translateX(0);
+    transform: translateX(calc(-1 * var(--title-cycle)));
   }
 }
 .current-station,
