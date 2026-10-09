@@ -119,9 +119,11 @@ export async function mountApp(root: HTMLElement) {
         : [...s.favoriteIds, id],
     }));
   }
-  async function region(id: string) {
-    await settings.update((s) => ({ ...s, tbnStationId: id }));
-    if (changeRegion(stations, player.state, id)) void player.select(id);
+  function region(id: string) {
+    // Playback intent belongs to this input event, never to a delayed save completion.
+    const shouldSwitch = changeRegion(stations, player.state, id);
+    void settings.update((s) => ({ ...s, tbnStationId: id }));
+    if (shouldSwitch) void player.select(id);
     render();
   }
   function stationRow(

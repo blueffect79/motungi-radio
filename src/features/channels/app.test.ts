@@ -241,3 +241,50 @@ it("preserves focus in the all-stations row when the same channel is also a favo
     stations.pop();
   }
 });
+it.each(["later favorite", "later play", "later stop"] as const)(
+  "does not let a pending region save override %s",
+  async (scenario) => {
+    saved.favoriteIds = ["tbn-2"];
+    dispose = await mountApp(root);
+    await tick();
+    if (scenario !== "later play") {
+      click("방송 재생");
+      await tick();
+    }
+    const original = mock.invoke.getMockImplementation()!;
+    let release: (() => void) | undefined;
+    let blocked = false;
+    mock.invoke.mockImplementation((command, args) => {
+      if (command === "save_settings" && !blocked) {
+        blocked = true;
+        return new Promise((resolve) => {
+          release = () => {
+            resolve(original(command, args));
+          };
+        });
+      }
+      return original(command, args);
+    });
+    click("TBN 지역 선택");
+    click("TBN 5 지역 선택");
+    await tick();
+    expect(release).toBeDefined();
+    if (scenario === "later favorite") click("TBN 2 재생");
+    if (scenario === "later play") click("방송 재생");
+    if (scenario === "later stop") click("방송 정지");
+    await tick();
+    const requests = mock.resolve.mock.calls.length;
+    release!();
+    await tick();
+    expect(mock.resolve).toHaveBeenCalledTimes(requests);
+    if (scenario === "later favorite") {
+      expect(root.querySelector("footer")?.textContent).toContain("TBN 2");
+      expect(root.querySelector("footer")?.textContent).toContain("재생 중");
+    } else if (scenario === "later play") {
+      expect(root.querySelector("footer")?.textContent).toContain("TBN 0");
+      expect(root.querySelector("footer")?.textContent).toContain("재생 중");
+    } else {
+      expect(root.querySelector("footer")?.textContent).toContain("정지됨");
+    }
+  },
+);
