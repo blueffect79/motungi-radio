@@ -295,3 +295,67 @@ fn slow_tbn_requests_do_not_starve_fast_broadcasters() {
         assert_eq!(tbn.available_permits(), 2);
     });
 }
+
+#[test]
+fn future_schedule_includes_tomorrow_without_extrapolating_live_sources() {
+    let v = serde_json::json!([
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"2300","EndTime":"2400","ProgramTitle":"오늘 마지막"},
+        {"Channel":"FM4U","LiveDays":"토","StartTime":"0000","EndTime":"0100","ProgramTitle":"내일 첫 방송"}
+    ]);
+    let entries = schedule_entries("mbc-mfm", &v, at("2026-10-09T23:30:00+09:00"));
+    assert_eq!(entries.len(), 2);
+    assert_eq!(entries[1].title, "내일 첫 방송");
+    assert!(entries[1].starts_at.starts_with("2026-10-10"));
+    assert!(schedule_entries(
+        "febc-seoul",
+        &serde_json::json!({"title":"live","startTime":"2300","endTime":"2400"}),
+        at("2026-10-09T23:30:00+09:00")
+    )
+    .is_empty());
+}
+#[test]
+fn sbs_future_flag_and_artwork_host_are_validated() {
+    let v = serde_json::json!({"schedule":{"power":[
+        {"channel":"power","onair_flag":"Y","start_time":"1000","end_time":"1100","title":"현재","image":"https://image.cloud.sbs.co.kr/current.png"},
+        {"channel":"power","onair_flag":"N","start_time":"1100","end_time":"1200","title":"다음","image":"https://image.cloud.sbs.co.kr.evil.test/a.png"}
+    ]}});
+    let entries = schedule_entries("sbs-powerpc", &v, at("2026-10-09T10:30:00+09:00"));
+    assert_eq!(entries.len(), 2);
+    assert!(entries[0].image_url.is_some());
+    assert!(entries[1].image_url.is_none());
+    assert_eq!(
+        state(
+            "sbs-powerpc",
+            Some(&v),
+            at("2026-10-09T10:30:00+09:00"),
+            at("2026-10-09T10:30:00+09:00")
+        )
+        .title
+        .as_deref(),
+        Some("현재")
+    );
+    let envelope = serde_json::to_value(&entries[0]).unwrap();
+    assert!(envelope.get("startsAt").is_some());
+    assert!(envelope.get("imageUrl").is_some());
+}
+#[test]
+fn conflicting_schedule_does_not_guess_next_program() {
+    let v = serde_json::json!([
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"1000","EndTime":"1200","ProgramTitle":"A"},
+        {"Channel":"FM4U","LiveDays":"금","StartTime":"1100","EndTime":"1300","ProgramTitle":"B"}
+    ]);
+    assert!(schedule_entries("mbc-mfm", &v, at("2026-10-09T10:30:00+09:00")).is_empty());
+}
+#[test]
+#[ignore = "live official schedule and artwork probe"]
+fn live_schedules() {
+    tauri::async_runtime::block_on(async {
+        for id in ["mbc-mfm", "sbs-powerpc", "cbs-music", "kbs-24"] {
+            let result = get_schedule(id.into()).await.unwrap();
+            println!("{}: {} schedule entries", id, result.entries.len());
+            if id == "mbc-mfm" || id == "sbs-powerpc" {
+                assert!(result.entries.len() > 1);
+            }
+        }
+    });
+}

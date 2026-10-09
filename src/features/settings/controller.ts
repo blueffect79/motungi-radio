@@ -7,6 +7,8 @@ import type {
 } from "../../shared/contracts";
 export const defaults = (): Settings => ({
   schemaVersion: 1,
+  appearance: "system",
+  playerMode: "full",
   favoriteIds: [],
   volume: 50,
   lastStationId: null,

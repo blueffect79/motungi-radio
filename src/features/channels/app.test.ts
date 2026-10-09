@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { mountApp } from "../../App";
+import { mountApp, safeArtwork } from "../../App";
 import { defaults } from "../settings/controller";
 const mock = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -21,23 +21,29 @@ vi.mock("../player/transport", () => ({
   },
 }));
 vi.mock("../player/invoke", () => ({ resolveStream: mock.resolve }));
-const stations = Array.from({ length: 13 }, (_, i) => ({
-  id: `tbn-${i}`,
-  name: `TBN ${i}`,
-  region: `지역 ${i}`,
-  groupId: "tbn",
-  providerId: "tbn",
+const stations = [
+  ["mbc-mfm", "MBC FM4U"],
+  ["sbs-powerpc", "SBS 파워FM"],
+  ["tbn-gyeongin", "TBN 경인"],
+  ["tbn-busan", "TBN 부산"],
+].map(([id, name]) => ({
+  id,
+  name,
+  providerId: id.split("-")[0],
+  region: null,
+  groupId: id.startsWith("tbn") ? "tbn" : null,
   streamKey: "x",
   officialPageUrl: "https://example.com",
 }));
 const tick = async () => {
-  for (let i = 0; i < 15; i++) await Promise.resolve();
+  for (let i = 0; i < 25; i++) await Promise.resolve();
 };
-let root: HTMLElement, dispose: (() => void) | undefined;
-let saved = defaults();
+let root: HTMLElement,
+  dispose: (() => void) | undefined,
+  saved = defaults();
 beforeEach(() => {
   vi.clearAllMocks();
-  saved = { ...defaults(), lastStationId: "tbn-0" };
+  saved = { ...defaults(), lastStationId: "mbc-mfm" };
   root = document.createElement("div");
   document.body.append(root);
   mock.invoke.mockImplementation(async (command, args) => {
@@ -49,10 +55,35 @@ beforeEach(() => {
     if (command === "list_stations")
       return { ok: true, data: { version: 1, stations } };
     if (command === "get_programs")
-      return { ok: false, error: { message: "fail" } };
-    if (command === "get_autostart")
-      return { ok: true, data: { enabled: true } };
-    return { ok: true, data: { enabled: false } };
+      return {
+        ok: true,
+        data: stations.map((s) => ({
+          stationId: s.id,
+          status: "available",
+          sourceKind: "schedule",
+          title: "현재 방송 <script>",
+          startsAt: new Date(Date.now() - 3600000).toISOString(),
+          endsAt: new Date(Date.now() + 3600000).toISOString(),
+          fetchedAt: new Date().toISOString(),
+          sourceUrl: "https://example.com",
+        })),
+      };
+    if (command === "get_schedule")
+      return {
+        ok: true,
+        data: {
+          stationId: args.stationId,
+          entries: [
+            {
+              title: "다음 프로그램",
+              startsAt: new Date(Date.now() + 3600000).toISOString(),
+              endsAt: new Date(Date.now() + 7200000).toISOString(),
+            },
+          ],
+          fetchedAt: new Date().toISOString(),
+        },
+      };
+    return { ok: true, data: { enabled: true } };
   });
   mock.resolve.mockImplementation(async (id) => ({
     ok: true,
@@ -70,244 +101,152 @@ afterEach(() => {
   root.remove();
 });
 function click(label: string) {
-  const button = Array.from(
-    root.querySelectorAll<HTMLButtonElement>("button"),
-  ).find((b) => b.getAttribute("aria-label") === label);
-  expect(button, label).toBeTruthy();
-  button!.click();
+  const b = [...root.querySelectorAll<HTMLButtonElement>("button")].find(
+    (b) => b.getAttribute("aria-label") === label,
+  );
+  expect(b, label).toBeTruthy();
+  b!.click();
 }
-it("renders one TBN group, thirteen region programs, silent restore and safe remote text", async () => {
-  stations[0].name = "<img src=x onerror=alert(1)>";
+it("restores silently, shows only Gyeongin and safely renders remote text", async () => {
   dispose = await mountApp(root);
   await tick();
   expect(mock.resolve).not.toHaveBeenCalled();
-  expect(root.querySelectorAll(".station")).toHaveLength(1);
-  expect(root.querySelector("img")).toBeNull();
-  click("TBN 지역 선택");
-  expect(root.querySelectorAll(".regions button")).toHaveLength(13);
-  expect(root.querySelectorAll(".regions .program")).toHaveLength(13);
-  click("TBN 2 지역 선택");
-  await tick();
-  expect(mock.resolve).not.toHaveBeenCalled();
-  expect(saved.tbnStationId).toBe("tbn-2");
-  expect(root.querySelector("footer")?.textContent).toContain("정지됨");
-  stations[0].name = "TBN 0";
+  expect(root.querySelectorAll(".station")).toHaveLength(3);
+  expect(root.textContent).not.toContain("TBN 부산");
+  expect(root.querySelector("script")).toBeNull();
+  expect(root.textContent).toContain("현재 방송 <script>");
+  expect(root.querySelector("input[type=range]")).toBeNull();
 });
-it("switches playing TBN region, leaves stopped audio alone and does not stop on info failure", async () => {
+it("keeps playback through settings, schedule and mini transitions", async () => {
   dispose = await mountApp(root);
   await tick();
   click("방송 재생");
   await tick();
-  expect(mock.resolve).toHaveBeenLastCalledWith(
-    "tbn-0",
-    expect.any(AbortSignal),
-  );
   const stops = mock.stop.mock.calls.length;
-  window.dispatchEvent(new Event("focus"));
+  click("MBC FM4U 편성표");
   await tick();
-  expect(mock.stop).toHaveBeenCalledTimes(stops);
-  click("TBN 지역 선택");
-  click("TBN 3 지역 선택");
+  expect(root.querySelector("main")?.textContent).toContain("다음 프로그램");
+  click("돌아가기");
+  click("미니 플레이어");
   await tick();
-  expect(mock.resolve).toHaveBeenLastCalledWith(
-    "tbn-3",
-    expect.any(AbortSignal),
-  );
-  click("방송 정지");
-  await tick();
-  const count = mock.resolve.mock.calls.length;
-  click("TBN 4 지역 선택");
-  await tick();
-  expect(mock.resolve).toHaveBeenCalledTimes(count);
-  expect(root.querySelector("footer")?.textContent).toContain("TBN 3");
-});
-it("renders two region favorites and lets users remove a deleted favorite", async () => {
-  saved.favoriteIds = ["tbn-1", "tbn-2", "deleted"];
-  saved.lastStationId = "removed";
-  dispose = await mountApp(root);
-  await tick();
-  expect(root.querySelectorAll(".station")).toHaveLength(4);
-  expect(root.textContent).toContain("removed · 마지막 채널 이용 불가");
-  click("deleted 즐겨찾기 해제");
-  await tick();
-  expect(saved.favoriteIds).toEqual(["tbn-1", "tbn-2"]);
+  expect(root.querySelector(".shell.mini")).toBeTruthy();
+  expect(saved.playerMode).toBe("mini");
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", { mini: true });
   click("설정");
   await tick();
-  expect(
-    root.querySelector<HTMLInputElement>("input[type=checkbox]")?.checked,
-  ).toBe(true);
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", { mini: false });
+  click("돌아가기");
+  await tick();
+  expect(root.querySelector(".shell.mini")).toBeTruthy();
+  expect(mock.stop).toHaveBeenCalledTimes(stops);
 });
-it("keeps the same volume control and keyboard focus across metadata and save renders", async () => {
+it("keeps volume DOM and focus through saves and metadata refresh; remembers appearance", async () => {
   dispose = await mountApp(root);
+  await tick();
+  click("설정");
   await tick();
   const volume = root.querySelector<HTMLInputElement>("input[type=range]")!;
   volume.focus();
   volume.value = "23";
-  volume.dispatchEvent(new Event("input", { bubbles: true }));
+  volume.dispatchEvent(new Event("input"));
   await tick();
   window.dispatchEvent(new Event("focus"));
   await tick();
   expect(root.querySelector("input[type=range]")).toBe(volume);
   expect(document.activeElement).toBe(volume);
   expect(saved.volume).toBe(23);
+  click("다크 모드");
+  await tick();
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  expect(saved.appearance).toBe("dark");
+  click("음소거");
+  await tick();
+  expect(saved.volume).toBe(0);
+  click("음소거");
+  await tick();
+  expect(saved.volume).toBe(23);
 });
-it("region selection while another broadcaster plays does not stop or change its audio", async () => {
-  stations.push({
-    ...stations[0],
-    id: "other",
-    name: "다른 방송",
-    groupId: null as unknown as string,
-  });
+it("uses tabs without duplicate favorites, preserving unavailable favorites for removal", async () => {
+  saved.favoriteIds = ["mbc-mfm", "tbn-busan", "deleted"];
   dispose = await mountApp(root);
   await tick();
-  click("다른 방송 재생");
+  expect(root.querySelectorAll(".station")).toHaveLength(3);
+  click("즐겨찾기");
+  expect(root.querySelectorAll(".station")).toHaveLength(3);
+  expect(root.textContent).toContain("이용 불가 · 삭제된 채널");
+  click("deleted 즐겨찾기 해제");
   await tick();
-  const count = mock.resolve.mock.calls.length,
-    stops = mock.stop.mock.calls.length;
-  click("TBN 지역 선택");
-  click("TBN 5 지역 선택");
-  await tick();
-  expect(mock.resolve).toHaveBeenCalledTimes(count);
-  expect(mock.stop).toHaveBeenCalledTimes(stops);
-  expect(root.querySelector("footer")?.textContent).toContain("다른 방송");
-  stations.pop();
+  expect(saved.favoriteIds).not.toContain("deleted");
 });
-it("keeps current program and Korean airtime visible in permanent footer through metadata refresh", async () => {
-  const original = mock.invoke.getMockImplementation()!;
-  let title = "아침 라디오";
-  mock.invoke.mockImplementation(async (command, args) =>
-    command === "get_programs"
-      ? {
-          ok: true,
-          data: stations.map((s) => ({
-            stationId: s.id,
-            status: "available",
-            sourceKind: "schedule",
-            title: `${title} ${s.id}`,
-            startsAt: new Date(Date.now() - 3600000).toISOString(),
-            endsAt: new Date(Date.now() + 3600000).toISOString(),
-            fetchedAt: new Date().toISOString(),
-            sourceUrl: "https://example.com/program",
-          })),
-        }
-      : original(command, args),
-  );
+it("does not let a late schedule response switch channel or reopen a panel", async () => {
   dispose = await mountApp(root);
   await tick();
-  const footer = root.querySelector("footer")!;
-  expect(footer.textContent).toContain("아침 라디오 tbn-0");
-  expect(footer.textContent).toMatch(/\d{2}:\d{2}–\d{2}:\d{2} \(한국 시간\)/);
-  expect(footer.textContent).toContain("편성표 기준");
-  expect(root.querySelector("main")?.textContent).not.toContain("한국 시간");
-  const volume = footer.querySelector<HTMLInputElement>("input")!;
-  volume.focus();
-  title = "새 프로그램";
-  window.dispatchEvent(new Event("focus"));
-  await tick();
-  expect(footer.textContent).toContain("새 프로그램 tbn-0");
-  expect(document.activeElement).toBe(volume);
-  expect(footer.querySelector("input")).toBe(volume);
-  click("TBN 지역 선택");
-  click("TBN 5 지역 선택");
-  await tick();
-  expect(footer.textContent).toContain("새 프로그램 tbn-0");
-  expect(root.querySelector(".station .program")?.textContent).toBe(
-    "새 프로그램 tbn-5",
-  );
-});
-it("preserves focus in the all-stations row when the same channel is also a favorite", async () => {
-  stations.push({
-    ...stations[0],
-    id: "other",
-    name: "다른 방송",
-    groupId: null as unknown as string,
-  });
-  saved.favoriteIds = ["other"];
-  try {
-    dispose = await mountApp(root);
-    await tick();
-    for (const label of ["다른 방송 재생", "다른 방송 즐겨찾기 해제"]) {
-      const matches = () =>
-        Array.from(root.querySelectorAll<HTMLButtonElement>("button")).filter(
-          (b) => b.getAttribute("aria-label") === label,
-        );
-      expect(matches()).toHaveLength(2);
-      matches()[1].focus();
-      window.dispatchEvent(new Event("focus"));
-      await tick();
-      expect(document.activeElement).toBe(matches()[1]);
-    }
-  } finally {
-    stations.pop();
-  }
-});
-it.each(["later favorite", "later play", "later stop"] as const)(
-  "does not let a pending region save override %s",
-  async (scenario) => {
-    saved.favoriteIds = ["tbn-2"];
-    dispose = await mountApp(root);
-    await tick();
-    if (scenario !== "later play") {
-      click("방송 재생");
-      await tick();
-    }
-    const original = mock.invoke.getMockImplementation()!;
-    let release: (() => void) | undefined;
-    let blocked = false;
-    mock.invoke.mockImplementation((command, args) => {
-      if (command === "save_settings" && !blocked) {
-        blocked = true;
-        return new Promise((resolve) => {
-          release = () => {
-            resolve(original(command, args));
-          };
-        });
-      }
-      return original(command, args);
-    });
-    click("TBN 지역 선택");
-    click("TBN 5 지역 선택");
-    await tick();
-    expect(release).toBeDefined();
-    if (scenario === "later favorite") click("TBN 2 재생");
-    if (scenario === "later play") click("방송 재생");
-    if (scenario === "later stop") click("방송 정지");
-    await tick();
-    const requests = mock.resolve.mock.calls.length;
-    release!();
-    await tick();
-    expect(mock.resolve).toHaveBeenCalledTimes(requests);
-    if (scenario === "later favorite") {
-      expect(root.querySelector("footer")?.textContent).toContain("TBN 2");
-      expect(root.querySelector("footer")?.textContent).toContain("재생 중");
-    } else if (scenario === "later play") {
-      expect(root.querySelector("footer")?.textContent).toContain("TBN 0");
-      expect(root.querySelector("footer")?.textContent).toContain("재생 중");
-    } else {
-      expect(root.querySelector("footer")?.textContent).toContain("정지됨");
-    }
-  },
-);
-it("refreshes actual OS autostart state when an open settings panel regains focus", async () => {
   const original = mock.invoke.getMockImplementation()!;
-  let enabled = true;
-  mock.invoke.mockImplementation((command, args) =>
-    command === "get_autostart"
-      ? Promise.resolve({ ok: true, data: { enabled } })
-      : original(command, args),
+  let resolve: any;
+  mock.invoke.mockImplementation((c, a) =>
+    c === "get_schedule" ? new Promise((r) => (resolve = r)) : original(c, a),
   );
+  click("SBS 파워FM 편성표");
+  click("돌아가기");
+  click("방송 재생");
+  await tick();
+  click("방송 정지");
+  resolve({
+    ok: true,
+    data: { stationId: "sbs-powerpc", entries: [], fetchedAt: "" },
+  });
+  await tick();
+  expect(root.querySelector("main")?.getAttribute("aria-label")).toBe(
+    "방송 목록",
+  );
+  expect(root.querySelector("footer")?.textContent).toContain("정지됨");
+  expect(mock.resolve).toHaveBeenCalledTimes(1);
+});
+it("refreshes OS registration and shows failed saves without replacing slider", async () => {
   dispose = await mountApp(root);
   await tick();
   click("설정");
   await tick();
-  expect(
-    root.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked,
-  ).toBe(true);
-  enabled = false;
+  const original = mock.invoke.getMockImplementation()!;
+  mock.invoke.mockImplementation((c, a) =>
+    c === "get_autostart"
+      ? Promise.resolve({ ok: true, data: { enabled: false } })
+      : c === "save_settings"
+        ? Promise.resolve({ ok: false, error: { message: "저장 실패" } })
+        : original(c, a),
+  );
   window.dispatchEvent(new Event("focus"));
   await tick();
   expect(
-    root.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked,
+    root.querySelector<HTMLInputElement>("input[type=checkbox]")!.checked,
   ).toBe(false);
-  expect(root.textContent).toContain("OS 등록 상태: 꺼짐");
+  click("다크 모드");
+  await tick();
+  expect(root.textContent).toContain("저장 실패");
+});
+it("shows fallback and retains audio when schedule is unavailable", async () => {
+  const original = mock.invoke.getMockImplementation()!;
+  mock.invoke.mockImplementation((c, a) =>
+    c === "get_schedule" ? Promise.reject(new Error()) : original(c, a),
+  );
+  dispose = await mountApp(root);
+  await tick();
+  click("방송 재생");
+  await tick();
+  const stops = mock.stop.mock.calls.length;
+  click("TBN 경인 편성표");
+  await tick();
+  expect(root.textContent).toContain("다음 프로그램 정보를 확인할 수 없습니다");
+  expect(root.querySelector('[aria-label="공식 편성표 확인"]')).toBeTruthy();
+  expect(mock.stop).toHaveBeenCalledTimes(stops);
+});
+it("rejects foreign artwork, credentials and deceptive host names", () => {
+  for (const url of [
+    "http://img.imbc.com/a",
+    "https://img.imbc.com.evil.test/a",
+    "https://user@img.imbc.com/a",
+    "javascript:alert(1)",
+  ])
+    expect(safeArtwork(url)).toBeNull();
+  expect(safeArtwork("https://img.imbc.com/a.jpg")).toBeTruthy();
 });

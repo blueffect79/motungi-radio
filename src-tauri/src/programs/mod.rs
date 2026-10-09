@@ -13,6 +13,7 @@ use tokio::sync::Mutex;
 #[serde(rename_all = "camelCase")]
 pub struct ProgramState {
     pub station_id: String,
+    pub image_url: Option<String>,
     pub status: String,
     pub source_kind: Option<String>,
     pub title: Option<String>,
@@ -137,6 +138,22 @@ fn cbs_title(v: &Value) -> &str {
         .unwrap_or("")
 }
 fn parse(id: &str, v: &Value, now: DateTime<FixedOffset>) -> Vec<Slot> {
+    parse_slots(id, v, now, false)
+}
+fn parse_slots(id: &str, v: &Value, now: DateTime<FixedOffset>, all: bool) -> Vec<Slot> {
+    let slot = |date, start, end, title, at| {
+        slot(
+            date,
+            start,
+            end,
+            title,
+            if all {
+                time(date, start).unwrap_or(at)
+            } else {
+                at
+            },
+        )
+    };
     let mut result = Vec::new();
     let today = now.date_naive();
     if id.starts_with("mbc-") {
@@ -147,7 +164,7 @@ fn parse(id: &str, v: &Value, now: DateTime<FixedOffset>) -> Vec<Slot> {
             _ => return result,
         };
         if let Some(rows) = v.as_array() {
-            for date in [today.pred_opt().unwrap(), today] {
+            for date in [today.pred_opt().unwrap(), today, today.succ_opt().unwrap()] {
                 let day = ["월", "화", "수", "목", "금", "토", "일"]
                     [date.weekday().num_days_from_monday() as usize];
                 for row in rows {
@@ -274,7 +291,7 @@ fn parse(id: &str, v: &Value, now: DateTime<FixedOffset>) -> Vec<Slot> {
             .and_then(Value::as_array)
         {
             for row in rows {
-                if text(row, "channel") == key && text(row, "onair_flag") == "Y" {
+                if text(row, "channel") == key && (all || text(row, "onair_flag") == "Y") {
                     for date in [today.pred_opt().unwrap(), today] {
                         if let Some(s) = slot(
                             date,
@@ -332,6 +349,7 @@ fn state(
     let slots = v.map(|v| parse(id, v, now)).unwrap_or_default();
     let mut state = ProgramState {
         station_id: id.into(),
+        image_url: None,
         status: "unavailable".into(),
         source_kind: None,
         title: None,
@@ -357,6 +375,7 @@ fn state(
             }
             .into(),
         );
+        state.image_url = v.and_then(|v| artwork(id, v, &s.title));
         state.title = Some(s.title.clone());
         state.starts_at = Some(s.start.to_rfc3339());
         state.ends_at = Some(s.end.to_rfc3339());
@@ -761,4 +780,113 @@ async fn acquire_request_budget(
         .await
         .expect("semaphore remains open");
     (provider, global)
+}
+
+// Artwork is presentation-only: exact official hosts, no credentials or unbounded URLs.
+fn artwork(id: &str, value: &Value, title: &str) -> Option<String> {
+    fn walk(v: &Value, title: &str, host: &str) -> Option<String> {
+        match v {
+            Value::Object(map) => {
+                let matches = ["ProgramTitle", "title", "program_title", "name"]
+                    .iter()
+                    .any(|k| text(v, k) == title);
+                if matches {
+                    for key in [
+                        "ThumbnailPicture",
+                        "MiniAppPicture",
+                        "image",
+                        "image_square",
+                    ] {
+                        if let Ok(u) = url::Url::parse(text(v, key)) {
+                            if u.scheme() == "https"
+                                && u.host_str() == Some(host)
+                                && u.username().is_empty()
+                                && u.password().is_none()
+                                && u.port_or_known_default() == Some(443)
+                                && u.as_str().len() < 2048
+                            {
+                                return Some(u.into());
+                            }
+                        }
+                    }
+                }
+                map.values().find_map(|v| walk(v, title, host))
+            }
+            Value::Array(rows) => rows.iter().find_map(|v| walk(v, title, host)),
+            _ => None,
+        }
+    }
+    let host = if id.starts_with("mbc-") {
+        "img.imbc.com"
+    } else if id.starts_with("sbs-") {
+        "image.cloud.sbs.co.kr"
+    } else {
+        return None;
+    };
+    walk(value, title, host)
+}
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScheduleEntry {
+    title: String,
+    starts_at: String,
+    ends_at: String,
+    image_url: Option<String>,
+}
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Schedule {
+    station_id: String,
+    entries: Vec<ScheduleEntry>,
+    fetched_at: String,
+}
+fn schedule_entries(id: &str, value: &Value, at: DateTime<FixedOffset>) -> Vec<ScheduleEntry> {
+    // Only schedule endpoints can establish future broadcasts. Live-only sources are not extrapolated.
+    if !["mbc-", "sbs-", "cbs-", "kbs-"]
+        .iter()
+        .any(|p| id.starts_with(p))
+    {
+        return vec![];
+    }
+    let mut slots = parse_slots(id, value, at, true);
+    slots.retain(|s| s.end > at && s.start < at + chrono::Duration::hours(24));
+    slots.sort_by_key(|s| s.start);
+    slots.dedup_by(|a, b| a.start == b.start && a.end == b.end && a.title == b.title);
+    // Ambiguous overlapping schedules are not presented as a reliable next show.
+    if slots.windows(2).any(|s| s[0].end > s[1].start) {
+        return vec![];
+    }
+    slots
+        .into_iter()
+        .map(|s| ScheduleEntry {
+            image_url: artwork(id, value, &s.title),
+            title: s.title,
+            starts_at: s.start.to_rfc3339(),
+            ends_at: s.end.to_rfc3339(),
+        })
+        .collect()
+}
+pub async fn get_schedule(station_id: String) -> Result<Schedule, AppError> {
+    get_programs(vec![station_id.clone()]).await?;
+    let url = endpoint(&station_id).ok_or_else(invalid)?;
+    let shared = CACHE
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .await
+        .get(url)
+        .cloned();
+    let mut result = Schedule {
+        station_id: station_id.clone(),
+        entries: vec![],
+        fetched_at: now().to_rfc3339(),
+    };
+    if let Some(shared) = shared {
+        if let Some(cache) = shared.lock().await.as_ref() {
+            if let Some(v) = cache.value.as_ref() {
+                result.entries = schedule_entries(&station_id, v, now());
+            }
+            result.fetched_at = cache.fetched.to_rfc3339();
+        }
+    }
+    Ok(result)
 }

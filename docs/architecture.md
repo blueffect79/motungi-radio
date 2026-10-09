@@ -9,3 +9,5 @@ Tauri 호스트가 OS 창·트레이·자동 실행·전원 알림과 로컬 파
 OS 복귀 알림은 호스트 → system-resumed 이벤트 → 재생 제어기로 전달된다. OS 로그인 실행과 사용자의 직접 실행은 시작 인자로 구분한다. 트레이와 창이 같은 프로세스·설정 저장 주체를 공유한다.
 
 외부 의존성은 방송사 조회 서비스, 공식 미디어 CDN, 설치 시 필요한 Microsoft WebView2다. GitHub Actions는 설치파일을 만드는 빌드 환경이며 앱 실행 중에는 필요하지 않다.
+
+get_schedule은 기존 방송사 정보 캐시에서 확인된 현재·미래 구간을 반환한다. 조회 결과는 채널 ID별로 분리해 늦은 응답이 다른 채널 화면을 덮지 않게 한다. set_player_size는 기존 창만 변경한다. appearance/playerMode는 schemaVersion 1의 선택적 확장 필드이며 기존 설정은 system/full로 복원한다.

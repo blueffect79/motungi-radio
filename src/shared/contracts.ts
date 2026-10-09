@@ -38,7 +38,19 @@ export interface Playback {
   requestId: number;
   error: AppError | null;
 }
+export interface ScheduleEntry {
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  imageUrl?: string | null;
+}
+export interface Schedule {
+  stationId: string;
+  entries: ScheduleEntry[];
+  fetchedAt: string;
+}
 export interface ProgramState {
+  imageUrl?: string | null;
   stationId: string;
   status: "available" | "unavailable";
   sourceKind: "live" | "schedule" | null;
@@ -50,6 +62,8 @@ export interface ProgramState {
 }
 export interface Settings {
   schemaVersion: 1;
+  appearance?: "system" | "light" | "dark";
+  playerMode?: "full" | "mini";
   favoriteIds: string[];
   volume: number;
   lastStationId: string | null;

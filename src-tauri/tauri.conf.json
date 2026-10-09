@@ -17,7 +17,7 @@
         "width": 380,
         "height": 640,
         "minWidth": 360,
-        "minHeight": 520,
+        "minHeight": 240,
         "resizable": false,
         "visible": false,
         "decorations": false,
@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost https:; media-src https: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.imbc.com https://image.cloud.sbs.co.kr; connect-src ipc: http://ipc.localhost https:; media-src https: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'"
     }
   },
   "bundle": {

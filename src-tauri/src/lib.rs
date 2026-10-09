@@ -35,6 +35,11 @@ async fn get_programs(station_ids: Vec<String>) -> radio::ApiResult<Vec<programs
     programs::get_programs(station_ids).await.into()
 }
 
+#[tauri::command]
+async fn get_schedule(station_id: String) -> radio::ApiResult<programs::Schedule> {
+    programs::get_schedule(station_id).await.into()
+}
+
 pub fn run() {
     desktop::plugins(tauri::Builder::default())
         .plugin(power::plugin())
@@ -48,6 +53,9 @@ pub fn run() {
             resolve_stream,
             cancel_resolve_stream,
             get_programs,
+            get_schedule,
+            tray::set_player_size,
+            tray::open_station_page,
             settings::load_settings,
             settings::save_settings,
             desktop::get_autostart,

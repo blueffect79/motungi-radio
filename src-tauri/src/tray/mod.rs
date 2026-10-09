@@ -222,3 +222,58 @@ mod tests {
         );
     }
 }
+
+/// Resize the existing webview, preserving the one audio controller.
+#[tauri::command]
+pub fn set_player_size(mini: bool, app: tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or("창을 찾을 수 없습니다.")?;
+    window
+        .set_size(tauri::LogicalSize::new(
+            380.0,
+            if mini { 270.0 } else { 640.0 },
+        ))
+        .map_err(|_| "창 크기를 변경할 수 없습니다.")?;
+    if let (Ok(Some(monitor)), Ok(pos), Ok(size)) = (
+        window.current_monitor(),
+        window.outer_position(),
+        window.outer_size(),
+    ) {
+        let area = monitor.work_area();
+        let x = pos.x.clamp(
+            area.position.x,
+            area.position.x + area.size.width.saturating_sub(size.width) as i32,
+        );
+        let y = pos.y.clamp(
+            area.position.y,
+            area.position.y + area.size.height.saturating_sub(size.height) as i32,
+        );
+        window
+            .set_position(PhysicalPosition::new(x, y))
+            .map_err(|_| "창 위치를 변경할 수 없습니다.")?;
+    }
+    Ok(())
+}
+/// The frontend supplies only a station ID; no arbitrary URL or shell text is accepted.
+#[tauri::command]
+pub fn open_station_page(station_id: String) -> Result<(), String> {
+    let catalog = crate::radio::list_stations().map_err(|_| "방송 목록을 확인할 수 없습니다.")?;
+    let station = catalog
+        .stations
+        .into_iter()
+        .find(|s| s.id == station_id)
+        .ok_or("등록되지 않은 방송입니다.")?;
+    let url = station.official_page_url;
+    #[cfg(target_os = "macos")]
+    let result = std::process::Command::new("open").arg(&url).spawn();
+    #[cfg(target_os = "windows")]
+    let result = std::process::Command::new("rundll32.exe")
+        .args(["url.dll,FileProtocolHandler", &url])
+        .spawn();
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    let result = std::process::Command::new("xdg-open").arg(&url).spawn();
+    result
+        .map(|_| ())
+        .map_err(|_| "공식 페이지를 열 수 없습니다.".into())
+}

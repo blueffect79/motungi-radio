@@ -28,6 +28,19 @@ mod tests {
         }
     }
     #[test]
+    fn appearance_and_mode_survive_restart_and_reject_invalid_values() {
+        let p = path();
+        let store = SettingsStore::new(p.clone());
+        let mut s = Settings::default();
+        s.appearance = "dark".into();
+        s.player_mode = "mini".into();
+        store.save(s.clone()).unwrap();
+        assert_eq!(SettingsStore::new(p).load().unwrap(), s);
+        let restored = restore(json!({"appearance":"broken", "playerMode":"bad"}));
+        assert_eq!(restored.appearance, "system");
+        assert_eq!(restored.player_mode, "full");
+    }
+    #[test]
     fn future_schema_is_not_overwritten() {
         let p = path();
         std::fs::create_dir_all(p.parent().unwrap()).unwrap();
@@ -80,15 +93,27 @@ use std::{collections::HashSet, fs, io::Write, path::PathBuf, sync::Mutex};
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub schema_version: u32,
+    #[serde(default = "system_appearance")]
+    pub appearance: String,
+    #[serde(default = "full_mode")]
+    pub player_mode: String,
     pub favorite_ids: Vec<String>,
     pub volume: f64,
     pub last_station_id: Option<String>,
     pub tbn_station_id: Option<String>,
 }
+fn system_appearance() -> String {
+    "system".into()
+}
+fn full_mode() -> String {
+    "full".into()
+}
 impl Default for Settings {
     fn default() -> Self {
         Self {
             schema_version: 1,
+            appearance: system_appearance(),
+            player_mode: full_mode(),
             favorite_ids: vec![],
             volume: 50.0,
             last_station_id: None,
@@ -121,6 +146,18 @@ fn restore(v: Value) -> Settings {
         .filter(|n| n.is_finite() && (0.0..=100.0).contains(n))
     {
         s.volume = volume
+    }
+    if let Some(value) = v["appearance"]
+        .as_str()
+        .filter(|v| ["system", "light", "dark"].contains(v))
+    {
+        s.appearance = value.into();
+    }
+    if let Some(value) = v["playerMode"]
+        .as_str()
+        .filter(|v| ["full", "mini"].contains(v))
+    {
+        s.player_mode = value.into();
     }
     let mut seen = HashSet::new();
     if let Some(ids) = v["favoriteIds"].as_array() {

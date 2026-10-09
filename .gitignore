@@ -8,3 +8,4 @@ src-tauri/gen/
 .DS_Store
 release-artifacts/
 dist-packages/
+artifacts/
