@@ -1,6 +1,20 @@
 # 검증 기록과 직접 사용 시험
 
-## 0.2.1 설치파일 — 2026-10-09
+## 공개 시험판 0.2.1 — 2026-10-09
+
+[GitHub Releases](https://github.com/devsejong/motungi-radio-site/releases/tag/v0.2.1)에 Mac 2종·Windows x64 설치파일과 통합 SHA256SUMS.txt를 공개했다. 소스는 `a0bab4ea21869a072571f954872d39874f5c7b0c`, 빌드는 [Actions 37927624430](https://github.com/devsejong/motungi-radio/actions/runs/37927624430)이며 세 작업 모두 성공했다.
+
+각 대상 프런트 50개·네이티브 46개·패키지 5개 테스트 통과(네이티브 실시간 검사 3개 제외). 실제 바이너리 CPU·설치파일 형식·SHA256 검사 통과. 두 DMG는 로컬에서 체크섬·내부 앱 ID·버전·CPU 및 ad-hoc 서명 무결성도 확인했다. 공개 파일 4개를 인증 없이 HTTP 200으로 내려받아 원본 해시와 대조했다.
+
+| 공개 파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.1-macos-arm64.dmg` | `500644000f40ceb65319b60e6857d662f7549db14f5534a585c2c69f249e125f` |
+| `motungi-radio-0.2.1-macos-x64.dmg` | `2b9947b1686e1c2ff81b360b33e3e1885afac047322797b1518c523738e615ab` |
+| `motungi-radio-0.2.1-windows-x64.exe` | `c8e5bc2ab1df5c5e1f378abc5ef5cc303c3b320979b4f279e0e0ace0a2821163` |
+
+Mac 공증·Windows 코드 서명은 하지 않았다. 이번 설치본의 실기기 설치·청취, 로그인·절전·업데이트 시험은 미검증이다. 방송사 조건과 명시적인 제3자 앱 허가는 별개로 기록한다.
+
+## 이전 0.2.1 설치파일 — 2026-10-09
 
 빌드 소스는 `4b7a65f024829fe4a669c04b7497205cc7fb12c4` (`codex/player-redesign`)이다. 플레이어 제목·다음 프로그램, 중앙 재생/정지와 이전·다음 채널, 압정 고정·드래그, 날짜별 편성표, 기본 음량 100%, Retina 메뉴바 아래 배치 수정을 포함한다. 이후 문서 커밋은 빌드 소스가 아니다.
 

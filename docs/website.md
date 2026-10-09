@@ -13,10 +13,10 @@ git -C /Users/sejong/Workspace/motungi-radio-site commit -m 'Update introduction
 git -C /Users/sejong/Workspace/motungi-radio-site push
 ```
 
-Pages 실행 성공, 공개 자산 일치, 데스크톱·모바일 화면을 확인한다. 소개 사이트에 앱 소스·설치파일·방송사 이미지·일시 스트림 URL을 올리지 않는다. 방송 정보는 예시다.
+Pages 실행 성공, 공개 자산 일치, 데스크톱·모바일 화면을 확인한다. 소개 사이트의 Pages에는 앱 소스·설치파일·방송사 이미지·일시 스트림 URL을 올리지 않는다. 설치파일은 공개 저장소의 GitHub Releases에만 올린다. 방송 정보는 예시다.
 
 [이전 배포 기록](archive/website-2026-10-09.md)
 
 ## 최신 확인
 
-2026-10-09 · 소스 `b943083` · Pages 37926891628 성공. 아래 설명을 삭제하고 Mac·Windows 다운로드 버튼을 첫 화면에 배치했다. 설치파일은 아직 공개되지 않아 준비 중으로 표시한다. 공개 HTML·CSS 일치, 320·1280px 버튼 노출과 넘침 없음 및 다크 모드 확인. 캡처: `artifacts/site-downloads/`.
+2026-10-09 · 소스 `1797fad` · Pages 37929942183 성공. GitHub Releases v0.2.1의 Mac 2종·Windows 설치파일에 다운로드 버튼을 연결했다. 공개 HTML·CSS 일치, 인증 없는 파일 다운로드·SHA256 일치, 320·1280px 화면 확인. 캡처: `artifacts/public-release/0.2.1/homepage.jpg`.

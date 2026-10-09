@@ -1488,11 +1488,15 @@ h1 em {
   background: #4654cc;
   color: #fff;
   text-align: left;
+  text-decoration: none;
   box-shadow: 0 8px 24px #4654cc22;
 }
-.download-button:disabled {
-  cursor: not-allowed;
-  opacity: 1;
+.download-button:hover {
+  background: #3844b3;
+}
+.download-button:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 4px;
 }
 .download-button strong,
 .download-button small {

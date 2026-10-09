@@ -44,7 +44,7 @@
 - KBS static.api.kbs.co.kr/mediafactory/v1/schedule/onair_now, SBS static.apis.sbs.co.kr/radio-api/gorealra/1.0/main/section/common, BBS 공식 온에어 HTML의 ProgramNamePage/BroadCastTimePage를 사용한다.
 - 현재 정보 총 18개 채널 확인. TBN 13개는 정확한 지역 어댑터가 있으나 네이티브 TLS 조회 시간 초과로 확인 불가다. KBS 한민족은 외부 채널 26과 내부 응답 27의 불일치로 확인 불가이며 임의로 치환하지 않는다.
 
-MBC 재링크 관련 고지가 존재하며 앱 재배포·외부 플레이어 사용에 대한 명시적 허용은 별도 확인 필요하다. 이번 결과는 공식 공개 연결의 기술적 검증이며 배포 허가의 증명이 아니다. 개인 중개 서버나 인증 우회는 사용하지 않았다.
+2026-10-09 [MBC 공식 webapp JS](https://miniwebapp.imbc.com/static/js/main.6c55a947.js)의 고지를 재확인했다. 사전 동의 없는 영리 목적 사용·재링크(링크 제공 포함)를 제한한다. 사용자 요청에 따른 이번 시험판은 무료·비영리이며, 명시적인 제3자 앱 허가를 받은 것으로 표시하지 않는다. 기술 접속 확인과 권리자의 동의는 별개다. 개인 중개 서버나 인증 우회는 사용하지 않았다.
 
 후속 검토 반영: SBS·cpbc API 모두 ssl=Y의 HTTPS 직접 반환을 실측하여 URL scheme 변환을 제거했다. 서명·경로·scheme 모두 응답 원문 유지. 미등록ID 직접 resolver 테스트를 추가했다.
 

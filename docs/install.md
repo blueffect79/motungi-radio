@@ -1,12 +1,12 @@
 # 설치·업데이트
 
-정식 배포 전 시험 중입니다. 새 이름·앱 ID로 된 설치파일은 아직 생성하지 않았습니다. 이전 시험본은 별도 설정을 사용합니다.
+[홈페이지](https://devsejong.github.io/motungi-radio-site/) 또는 [GitHub Releases](https://github.com/devsejong/motungi-radio-site/releases/tag/v0.2.1)에서 무료 시험판을 받습니다. GitHub 로그인은 필요 없습니다. 이전 한국 라디오 시험본과는 별도 설정을 사용합니다.
 
-| 환경 | 향후 설치파일 |
+| 환경 | 0.2.1 설치파일 |
 | --- | --- |
-| macOS 13+ Apple Silicon | motungi-radio-버전-macos-arm64.dmg |
-| macOS 13+ Intel | motungi-radio-버전-macos-x64.dmg |
-| Windows 10/11 x64 | motungi-radio-버전-windows-x64.exe |
+| macOS 13+ Apple Silicon | motungi-radio-0.2.1-macos-arm64.dmg |
+| macOS 13+ Intel | motungi-radio-0.2.1-macos-x64.dmg |
+| Windows 10/11 x64 | motungi-radio-0.2.1-windows-x64.exe |
 
 ## 설치
 
