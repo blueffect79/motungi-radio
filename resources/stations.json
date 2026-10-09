@@ -160,8 +160,8 @@
       "name": "FEBC 서울극동방송",
       "region": "서울",
       "groupId": null,
-      "officialPageUrl": "https://seoul.febc.net/",
-      "streamKey": "unavailable"
+      "officialPageUrl": "https://seoul.febc.net/radio/schedule/live/1",
+      "streamKey": "seoulfm"
     },
     {
       "id": "wbs-seoul",
