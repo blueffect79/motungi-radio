@@ -1,5 +1,11 @@
 # 현재 상태
 
+## GitHub Pages 소개 사이트 — 2026-10-09
+
+[공개 소개 페이지](https://devsejong.github.io/radiokorea-site/)를 별도 공개 저장소 `devsejong/radiokorea-site`에 배포했다. 기능·설치 안내·FAQ, 라이트/다크 테마와 미니 모드 예시를 제공한다. 앱 소스는 비공개로 유지하며 설치파일은 공개하지 않았다. 현재 0.2.1 시험 상태와 공개 다운로드 준비 상태를 명시한다.
+
+공개 페이지 HTTP 200, 최종 Pages 빌드 `built`, 실제 공개 화면의 테마·FAQ·설치 안내·모바일 가로 넘침 및 콘솔 오류 검사를 통과했다. 사이트 원본은 `site/`, 캡처는 `artifacts/site`, 운영·검증 근거는 `docs/website.md`에 기록했다.
+
 ## 0.2.1 설치파일 — 2026-10-09
 
 최신 UI 보완과 Retina 메뉴바 배치를 포함한 소스 `4b7a65f`로 Mac arm64·Intel DMG와 Windows x64 NSIS EXE를 생성했다. Mac 내부 앱 버전·실제 CPU·서명 무결성 및 DMG 검사, Windows Actions 37914476217의 테스트·실제 앱 CPU·EXE 형식 검사, 세 다운로드 파일의 SHA256 검증이 통과했다. 프런트 44개·네이티브 46개·패키지 5개 테스트 통과, 실시간 3개 제외. 파일과 빌드 근거는 `release-artifacts/0.2.1-4b7a65f/`, 상세 해시는 `docs/verification.md`에 기록했다.

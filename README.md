@@ -4,6 +4,7 @@
 
 목표 환경은 macOS 13 이상 Apple Silicon/Intel 및 Windows 10/11 x64입니다. Mac 두 아키텍처의 DMG와 Windows x64 NSIS EXE 시험본을 생성했습니다. 현재는 비공개 시험 단계이며, 빌드 성공과 실제 설치·청취 성공은 구분합니다. 공개 다운로드가 있다고 가정하지 마세요.
 
+- [앱 소개 사이트](https://devsejong.github.io/radiokorea-site/) · [사이트 운영 안내](docs/website.md)
 - [설치·업데이트 안내](docs/install.md)
 - [릴리스 검증 체크리스트](docs/release-checklist.md)
 - [방송 지원 범위](docs/station-support.md)

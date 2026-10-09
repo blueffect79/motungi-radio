@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="한국 라디오 — Mac 메뉴 막대와 Windows 트레이에서 듣는 무료 한국 라디오 앱. 현재 프로그램, 편성표, 즐겨찾기와 미니 플레이어를 한곳에."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f8fc" />
+    <title>한국 라디오 — 작업은 계속. 라디오는 곁에.</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 이동</a>
+    <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="radio" viewBox="0 0 24 24">
+          <path
+            d="M5 7h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 0 14-4"
+          />
+          <circle cx="8" cy="14" r="3" />
+          <path d="M14 12h4m-4 4h4" />
+        </symbol>
+        <symbol id="sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"
+          />
+        </symbol>
+        <symbol id="moon" viewBox="0 0 24 24">
+          <path d="M20.5 14a9 9 0 0 1-10.5-10.5A9 9 0 1 0 20.5 14Z" />
+        </symbol>
+        <symbol id="star" viewBox="0 0 24 24">
+          <path
+            d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"
+          />
+        </symbol>
+        <symbol id="pin" viewBox="0 0 24 24">
+          <path d="m14 3 7 7-3 1-4 4-1 4-3-3-6 6m6-6-3-3 4-1 4-4Z" />
+        </symbol>
+        <symbol id="prev" viewBox="0 0 24 24">
+          <path d="M5 5v14" />
+          <path d="m19 5-11 7 11 7Z" />
+        </symbol>
+        <symbol id="next" viewBox="0 0 24 24">
+          <path d="M19 5v14" />
+          <path d="m5 5 11 7-11 7Z" />
+        </symbol>
+        <symbol id="play" viewBox="0 0 24 24">
+          <path d="m8 4 12 8-12 8Z" />
+        </symbol>
+        <symbol id="arrow" viewBox="0 0 24 24">
+          <path d="M7 17 17 7M7 7h10v10" />
+        </symbol>
+        <symbol id="check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+      </defs>
+    </svg>
+    <header class="header wrap">
+      <a class="brand" href="#"
+        ><span class="brand-icon"
+          ><svg><use href="#radio" /></svg></span
+        >한국 라디오</a
+      >
+      <nav aria-label="주요 메뉴">
+        <a href="#features">기능</a><a href="#install">설치 안내</a
+        ><button
+          class="theme-toggle"
+          type="button"
+          aria-label="다크 모드로 전환"
+        >
+          <svg><use href="#moon" /></svg>
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <span class="eyebrow"><span></span> YOUR LITTLE RADIO COMPANION</span>
+          <h1>작업은 계속.<br />라디오는 <em>곁에.</em></h1>
+          <p class="hero-description">
+            이 방송, 저 방송. 앱을 옮겨 다닐 필요 없이.<br />한국 라디오를 작은
+            창 하나에 담았습니다.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#install"
+              >설치 안내 <svg><use href="#arrow" /></svg></a
+            ><a class="text-link" href="#features"
+              >어떤 앱인가요? <span>↓</span></a
+            >
+          </div>
+          <div class="hero-notes">
+            <span>Mac & Windows</span><span>무료</span><span>로그인 없이</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="desktop-bar">
+            <span class="desktop-label">당신의 데스크톱</span
+            ><span class="tray-radio"
+              ><svg><use href="#radio" /></svg><i></i></span
+            ><span class="desktop-time">14:00</span>
+          </div>
+          <div class="app-window" aria-label="한국 라디오 인터페이스 예시">
+            <div class="app-toolbar">
+              <strong>한국 라디오</strong>
+              <div>
+                <button id="mini-toggle" type="button" aria-pressed="false">
+                  미니</button
+                ><span>설정</span><svg><use href="#pin" /></svg>
+              </div>
+            </div>
+            <div class="player-card">
+              <div class="program-content">
+                <div class="program-art" aria-hidden="true">
+                  <span>ON<br />AIR</span>
+                  <div class="art-wave">
+                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                  </div>
+                </div>
+                <div class="program-copy">
+                  <small>MBC FM4U · 14:00–16:00</small>
+                  <h2>오후의 음악</h2>
+                  <p>다음 16:00 · 함께하는 오후 <span>›</span></p>
+                </div>
+              </div>
+              <div class="player-controls">
+                <div>
+                  <svg><use href="#prev" /></svg><small>MBC 표준FM</small>
+                </div>
+                <span class="play-icon"
+                  ><svg><use href="#play" /></svg
+                ></span>
+                <div>
+                  <svg><use href="#next" /></svg><small>MBC 올댓뮤직</small>
+                </div>
+              </div>
+            </div>
+            <div class="channel-list">
+              <div class="channel-tabs">
+                <span>전체 채널</span><span>즐겨찾기</span>
+              </div>
+              <div class="channel">
+                <span class="channel-cover">MBC</span>
+                <div>
+                  <strong>MBC 표준FM</strong><small>이야기가 있는 시간</small>
+                </div>
+                <span class="schedule-label">편성표</span
+                ><svg><use href="#star" /></svg>
+              </div>
+              <div class="channel selected">
+                <span class="channel-cover selected-cover">FM4U</span>
+                <div><strong>MBC FM4U</strong><small>오후의 음악</small></div>
+                <span class="schedule-label">편성표</span
+                ><svg class="filled-star"><use href="#star" /></svg>
+              </div>
+              <div class="channel">
+                <span class="channel-cover">KBS</span>
+                <div>
+                  <strong>KBS 1라디오</strong><small>뉴스와 시사</small>
+                </div>
+                <span class="schedule-label">편성표</span
+                ><svg><use href="#star" /></svg>
+              </div>
+              <div class="channel">
+                <span class="channel-cover">SBS</span>
+                <div>
+                  <strong>SBS 파워FM</strong><small>음악이 흐르는 오후</small>
+                </div>
+                <span class="schedule-label">편성표</span
+                ><svg><use href="#star" /></svg>
+              </div>
+            </div>
+          </div>
+          <div class="preview-note">
+            UI 미리보기 · 프로그램과 시간은 예시입니다
+          </div>
+        </div>
+      </section>
+      <div class="station-strip wrap">
+        <span class="strip-label">익숙한 목소리, 한곳에서</span>
+        <div>
+          <span>MBC</span><span>KBS</span><span>SBS</span><span>EBS</span
+          ><span>CBS</span><span>TBN 경인</span><span>종교방송</span>
+        </div>
+      </div>
+      <section class="features wrap" id="features">
+        <div class="section-heading">
+          <span class="eyebrow">SMALL WINDOW, GOOD COMPANY</span>
+          <h2>작아서 더 편한 라디오.</h2>
+          <p>필요한 정보와 버튼만, 손이 닿는 곳에.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card wide">
+            <div class="feature-number">01 / 곁에 두기</div>
+            <h3>메뉴 막대에서,<br />트레이에서 바로.</h3>
+            <p>
+              아이콘을 누르면 작은 플레이어가 열립니다.<br />압정으로 고정하고
+              원하는 위치로 옮겨두세요.
+            </p>
+            <div class="mini-demo">
+              <div class="mini-cover">
+                <svg><use href="#radio" /></svg>
+              </div>
+              <div><small>MBC FM4U</small><strong>오후의 음악</strong></div>
+              <svg class="mini-play"><use href="#play" /></svg>
+            </div>
+            <span class="feature-footnote"
+              >한 채널을 오래 듣는 날엔 미니 플레이어로.</span
+            >
+          </article>
+          <article class="feature-card">
+            <div class="feature-number">02 / 다음도 알기</div>
+            <h3>지금 누구의 시간인지.<br />다음은 언제인지.</h3>
+            <p>
+              현재 프로그램과 다음 방송을 확인하고,<br />날짜별 편성표에서
+              하루의 흐름을 살펴보세요.
+            </p>
+            <div class="schedule-demo">
+              <div class="past"><span>12:00</span>점심의 이야기</div>
+              <div class="now"><span>14:00</span>오후의 음악 <b>NOW</b></div>
+              <div><span>16:00</span>함께하는 오후</div>
+            </div>
+            <span class="feature-footnote"
+              >방송사가 제공하는 정보에 따라 표시됩니다.</span
+            >
+          </article>
+          <article class="feature-card">
+            <div class="feature-number">03 / 내 취향대로</div>
+            <h3>흰색도, 검정색도.<br />좋아하는 채널도.</h3>
+            <p>
+              라이트·다크·시스템 테마를 지원합니다.<br />즐겨찾기와 마지막
+              채널은 이 PC에 기억합니다.
+            </p>
+            <div class="theme-demo">
+              <span class="light-chip"
+                ><svg><use href="#sun" /></svg> Light</span
+              ><span class="dark-chip"
+                ><svg><use href="#moon" /></svg> Dark</span
+              >
+            </div>
+            <span class="feature-footnote"
+              >위쪽 달 아이콘으로 이 페이지의 테마도 바꿔보세요.</span
+            >
+          </article>
+        </div>
+      </section>
+      <section class="quiet-section wrap">
+        <span class="quiet-icon"
+          ><svg><use href="#radio" /></svg
+        ></span>
+        <h2>켜는 건 앱.<br />듣는 건 당신의 선택.</h2>
+        <p>
+          앱을 실행하거나 로그인해도 소리는 자동으로 시작하지 않습니다.<br />창을
+          닫아도 재생 중인 방송은 계속 들을 수 있습니다.
+        </p>
+        <div class="quiet-pills">
+          <span
+            ><svg><use href="#check" /></svg> 계정 없이</span
+          ><span
+            ><svg><use href="#check" /></svg> 청취 이력 수집 없이</span
+          ><span
+            ><svg><use href="#check" /></svg> 운영 서버 없이</span
+          >
+        </div>
+      </section>
+      <section class="install-section wrap" id="install">
+        <div class="section-heading">
+          <span class="eyebrow">GET READY TO LISTEN</span>
+          <h2>당신의 PC에도, 한국 라디오.</h2>
+          <p>현재 버전 <strong>0.2.1</strong> · 비공개 시험 중</p>
+        </div>
+        <div class="install-grid">
+          <article class="install-card">
+            <span class="os-mark">macOS</span>
+            <h3>Mac에서 듣기</h3>
+            <p>macOS 13 이상<br />Apple Silicon / Intel 각각 제공</p>
+            <div class="availability">DMG 시험본 준비 완료</div>
+            <ol>
+              <li>사용 중인 Mac에 맞는 DMG를 받습니다.</li>
+              <li>기존 앱을 종료하고 Applications로 복사합니다.</li>
+              <li>메뉴 막대의 라디오 아이콘을 눌러 시작합니다.</li>
+            </ol>
+          </article>
+          <article class="install-card">
+            <span class="os-mark">Windows</span>
+            <h3>Windows에서 듣기</h3>
+            <p>
+              Windows 10 / 11 x64 목표<br />Intel / AMD · Windows ARM 미지원
+            </p>
+            <div class="availability">EXE 시험본 준비 완료</div>
+            <ol>
+              <li>x64용 EXE를 받습니다.</li>
+              <li>기존 앱을 종료하고 설치기를 실행합니다.</li>
+              <li>트레이의 라디오 아이콘을 눌러 시작합니다.</li>
+            </ol>
+          </article>
+        </div>
+        <div class="release-notice">
+          <strong>공개 다운로드는 준비 중입니다.</strong>
+          <p>
+            설치파일은 현재 비공개 시험용으로 제공됩니다. 방송사 이용 조건과
+            실제 기기 검증을 확인한 뒤 이 페이지에 공개 다운로드를
+            안내하겠습니다. Mac 공증과 Windows 코드 서명은 아직 완료되지
+            않았습니다.
+          </p>
+        </div>
+      </section>
+      <section class="faq wrap">
+        <h2>궁금한 점</h2>
+        <details>
+          <summary>어떤 채널을 들을 수 있나요?</summary>
+          <p>
+            MBC·KBS·SBS·EBS와 종교방송, TBN 경인 등 20개 한국 라디오 채널을
+            제공합니다. 다른 TBN 지역 채널은 현재 목록에서 제외했습니다. 원천의
+            제공 상태에 따라 재생이나 프로그램 정보가 달라질 수 있습니다.
+          </p>
+        </details>
+        <details>
+          <summary>무료인가요? 가입이 필요한가요?</summary>
+          <p>
+            유료화 계획이 없는 무료 앱이며 가입 없이 사용합니다. 인터넷 연결이
+            필요합니다. 즐겨찾기·음량·마지막 채널 등의 설정은 사용하는 PC에
+            저장합니다.
+          </p>
+        </details>
+        <details>
+          <summary>방송사의 공식 앱인가요?</summary>
+          <p>
+            독립적으로 만든 앱이며 방송사의 공식 앱이 아닙니다. 공식 방송 소스에
+            직접 연결합니다. 방송 음원·프로그램명·이미지 등은 각 권리자에게
+            권리가 있습니다.
+          </p>
+        </details>
+        <details>
+          <summary>프로그램 정보가 없을 때도 들을 수 있나요?</summary>
+          <p>
+            프로그램 정보와 재생은 별도로 처리합니다. 방송사가 정보를 제공하지
+            않거나 조회가 실패하면 확인 불가를 표시하며, 편성표를 제공하지 않는
+            채널은 공식 페이지를 안내합니다.
+          </p>
+        </details>
+      </section>
+    </main>
+    <footer class="footer wrap">
+      <a class="brand" href="#"
+        ><span class="brand-icon"
+          ><svg><use href="#radio" /></svg></span
+        >한국 라디오</a
+      >
+      <p>한국의 목소리를, 당신의 곁에.</p>
+      <a
+        href="https://github.com/devsejong/radiokorea-site"
+        target="_blank"
+        rel="noopener noreferrer"
+        >사이트 GitHub <svg><use href="#arrow" /></svg></a
+      ><small>방송 콘텐츠의 권리는 각 방송사와 권리자에게 있습니다.</small>
+    </footer>
+  </body>
+</html>
