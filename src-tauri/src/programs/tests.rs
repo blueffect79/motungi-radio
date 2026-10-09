@@ -247,3 +247,51 @@ fn kbs_different_nested_channel_is_not_substituted() {
     let v = serde_json::json!([{"channel_code":"26","local_station_code":"00","schedules":[{"channel_code":"27","local_station_code":"00","program_planned_date":"20261009","program_planned_start_time":"10050000","program_planned_end_time":"11000000","program_title":"다른 채널"}]}]);
     assert_eq!(state("kbs-26", Some(&v), now, now).title, None);
 }
+#[test]
+fn slow_tbn_requests_do_not_starve_fast_broadcasters() {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let global = Arc::new(tokio::sync::Semaphore::new(8));
+        let tbn = Arc::new(tokio::sync::Semaphore::new(2));
+        let mut blocked = tokio::task::JoinSet::new();
+        let (started, mut observed) = tokio::sync::mpsc::unbounded_channel();
+        for _ in 0..13 {
+            let global = global.clone();
+            let tbn = tbn.clone();
+            let started = started.clone();
+            blocked.spawn(async move {
+                let _permits = acquire_request_budget(
+                    "https://www.tbn.or.kr/onair/tbnlive.tbn?area_code=6",
+                    &global,
+                    &tbn,
+                )
+                .await;
+                started.send(()).unwrap();
+                // Mock a transport that never returns a response.
+                std::future::pending::<()>().await;
+            });
+        }
+        observed.recv().await.unwrap();
+        observed.recv().await.unwrap();
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        let fast = tokio::time::timeout(Duration::from_millis(100), async {
+            let _permits = acquire_request_budget(
+                "https://miniapi.imbc.com/Schedule/schedulelist",
+                &global,
+                &tbn,
+            )
+            .await;
+            // A healthy mock transport responds immediately while TBN remains blocked.
+            serde_json::json!({"title":"정상 방송사 응답"})
+        })
+        .await;
+        blocked.abort_all();
+        while blocked.join_next().await.is_some() {}
+        assert_eq!(
+            fast.expect("TBN must not monopolize global request slots")["title"],
+            "정상 방송사 응답"
+        );
+        assert_eq!(global.available_permits(), 8);
+        assert_eq!(tbn.available_permits(), 2);
+    });
+}
