@@ -1,6 +1,6 @@
 # Mac 서명·공증
 
-Mac 0.2.4 Apple Silicon·Intel 설치파일은 Developer ID 서명·Apple 공증을 완료했다. [공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.4). 이전 0.2.1은 임시 서명이며 공증 전이다.
+Mac 0.2.5 Apple Silicon·Intel 설치파일은 Developer ID 서명·Apple 공증을 완료했다. [공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.5). 이전 0.2.1은 임시 서명이며 공증 전이다.
 
 ## 개발자 등록
 

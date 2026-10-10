@@ -1,5 +1,27 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.5 공개 시험판 — 2026-10-10
+
+앱 빌드 소스 `9ac40d1ea70d7bcad38e739414c5386fbe28909c`. 상단 투명도·압정·설정 톱니바퀴를 한 줄에 배치하고 채널 보기·접기를 플레이어 카드 하단에 통합했다. 별도 미니 스타일은 제거했다. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. 같은 앱 코드의 UI 미리보기에서 밝은·어두운 플레이어·목록 접기·편성표 화면을 다시 캡처했다. OS 합성 캡처는 아니다.
+
+- Mac arm64·x64: 최종 DMG와 내부 앱의 버전 0.2.5·앱 ID·CPU·Developer ID·hardened runtime·공증 확인표·Gatekeeper 통과. 공증 Accepted, issues 없음. arm64 `bc43b59f-141f-4516-8e8e-28e1bbd3e94d`, x64 `c840f726-986d-4500-a6dc-cfa5edd78c7c`.
+- [Windows 빌드 38045108709](https://github.com/devsejong/motungi-radio/actions/runs/38045108709): 설치파일 생성·내부 앱 CPU·형식·해시 확인. 미서명.
+- [Linux 빌드 38045111781](https://github.com/devsejong/motungi-radio/actions/runs/38045111781): Debian·AppImage 생성, CPU·형식·해시 및 Debian WebKit/IPC·무음 시작·채널 접기·고정·투명도·트레이 설정/정지·설정 검사 통과.
+
+Mac·Windows 실기기 UI·청취·로그인·절전 및 Windows WebView2 미설치 환경은 미검증이다. Linux 가상 화면 검사를 사람의 청취·물리 트레이·로그인·절전·Wayland 검증으로 합산하지 않는다.
+
+[Linux 설치본 실행 38045565423](https://github.com/devsejong/motungi-radio/actions/runs/38045565423)에서 Debian·AppImage의 WebKit/IPC·무음 시작·채널 접기 높이·고정·35% 투명도·트레이 설정/정지·EBS 재생/정지 통과. 실행 검사 소스도 `9ac40d1`.
+
+[0.2.5 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.5)
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.5-linux-x64.AppImage` | `dfa80eb65474393b5a17888b31df63724c85dcd37b4a45c45c55ec7e82c88a8b` |
+| `motungi-radio-0.2.5-linux-x64.deb` | `6dfa8020b6daaddb6bf0a94a91e55cb1d1ba9a1ec8d3a9a2077db7d547a7c349` |
+| `motungi-radio-0.2.5-macos-arm64.dmg` | `99c34be0b2a6b78a64137622aaa9c4052b673c8f5d1f54127d9cf8ca49068611` |
+| `motungi-radio-0.2.5-macos-x64.dmg` | `e67a4c5fe3165d77ea8143d043f2182c0db7d9eaef377a464109636dfcb66053` |
+| `motungi-radio-0.2.5-windows-x64.exe` | `8d7e6144147e553bcc4a8276dcd9a5194071351b6da24de7302593037c993320` |
+
 ## 0.2.4 공개 시험판 — 2026-10-10
 
 앱 소스 `d0795541f79fbfe5190238fe37d9c668b34e74e4`. 고정 모드 상단 오른쪽의 작은 투명도 슬라이더. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. UI 미리보기에서 기본·미니·라이트·다크·편성표 화면을 캡처하고 키보드 조절·고정 해제 시 불투명 복원을 확인했다. OS 바탕화면 합성 캡처는 아니다.
