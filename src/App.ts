@@ -418,10 +418,14 @@ export async function mountApp(root: HTMLElement) {
         slider.step = "1";
         slider.value = String(transparency);
         slider.setAttribute("aria-label", "플레이어 투명도");
+        slider.title = `투명도 ${transparency}%`;
+        slider.setAttribute("aria-valuetext", `투명도 ${transparency}%`);
         slider.dataset.key = "transparency";
         slider.oninput = () => {
           transparency = Number(slider.value);
           value.textContent = `${transparency}%`;
+          slider.title = `투명도 ${transparency}%`;
+          slider.setAttribute("aria-valuetext", `투명도 ${transparency}%`);
           void applyOpacity().catch(() => {
             actionError = "투명도를 변경할 수 없습니다.";
             render();
