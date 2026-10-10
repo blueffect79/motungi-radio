@@ -57,4 +57,4 @@ Runner와 action 버전은 2026-10-09에 [GitHub runner 문서](https://docs.git
 
 ## 현재 미검증 범위
 
-자동 테스트와 원천 응답 검증은 실제 사용자 화면·청취 검증을 대신하지 않는다. 실제 화면, 청취, 로그인 자동 실행, Windows 실기기 설치는 미검증이다. 사용자의 Windows 11 Intel 장치는 연결되지 않았고 Mac 잠금 상태에서 UI 검증은 보류했다. 서명 인증서 구매·Developer ID 공증·Windows 코드 서명은 수행하지 않았다. 스트림은 32개 주소·미디어 응답을 확인했고 프로그램 정보는 18개 확인됐다. TBN 13개는 네이티브 TLS 시간 초과, KBS 한민족은 응답 채널 불일치로 정보 확인 불가다.
+0.2.3 Mac 두 DMG는 Developer ID 서명·공증·Gatekeeper를 통과했고 Windows x64는 빌드·CPU·형식 검사를 통과했다. Windows는 미서명이다. Linux 두 설치 형식은 가상 화면에서 WebKit/IPC·고정·투명도 명령·트레이 설정/정지 이벤트·EBS 스트리밍을 검사했다. Mac·Windows 실제 UI와 실기기 청취·로그인·절전·Windows WebView2 미설치 환경은 미검증이다. 자동 테스트·빌드·공증을 실제 설치·청취 성공으로 합산하지 않는다. 버전별 근거는 [검증 기록](verification.md)을 따른다.

@@ -1,5 +1,24 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.3 공개 시험판 — 2026-10-10
+
+앱 소스 `5fd59318b3d4e0f01bff387f24b05fc9393cf196`. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. KBS 6개 채널의 현재 썸네일을 실제 조회했다.
+
+- Mac arm64·x64: 최종 DMG와 내부 앱의 버전·앱 ID·CPU·Developer ID·hardened runtime·공증 확인표·Gatekeeper 통과. 두 공증은 Accepted, issues 없음. arm64 `08f15043-3411-43db-8741-5e53eeb7c783`, x64 `7de13ba2-5c34-4225-b34b-5c09105c6fdc`.
+- [Windows 빌드 38033325610](https://github.com/devsejong/motungi-radio/actions/runs/38033325610): 테스트·NSIS·내부 앱 AMD64·형식·해시 통과. 설치기는 미서명이며 실기기 설치·새 UI 동작은 미검증.
+- [Linux 빌드 38033327182](https://github.com/devsejong/motungi-radio/actions/runs/38033327182), [설치본 실행 38033693221](https://github.com/devsejong/motungi-radio/actions/runs/38033693221): 두 설치 형식의 WebKit/IPC, 무음 시작, 미니 높이, 고정·35% 투명도 명령·해제, 트레이 설정·정지 이벤트, EBS 재생·정지 통과. 가상 화면·가상 음원 출력이며 사람의 청취·물리 트레이·로그인·절전·Wayland는 미검증. 실행 검사 소스는 `63bd71a`이며 앱 소스와 구분한다.
+- 인터넷에서 익명으로 받은 5개 설치파일과 통합 체크섬의 SHA256 일치. Mac 다운로드 사본의 공증 확인표도 확인했다. Mac 실제 UI·청취·로그인·절전과 Intel 실행은 미검증.
+
+[0.2.3 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.3)
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.3-macos-arm64.dmg` | `c3d271ac39296cd273015839c082ec235ced1a35770e7f25bef9b83e24ce9809` |
+| `motungi-radio-0.2.3-macos-x64.dmg` | `3d6d39516092aa0fac22da3a20c4cb99ac70628cf38b58ad8d2f6b7892927f44` |
+| `motungi-radio-0.2.3-windows-x64.exe` | `fa68d02eb9b125ac31bd5e4aef31bba093bec85c97babf77feeb7c095425e53d` |
+| `motungi-radio-0.2.3-linux-x64.deb` | `021e4b88886390188e9a12fea07fa130972c5b45e7ba0b09684a064c099fd5bb` |
+| `motungi-radio-0.2.3-linux-x64.AppImage` | `943c3ab167a927d7447da6f95baafb74eea5ad5d9e1895195014828c93cae574` |
+
 ## Mac 0.2.2 서명 빌드 — 2026-10-10
 
 앱 소스 `76dc1ab`, 공증·검증 스크립트 `46eac92`. Apple Silicon·Intel DMG 생성 완료. 최종 이미지 내부의 0.2.2 버전·앱 ID·대상 CPU·Developer ID Application 서명·hardened runtime와 서명 무결성을 확인했다. 프런트 50개·네이티브 46개·설치파일 형식 테스트 6개 통과.
