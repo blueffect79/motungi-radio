@@ -133,6 +133,7 @@ p {
   font-size: 11px;
 }
 .now-playing {
+  --card-padding: 16px;
   margin: 0 16px 12px;
   padding: 16px 16px 0;
   background: var(--surface);
@@ -461,35 +462,12 @@ main > button {
   margin: 15px 4px 0 0;
   font-size: 11px;
 }
-.mini main {
+.channels-collapsed main {
   display: none;
-}
-.mini .now-playing {
-  margin-bottom: 8px;
-  flex: none;
-  min-height: 0;
-}
-.mini .cover {
-  width: 76px;
-  height: 76px;
-}
-.mini .current-title {
-  font-size: 16px;
-}
-.mini .hero-bottom {
-  margin-top: 9px;
-}
-.mini .next-program {
-  padding: 0;
-  margin-top: 4px;
-}
-.mini .now-playing .error {
-  max-height: 28px;
-  margin: 3px 0;
-  font-size: 10px;
 }
 @media (max-width: 360px) {
   .now-playing {
+    --card-padding: 12px;
     margin-left: 12px;
     margin-right: 12px;
     padding-left: 12px;
@@ -557,7 +535,7 @@ header.draggable h1:active {
 .schedule-row.past strong {
   font-weight: 400;
 }
-.mini.shell {
+.channels-collapsed.shell {
   height: auto;
 }
 
@@ -653,18 +631,13 @@ main h2 {
   white-space: nowrap;
 }
 
-/* Small upper-right control, above the player toolbar, only when pinned. */
+/* Inline upper-right control, before pin and settings, only when pinned. */
 header {
   position: relative;
 }
-header:has(.transparency-control) {
-  padding-top: 30px;
-}
 .transparency-control {
-  position: absolute;
-  top: 4px;
-  right: 16px;
-  width: 80px;
+  flex: 0 0 64px;
+  width: 64px;
   height: 20px;
   display: flex;
   align-items: center;
@@ -685,4 +658,64 @@ header:has(.transparency-control) {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+.settings-button {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  display: grid;
+  place-items: center;
+}
+.settings-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.channel-visibility {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  width: calc(100% + var(--card-padding) * 2);
+  margin: 0 calc(-1 * var(--card-padding));
+  padding: 10px var(--card-padding);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--selected);
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 13px 13px;
+}
+.channel-visibility:hover,
+.channel-visibility[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--accent) 8%, var(--selected));
+}
+.channel-visibility:active {
+  background: var(--selected);
+}
+.channel-visibility svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.channel-visibility .channel-chevron {
+  margin-left: auto;
+}
+.channel-visibility span {
+  flex: 1;
+  text-align: left;
+}
+.channel-visibility[aria-expanded="true"] .channel-chevron {
+  transform: rotate(180deg);
 }

@@ -125,7 +125,7 @@ it("restores silently, shows only Gyeongin and safely renders remote text", asyn
   expect(root.textContent).toContain("현재 방송 <script>");
   expect(root.querySelector("input[type=range]")).toBeNull();
 });
-it("keeps playback through settings, schedule and mini transitions", async () => {
+it("keeps playback through settings, schedule and channel-list transitions", async () => {
   dispose = await mountApp(root);
   await tick();
   click("방송 재생");
@@ -135,10 +135,17 @@ it("keeps playback through settings, schedule and mini transitions", async () =>
   await tick();
   expect(root.querySelector("main")?.textContent).toContain("다음 프로그램");
   click("돌아가기");
-  click("미니 플레이어");
+  click("채널 목록 표시 전환");
   await tick();
-  expect(root.querySelector(".shell.mini")).toBeTruthy();
+  expect(root.querySelector(".shell.channels-collapsed")).toBeTruthy();
   expect(saved.playerMode).toBe("mini");
+  expect(
+    root.querySelector(".channel-visibility")?.getAttribute("aria-expanded"),
+  ).toBe("false");
+  expect(root.querySelector(".now-playing")?.lastElementChild).toBe(
+    root.querySelector(".channel-visibility"),
+  );
+  expect(root.querySelector('button[aria-label="미니 플레이어"]')).toBeNull();
   expect(mock.invoke).toHaveBeenCalledWith(
     "set_player_size",
     expect.objectContaining({ mini: true }),
@@ -151,7 +158,7 @@ it("keeps playback through settings, schedule and mini transitions", async () =>
   );
   click("돌아가기");
   await tick();
-  expect(root.querySelector(".shell.mini")).toBeTruthy();
+  expect(root.querySelector(".shell.channels-collapsed")).toBeTruthy();
   expect(mock.stop).toHaveBeenCalledTimes(stops);
 });
 it("keeps volume DOM and focus through saves and metadata refresh; remembers appearance", async () => {

@@ -103,10 +103,10 @@ try {
     `dist-packages/linux-x64/proof/${proofLabel}-player.png`,
     await screenshot(),
   );
-  await click("미니 플레이어");
+  await click("채널 목록 표시 전환");
   await wait(() =>
     execute(
-      'return !!document.querySelector(".mini") && innerHeight >= 200 && innerHeight <= 360',
+      'return !!document.querySelector(".channels-collapsed") && innerHeight >= 200 && innerHeight <= 360',
     ),
   );
   writeFileSync(
@@ -164,7 +164,7 @@ try {
   );
   if (process.env.LINUX_LIVE_PROBE === "1") {
     await click("돌아가기");
-    await click("기본 플레이어");
+    await click("채널 목록 표시 전환");
     await click("EBS FM 재생");
     await wait(() =>
       execute(
@@ -200,7 +200,7 @@ try {
     );
   }
   console.log(
-    "Linux 설치본: 실제 IPC 채널 로드, 무음 시작, 미니 모드, 고정·투명도 명령, 트레이 설정·정지 이벤트, 설정·기본 음량·화면 크기 검사 통과. 실제 청취·트레이·로그인·절전 미검증.",
+    "Linux 설치본: 실제 IPC 채널 로드, 무음 시작, 채널 목록 접기, 고정·투명도 명령, 트레이 설정·정지 이벤트, 설정·기본 음량·화면 크기 검사 통과. 실제 청취·트레이·로그인·절전 미검증.",
   );
 } finally {
   if (session) await request(`/session/${session}`, "DELETE").catch(() => {});

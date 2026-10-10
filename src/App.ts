@@ -85,7 +85,7 @@ export async function mountApp(root: HTMLElement) {
     disposed = false;
   let panel: "channels" | "settings" | "schedule" = "channels",
     scheduleId: string | null = null;
-  let mode: "full" | "mini" = "full",
+  let channelsVisible = true,
     filter: "all" | "favorites" = "all",
     catalogError = "",
     infoError = "",
@@ -228,6 +228,30 @@ export async function mountApp(root: HTMLElement) {
   volumeHeading.append(volumeLabel, volumeValue);
   volumeControls.append(node("span", "◖))", "speaker"), volume, mute);
   volumeBox.append(volumeHeading, volumeControls);
+  const channelToggle = button(
+    "채널 숨기기",
+    "채널 목록 표시 전환",
+    () => {
+      channelsVisible = !channelsVisible;
+      // Preserve the existing settings contract; this now only controls the list.
+      const playerMode = channelsVisible ? "full" : "mini";
+      void settings.update((value) => ({ ...value, playerMode }));
+      render();
+    },
+    "channel-visibility",
+  );
+  channelToggle.className = "channel-visibility";
+  const channelToggleLabel = node("span");
+  const channelChevron = glyph("m8 10 4 4 4-4");
+  channelChevron.classList.add("channel-chevron");
+  channelToggle.replaceChildren(
+    glyph("M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"),
+    channelToggleLabel,
+    channelChevron,
+  );
+  channelToggle.setAttribute("aria-controls", "channel-panel");
+  main.id = "channel-panel";
+  hero.append(channelToggle);
   shell.append(header, hero, main);
   root.replaceChildren(shell);
   let headerState = "";
@@ -235,7 +259,7 @@ export async function mountApp(root: HTMLElement) {
     resized = "",
     sizeQueue = Promise.resolve();
   function resize() {
-    const compact = mode === "mini" && panel === "channels";
+    const compact = !channelsVisible && panel === "channels";
     const height = compact
       ? Math.max(
           200,
@@ -324,11 +348,16 @@ export async function mountApp(root: HTMLElement) {
       scroll = main.scrollTop;
     document.documentElement.dataset.theme =
       settings.settings.appearance ?? "system";
-    const compact = mode === "mini" && panel === "channels";
-    shell.classList.toggle("mini", compact);
+    const compact = !channelsVisible && panel === "channels";
+    shell.classList.toggle("channels-collapsed", compact);
+    channelToggle.hidden = panel !== "channels";
+    channelToggleLabel.textContent = channelsVisible
+      ? "채널 접기"
+      : "채널 보기";
+    channelToggle.setAttribute("aria-expanded", String(channelsVisible));
     shell.classList.toggle("panel-open", panel !== "channels");
-    if (headerState !== `${panel}:${mode}:${pinned}:${pinBusy}:${scheduleId}`) {
-      headerState = `${panel}:${mode}:${pinned}:${pinBusy}:${scheduleId}`;
+    if (headerState !== `${panel}:${pinned}:${pinBusy}:${scheduleId}`) {
+      headerState = `${panel}:${pinned}:${pinBusy}:${scheduleId}`;
       const heading = node(
         "h1",
         panel === "settings"
@@ -349,25 +378,7 @@ export async function mountApp(root: HTMLElement) {
       header.classList.toggle("draggable", pinned);
       if (panel !== "channels")
         header.append(button("← 돌아가기", "돌아가기", showChannels));
-      else
-        header.append(
-          button(
-            mode === "mini" ? "채널 목록" : "미니",
-            mode === "mini" ? "기본 플레이어" : "미니 플레이어",
-            () => {
-              mode = mode === "mini" ? "full" : "mini";
-              const selected = mode;
-              void settings.update((s) => ({ ...s, playerMode: selected }));
-              render();
-            },
-          ),
-        );
       header.append(
-        button(panel === "settings" ? "닫기" : "설정", "설정", () => {
-          panel = panel === "settings" ? "channels" : "settings";
-          if (panel === "settings") void autostart.refresh();
-          render();
-        }),
         (() => {
           const pin = button(
             "",
@@ -432,8 +443,22 @@ export async function mountApp(root: HTMLElement) {
           });
         };
         row.append(node("span", "투명도"), slider, value);
-        header.append(row);
+        header.insertBefore(row, header.querySelector(".pin-button"));
       }
+      const gear = button("", "설정", () => {
+        panel = panel === "settings" ? "channels" : "settings";
+        if (panel === "settings") void autostart.refresh();
+        render();
+      });
+      gear.className = "settings-button";
+      gear.title = panel === "settings" ? "설정 닫기" : "설정";
+      gear.setAttribute("aria-pressed", String(panel === "settings"));
+      gear.append(
+        glyph(
+          "M9.5 3h5l.7 2.5 2 .9 2.4-.6 2.5 4.3-1.7 1.8v2.2l1.7 1.8-2.5 4.3-2.4-.6-2 .9-.7 2.5h-5l-.7-2.5-2-.9-2.4.6L1.9 16l1.7-1.8V12.1l-1.7-1.8 2.5-4.3 2.4.6 2-.9z M15.5 12.5a3.5 3.5 0 1 0-7 0a3.5 3.5 0 1 0 7 0",
+        ),
+      );
+      header.append(gear);
     }
     const state = player.state,
       current = stations.find((s) => s.id === state.stationId),
@@ -837,7 +862,7 @@ export async function mountApp(root: HTMLElement) {
     })
     .catch(() => {});
   await settings.load();
-  mode = settings.settings.playerMode ?? "full";
+  channelsVisible = settings.settings.playerMode !== "mini";
   lastVolume = settings.settings.volume || 100;
   player.restore(settings.settings.lastStationId, settings.settings.volume);
   try {
