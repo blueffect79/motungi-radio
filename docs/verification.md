@@ -4,7 +4,16 @@
 
 앱 소스 `76dc1ab`, 공증·검증 스크립트 `46eac92`. Apple Silicon·Intel DMG 생성 완료. 최종 이미지 내부의 0.2.2 버전·앱 ID·대상 CPU·Developer ID Application 서명·hardened runtime와 서명 무결성을 확인했다. 프런트 50개·네이티브 46개·설치파일 형식 테스트 6개 통과.
 
-Apple 공증 상태는 아직 `In Progress`다. 제출 ID: Apple Silicon `ea3e2011-481b-4d59-93f9-f7dc3b41f82a`, Intel `d5ad84cb-52a8-4a17-b703-884fb5adcae2`. 승인 후 DMG에 확인표를 첨부하고 Gatekeeper 검증·최종 해시를 기록한다. 공개 다운로드는 여전히 0.2.1이며, 0.2.2를 공증 완료로 표시하지 않는다.
+Apple Silicon·Intel 모두 `Accepted`, 공증 로그의 issues 없음. 제출 ID: Apple Silicon `ea3e2011-481b-4d59-93f9-f7dc3b41f82a`, Intel `d5ad84cb-52a8-4a17-b703-884fb5adcae2`. 두 DMG의 공증 확인표, 체크섬, 서명과 최종 이미지 안의 앱 서명·Gatekeeper 평가가 모두 통과했다. Gatekeeper 원천은 `Notarized Developer ID`다. 실제 설치·청취·로그인·절전과 Intel Mac 실행은 별도 미검증이다.
+
+[공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.2). 최종 파일 해시:
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.2-macos-arm64.dmg` | `f5a1013a4f2f939a60d678180092db948484830c1d023b5eecef9202d6117326` |
+| `motungi-radio-0.2.2-macos-x64.dmg` | `9c873bdfe5bb8a87320fc08d995d13749deef8e6e19f612a1af2c1d1a4494dab` |
+
+Windows 0.2.1과 Linux 시험판은 기존 파일을 유지한다.
 
 ## Linux 시험판 — 2026-10-10
 

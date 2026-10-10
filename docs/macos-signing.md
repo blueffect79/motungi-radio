@@ -1,6 +1,6 @@
 # Mac 서명·공증
 
-현재 공개된 0.2.1은 임시 서명(ad-hoc)이며 Apple 공증을 받지 않았다. 0.2.2부터 Developer ID 서명·공증 설치파일을 별도로 생성한다.
+Mac 0.2.2 Apple Silicon·Intel 설치파일은 Developer ID 서명·Apple 공증을 완료했다. [공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.2). 이전 0.2.1은 임시 서명이며 공증 전이다.
 
 ## 개발자 등록
 
