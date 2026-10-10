@@ -372,3 +372,51 @@ fn date_schedule_retains_past_programs_of_today() {
     assert_eq!(entries[0].title, "지난 방송");
     assert_eq!(entries[2].title, "다음 방송");
 }
+
+#[test]
+fn kbs_artwork_matches_exact_channel_region_and_title() {
+    let image = "https://programres.kbs.co.kr/r2025-0079/2025/6/25/1750810544504_590060.jpg";
+    let mut data = serde_json::json!([
+        {"channel_code":"21","local_station_code":"00","schedules":[
+            {"channel_code":"21","local_station_code":"00","program_title":"같은 제목","image_w":"https://programres.kbs.co.kr/wrong.jpg"}]},
+        {"channel_code":"22","local_station_code":"00","schedules":[
+            {"channel_code":"22","local_station_code":"00","program_title":"같은 제목","image_w":image}]}
+    ]);
+    assert_eq!(
+        artwork("kbs-22", &data, "같은 제목").as_deref(),
+        Some(image)
+    );
+    assert_eq!(artwork("kbs-22", &data, "다른 제목"), None);
+    for rejected in [
+        "https://programres.kbs.co.kr.evil.test/x.jpg",
+        "http://programres.kbs.co.kr/x.jpg",
+        "https://user@programres.kbs.co.kr/x.jpg",
+        "https://programres.kbs.co.kr:8443/x.jpg",
+    ] {
+        data[1]["schedules"][0]["image_w"] = serde_json::json!(rejected);
+        assert_eq!(artwork("kbs-22", &data, "같은 제목"), None);
+    }
+    data[1]["schedules"][0]["image_w"] = serde_json::json!(
+        "https://mediafactory.play.kbs.co.kr/upload/radioImage/Program/test.jpeg"
+    );
+    assert!(artwork("kbs-22", &data, "같은 제목").is_some());
+    data[1]["schedules"][0]["local_station_code"] = serde_json::json!("10");
+    assert_eq!(artwork("kbs-22", &data, "같은 제목"), None);
+}
+
+#[test]
+#[ignore = "live official KBS artwork probe"]
+fn live_kbs_artwork() {
+    tauri::async_runtime::block_on(async {
+        let values = get_programs((21..=26).map(|code| format!("kbs-{code}")).collect())
+            .await
+            .unwrap();
+        let mut images = 0;
+        for value in values {
+            let has_image = value.image_url.is_some();
+            println!("{}: image={}", value.station_id, has_image);
+            images += usize::from(has_image);
+        }
+        assert!(images > 0, "no current KBS artwork found");
+    });
+}

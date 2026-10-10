@@ -1,3 +1,4 @@
+mod opacity;
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -8,11 +9,27 @@ use std::{
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Manager, PhysicalPosition, WindowEvent,
+    Emitter, Manager, PhysicalPosition, WindowEvent,
 };
 #[derive(Default)]
 struct PlayerWindowState {
     pinned: AtomicBool,
+}
+
+struct TrayMenuState {
+    station: MenuItem<tauri::Wry>,
+    program: MenuItem<tauri::Wry>,
+    playback: MenuItem<tauri::Wry>,
+}
+
+fn menu_label(text: &str) -> String {
+    let plain = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    let label: String = plain.chars().take(64).collect();
+    if plain.chars().count() > 64 {
+        format!("{label}…")
+    } else {
+        label
+    }
 }
 
 fn hide_on_blur(pinned: bool) -> bool {
@@ -148,9 +165,21 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             _ => {}
         });
     }
-    let open = MenuItem::with_id(app, "open", "열기", true, None::<&str>)?;
+    let station = MenuItem::with_id(app, "station", "채널을 선택해 주세요", false, None::<&str>)?;
+    let program = MenuItem::with_id(app, "program", "프로그램 정보 없음", false, None::<&str>)?;
+    let open = MenuItem::with_id(app, "open", "화면 열기", true, None::<&str>)?;
+    let playback = MenuItem::with_id(app, "playback", "재생", false, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "설정", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &quit])?;
+    let menu = Menu::with_items(
+        app,
+        &[&station, &program, &open, &playback, &settings, &quit],
+    )?;
+    app.manage(TrayMenuState {
+        station,
+        program,
+        playback,
+    });
     let icon = status_icon(false);
     TrayIconBuilder::with_id("radio")
         .icon(icon)
@@ -159,11 +188,17 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .menu(&menu)
         .show_menu_on_left_click(cfg!(target_os = "linux"))
         .on_menu_event(|app, event| match event.id.as_ref() {
-            "open" => show(
-                app,
-                app.tray_by_id("radio")
-                    .and_then(|t| t.rect().ok().flatten()),
-            ),
+            "open" | "settings" => {
+                show(
+                    app,
+                    app.tray_by_id("radio")
+                        .and_then(|t| t.rect().ok().flatten()),
+                );
+                let _ = app.emit("tray-action", event.id.as_ref());
+            }
+            "playback" => {
+                let _ = app.emit("tray-action", "playback");
+            }
             "quit" => app.exit(0),
             _ => {}
         })
@@ -249,6 +284,66 @@ pub fn set_tray_playing(playing: bool, app: tauri::AppHandle) -> Result<(), Stri
     .map_err(|_| "아이콘 상태를 변경할 수 없습니다.".to_string())
 }
 #[tauri::command]
+pub fn set_tray_state(
+    station: String,
+    program: String,
+    playing: bool,
+    busy: bool,
+    app: tauri::AppHandle,
+) -> Result<(), String> {
+    let state = app.state::<TrayMenuState>();
+    state
+        .station
+        .set_text(if station.is_empty() {
+            "채널을 선택해 주세요".into()
+        } else {
+            menu_label(&station)
+        })
+        .map_err(|e| e.to_string())?;
+    state
+        .program
+        .set_text(if program.is_empty() {
+            "프로그램 정보 없음".into()
+        } else {
+            menu_label(&program)
+        })
+        .map_err(|e| e.to_string())?;
+    state
+        .playback
+        .set_text(if busy { "정지" } else { "재생" })
+        .map_err(|e| e.to_string())?;
+    state
+        .playback
+        .set_enabled(!station.is_empty())
+        .map_err(|e| e.to_string())?;
+    set_tray_playing(playing, app)
+}
+
+#[tauri::command]
+pub async fn set_player_opacity(percent: u8, app: tauri::AppHandle) -> Result<(), String> {
+    if !(40..=100).contains(&percent) {
+        return Err("투명도 범위를 벗어났습니다.".into());
+    }
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    let handle = app.clone();
+    app.run_on_main_thread(move || {
+        let result = handle
+            .get_webview_window("main")
+            .ok_or_else(|| "창을 찾을 수 없습니다.".to_string())
+            .and_then(|window| {
+                let pinned = handle
+                    .state::<PlayerWindowState>()
+                    .pinned
+                    .load(Ordering::SeqCst);
+                opacity::apply(&window, if pinned { percent } else { 100 })
+            });
+        let _ = tx.send(result);
+    })
+    .map_err(|e| e.to_string())?;
+    rx.await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub fn set_player_pinned(pinned: bool, app: tauri::AppHandle) -> Result<(), String> {
     let window = app
         .get_webview_window("main")
@@ -285,6 +380,12 @@ pub fn start_player_drag(app: tauri::AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn tray_labels_are_single_line_and_unicode_safe() {
+        assert_eq!(menu_label("KBS\n ClassicFM"), "KBS ClassicFM");
+        let long = "방".repeat(100);
+        assert_eq!(menu_label(&long), format!("{}…", "방".repeat(64)));
+    }
     #[test]
     fn pinned_window_keeps_visibility_and_status_badge_changes() {
         assert!(!hide_on_blur(true));

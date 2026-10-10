@@ -1,3 +1,4 @@
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import type {
   Catalog,
@@ -65,7 +66,12 @@ export function safeArtwork(raw?: string | null) {
       !u.username &&
       !u.password &&
       (!u.port || u.port === "443") &&
-      ["img.imbc.com", "image.cloud.sbs.co.kr"].includes(u.hostname)
+      [
+        "img.imbc.com",
+        "image.cloud.sbs.co.kr",
+        "programres.kbs.co.kr",
+        "mediafactory.play.kbs.co.kr",
+      ].includes(u.hostname)
       ? u.href
       : null;
   } catch {
@@ -87,6 +93,7 @@ export async function mountApp(root: HTMLElement) {
     lastVolume = 100;
   let pinned = false,
     pinBusy = false,
+    transparency = 0,
     scheduleDate = "",
     scheduleFocusPending = false;
   const schedules = new Map<string, Schedule>(),
@@ -372,6 +379,7 @@ export async function mountApp(root: HTMLElement) {
               void invoke("set_player_pinned", { pinned: !pinned })
                 .then(() => {
                   pinned = !pinned;
+                  return applyOpacity();
                 })
                 .catch(() => {
                   actionError = "플레이어 고정을 변경할 수 없습니다.";
@@ -400,10 +408,33 @@ export async function mountApp(root: HTMLElement) {
           return pin;
         })(),
       );
+      if (pinned) {
+        const row = node("label", undefined, "transparency-control"),
+          slider = node("input"),
+          value = node("output", `${transparency}%`);
+        slider.type = "range";
+        slider.min = "0";
+        slider.max = "60";
+        slider.step = "1";
+        slider.value = String(transparency);
+        slider.setAttribute("aria-label", "플레이어 투명도");
+        slider.dataset.key = "transparency";
+        slider.oninput = () => {
+          transparency = Number(slider.value);
+          value.textContent = `${transparency}%`;
+          void applyOpacity().catch(() => {
+            actionError = "투명도를 변경할 수 없습니다.";
+            render();
+          });
+        };
+        row.append(node("span", "투명도"), slider, value);
+        header.append(row);
+      }
     }
     const state = player.state,
       current = stations.find((s) => s.id === state.stationId),
       p = state.stationId ? program(state.stationId) : null;
+    if (ready) syncTray(current, p);
     artwork(cover, current, p ?? undefined);
     titleFlow.update(
       p?.status === "available"
@@ -748,24 +779,59 @@ export async function mountApp(root: HTMLElement) {
         ?.focus({ preventScroll: true });
     if (ready) resize();
   }
-  let selectedId: string | null = null,
-    trayPlaying: boolean | undefined;
+  let selectedId: string | null = null;
+  let trayKey = "";
   let trayQueue = Promise.resolve<unknown>(undefined);
+  let opacityQueue = Promise.resolve<unknown>(undefined);
+  function applyOpacity() {
+    const percent = pinned ? 100 - transparency : 100;
+    const next = opacityQueue
+      .catch(() => {})
+      .then(() => invoke("set_player_opacity", { percent }));
+    opacityQueue = next;
+    return next;
+  }
+  function syncTray(station: Station | undefined, p: ProgramState | null) {
+    const state = {
+      station: station?.name ?? "",
+      program: p?.status === "available" ? (p.title ?? "") : "",
+      playing: player.state.status === "playing",
+      busy: ["playing", "loading"].includes(player.state.status),
+    };
+    const key = JSON.stringify(state);
+    if (key === trayKey) return;
+    trayKey = key;
+    trayQueue = trayQueue
+      .then(() => invoke("set_tray_state", state))
+      .catch(() => {
+        if (trayKey === key) trayKey = "";
+      });
+  }
   player.subscribe(() => {
     render();
-    const playing = player.state.status === "playing";
-    if (playing !== trayPlaying) {
-      trayPlaying = playing;
-      trayQueue = trayQueue
-        .then(() => invoke("set_tray_playing", { playing }))
-        .catch(() => {});
-    }
     const id = player.state.stationId;
     if (ready && id && id !== selectedId) {
       selectedId = id;
       void loadSchedule(id);
     }
   });
+  let removeTray: UnlistenFn | undefined;
+  void listen<string>("tray-action", ({ payload }) => {
+    if (disposed) return;
+    if (payload === "playback") {
+      if (["playing", "loading"].includes(player.state.status)) player.stop();
+      else void player.play();
+    } else if (payload === "open" || payload === "settings") {
+      panel = payload === "settings" ? "settings" : "channels";
+      if (panel === "settings") void autostart.refresh();
+      render();
+    }
+  })
+    .then((remove) => {
+      if (disposed) remove();
+      else removeTray = remove;
+    })
+    .catch(() => {});
   await settings.load();
   mode = settings.settings.playerMode ?? "full";
   lastVolume = settings.settings.volume || 100;
@@ -829,6 +895,7 @@ export async function mountApp(root: HTMLElement) {
     clearInterval(timer);
     poller?.stop();
     lifecycle();
+    removeTray?.();
     titleFlow.dispose();
     player.dispose();
     document.removeEventListener("visibilitychange", refresh);

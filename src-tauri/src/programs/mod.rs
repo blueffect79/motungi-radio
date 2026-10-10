@@ -784,6 +784,33 @@ async fn acquire_request_budget(
 
 // Artwork is presentation-only: exact official hosts, no credentials or unbounded URLs.
 fn artwork(id: &str, value: &Value, title: &str) -> Option<String> {
+    if let Some(code) = id.strip_prefix("kbs-") {
+        let channel = value.as_array()?.iter().find(|row| {
+            text(row, "channel_code") == code && text(row, "local_station_code") == "00"
+        })?;
+        return channel
+            .get("schedules")?
+            .as_array()?
+            .iter()
+            .filter(|row| {
+                text(row, "channel_code") == code
+                    && text(row, "local_station_code") == "00"
+                    && text(row, "program_title") == title
+            })
+            .find_map(|row| {
+                let u = url::Url::parse(text(row, "image_w")).ok()?;
+                (u.scheme() == "https"
+                    && matches!(
+                        u.host_str(),
+                        Some("programres.kbs.co.kr" | "mediafactory.play.kbs.co.kr")
+                    )
+                    && u.username().is_empty()
+                    && u.password().is_none()
+                    && u.port_or_known_default() == Some(443)
+                    && u.as_str().len() < 2048)
+                    .then(|| u.into())
+            });
+    }
     fn walk(v: &Value, title: &str, host: &str) -> Option<String> {
         match v {
             Value::Object(map) => {

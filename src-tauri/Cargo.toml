@@ -1,6 +1,6 @@
 [package]
 name = "motungi-radio"
-version = "0.2.2"
+version = "0.2.3"
 description = "모퉁이 라디오 — 한국 채널 메뉴 막대·트레이 플레이어"
 edition = "2021"
 license = "MIT"
@@ -38,3 +38,4 @@ block2 = "0.6"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gio = "0.18"
+gtk = "0.18"

@@ -652,3 +652,26 @@ main h2 {
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+/* Pinned-only control occupies its own short row in both player sizes. */
+header {
+  flex-wrap: wrap;
+}
+.transparency-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--muted);
+}
+.transparency-control input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.transparency-control output {
+  min-width: 32px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

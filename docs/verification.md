@@ -149,11 +149,11 @@ Mac과 Windows에서 아래 20개 채널을 각각 선택해 짧게 실제 소�
 | mbc-sfm | MBC 표준FM | 미검증 | 미검증 |
 | mbc-mfm | MBC FM4U | 미검증 | 미검증 |
 | mbc-chm | MBC 올댓뮤직 | 미검증 | 미검증 |
-| kbs-21 | KBS 1라디오 | 미검증 | 미검증 |
-| kbs-22 | KBS 2라디오 | 미검증 | 미검증 |
-| kbs-23 | KBS 3라디오 | 미검증 | 미검증 |
-| kbs-24 | KBS 1FM | 미검증 | 미검증 |
-| kbs-25 | KBS 2FM | 미검증 | 미검증 |
+| kbs-21 | KBS 1Radio | 미검증 | 미검증 |
+| kbs-22 | KBS HappyFM | 미검증 | 미검증 |
+| kbs-23 | KBS 사랑의소리 | 미검증 | 미검증 |
+| kbs-24 | KBS ClassicFM | 미검증 | 미검증 |
+| kbs-25 | KBS CoolFM | 미검증 | 미검증 |
 | kbs-26 | KBS 한민족방송 | 미검증 | 미검증 |
 | sbs-powerpc | SBS 파워FM | 미검증 | 미검증 |
 | sbs-lovepc | SBS 러브FM | 미검증 | 미검증 |

@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "모퉁이 라디오",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "identifier": "io.github.devsejong.motungiradio",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.imbc.com https://image.cloud.sbs.co.kr; connect-src ipc: http://ipc.localhost https:; media-src https: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.imbc.com https://image.cloud.sbs.co.kr https://programres.kbs.co.kr https://mediafactory.play.kbs.co.kr; connect-src ipc: http://ipc.localhost https:; media-src https: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'"
     }
   },
   "bundle": {

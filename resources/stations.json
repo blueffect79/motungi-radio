@@ -31,7 +31,7 @@
     {
       "id": "kbs-21",
       "providerId": "kbs",
-      "name": "KBS 1라디오",
+      "name": "KBS 1Radio",
       "region": "서울",
       "groupId": null,
       "officialPageUrl": "https://radio.kbs.co.kr/",
@@ -40,7 +40,7 @@
     {
       "id": "kbs-22",
       "providerId": "kbs",
-      "name": "KBS 2라디오",
+      "name": "KBS HappyFM",
       "region": "서울",
       "groupId": null,
       "officialPageUrl": "https://radio.kbs.co.kr/",
@@ -49,7 +49,7 @@
     {
       "id": "kbs-23",
       "providerId": "kbs",
-      "name": "KBS 3라디오",
+      "name": "KBS 사랑의소리",
       "region": "서울",
       "groupId": null,
       "officialPageUrl": "https://radio.kbs.co.kr/",
@@ -58,7 +58,7 @@
     {
       "id": "kbs-24",
       "providerId": "kbs",
-      "name": "KBS 1FM",
+      "name": "KBS ClassicFM",
       "region": "서울",
       "groupId": null,
       "officialPageUrl": "https://radio.kbs.co.kr/",
@@ -67,7 +67,7 @@
     {
       "id": "kbs-25",
       "providerId": "kbs",
-      "name": "KBS 2FM",
+      "name": "KBS CoolFM",
       "region": "서울",
       "groupId": null,
       "officialPageUrl": "https://radio.kbs.co.kr/",

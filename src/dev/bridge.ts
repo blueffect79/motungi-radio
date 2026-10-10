@@ -75,10 +75,19 @@ export async function invoke(command: string, args: any = {}): Promise<any> {
     );
     return;
   }
+  if (command === "set_player_opacity") {
+    document.querySelector<HTMLElement>(".shell")!.style.opacity = String(
+      args.percent / 100,
+    );
+    return;
+  }
   if (
-    ["set_player_pinned", "start_player_drag", "set_tray_playing"].includes(
-      command,
-    )
+    [
+      "set_tray_state",
+      "set_player_pinned",
+      "start_player_drag",
+      "set_tray_playing",
+    ].includes(command)
   )
     return;
   if (command === "resolve_stream")

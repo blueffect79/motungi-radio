@@ -8,6 +8,13 @@ const mock = vi.hoisted(() => ({
   stop: vi.fn(),
   resolve: vi.fn(),
   volume: vi.fn(),
+  events: new Map<string, (event: { payload: string }) => void>(),
+}));
+vi.mock("@tauri-apps/api/event", () => ({
+  listen: vi.fn(async (name, handler) => {
+    mock.events.set(name, handler);
+    return () => mock.events.delete(name);
+  }),
 }));
 vi.mock("@tauri-apps/api/core", () => ({ invoke: mock.invoke }));
 vi.mock("@tauri-apps/api/window", () => ({
@@ -43,6 +50,7 @@ let root: HTMLElement,
   saved = defaults();
 beforeEach(() => {
   vi.clearAllMocks();
+  mock.events.clear();
   saved = { ...defaults(), lastStationId: "mbc-mfm" };
   root = document.createElement("div");
   document.body.append(root);
@@ -261,9 +269,10 @@ it("rejects foreign artwork, credentials and deceptive host names", () => {
 it("pins without changing playback and publishes actual tray playback state", async () => {
   dispose = await mountApp(root);
   await tick();
-  expect(mock.invoke).toHaveBeenCalledWith("set_tray_playing", {
-    playing: false,
-  });
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_tray_state",
+    expect.objectContaining({ playing: false }),
+  );
   expect(root.querySelector('[aria-label="창 숨기기"]')).toBeNull();
   click("플레이어 고정");
   await tick();
@@ -275,16 +284,15 @@ it("pins without changing playback and publishes actual tray playback state", as
   ).toBe("true");
   click("방송 재생");
   await tick();
-  expect(mock.invoke).toHaveBeenCalledWith("set_tray_playing", {
-    playing: true,
-  });
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_tray_state",
+    expect.objectContaining({ playing: true }),
+  );
   click("방송 정지");
   await tick();
   expect(
-    mock.invoke.mock.calls
-      .filter((c) => c[0] === "set_tray_playing")
-      .at(-1)?.[1],
-  ).toEqual({ playing: false });
+    mock.invoke.mock.calls.filter((c) => c[0] === "set_tray_state").at(-1)?.[1],
+  ).toEqual(expect.objectContaining({ playing: false }));
   click("플레이어 고정 해제");
   await tick();
   expect(root.querySelector("header")?.classList.contains("draggable")).toBe(
@@ -385,4 +393,80 @@ it("shows neighboring channel names and switches through the single player", asy
   expect(hero.querySelector(".current-station")?.textContent).toContain(
     "MBC FM4U",
   );
+});
+
+it("shows transparency only while pinned, preserves the slider during playback updates, and resets on unpin", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
+  click("플레이어 고정");
+  await tick();
+  const slider = root.querySelector<HTMLInputElement>(
+    '[aria-label="플레이어 투명도"]',
+  )!;
+  slider.focus();
+  slider.value = "35";
+  slider.dispatchEvent(new Event("input"));
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
+    percent: 65,
+  });
+  click("방송 재생");
+  await tick();
+  expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBe(slider);
+  expect(slider.value).toBe("35");
+  click("플레이어 고정 해제");
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
+    percent: 100,
+  });
+  expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
+});
+
+it("routes tray actions to the same player and opens settings without starting audio", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_tray_state",
+    expect.objectContaining({
+      station: "MBC FM4U",
+      program: "현재 방송 <script>",
+      busy: false,
+    }),
+  );
+  const event = mock.events.get("tray-action")!;
+  event({ payload: "settings" });
+  await tick();
+  expect(root.querySelector(".settings")).not.toBeNull();
+  expect(mock.start).not.toHaveBeenCalled();
+  event({ payload: "playback" });
+  await tick();
+  expect(mock.start).toHaveBeenCalledTimes(1);
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_tray_state",
+    expect.objectContaining({ busy: true, playing: true }),
+  );
+  event({ payload: "playback" });
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_tray_state",
+    expect.objectContaining({ busy: false, playing: false }),
+  );
+  event({ payload: "open" });
+  await tick();
+  expect(root.querySelector(".settings")).toBeNull();
+  dispose();
+  dispose = undefined;
+  expect(mock.events.has("tray-action")).toBe(false);
+});
+
+it("accepts only official HTTPS KBS artwork hosts", () => {
+  expect(safeArtwork("https://programres.kbs.co.kr/a.jpg")).toBeTruthy();
+  expect(
+    safeArtwork("https://mediafactory.play.kbs.co.kr/a.jpeg"),
+  ).toBeTruthy();
+  expect(
+    safeArtwork("https://programres.kbs.co.kr.evil.test/a.jpg"),
+  ).toBeNull();
+  expect(safeArtwork("https://user@programres.kbs.co.kr/a.jpg")).toBeNull();
 });

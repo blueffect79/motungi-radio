@@ -5,7 +5,7 @@
 | 방송사 | 카탈로그 | 공식 원천·확인 결과 |
 |---|---|---|
 | MBC | 서울 표준FM, FM4U, 올댓뮤직 | [mini](https://mini.imbc.com/), [공식 webapp JS](https://miniwebapp.imbc.com/static/js/main.6c55a947.js)의 sminiplay.imbc.com/aacplay.ashx. sfm/mfm/chm + protocol=M3U8 + agent=webapp. 고정 callback `__aacplay` JSONP를 JSON 데이터로만 파싱. API·HLS·오디오조각200, 실제 Rust resolver 3개 성공. |
-| KBS | 1·2·3라디오, 1·2FM, 한민족 | [공식 라디오](https://radio.kbs.co.kr/), cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/21~26의 channel_item.service_url. API·HLS·조각200. 한민족 CDN은 hanminjokradio.gscdn.kbs.co.kr. World/인터넷 부가채널은 연결·카탈로그 별도 미확인으로 이번 등록 제외. |
+| KBS | 1Radio, HappyFM, 사랑의소리, ClassicFM, CoolFM, 한민족방송 | [공식 라디오](https://radio.kbs.co.kr/), cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/21~26의 channel_item.service_url. API·HLS·조각200. 한민족 CDN은 hanminjokradio.gscdn.kbs.co.kr. World/인터넷 부가채널은 연결·카탈로그 별도 미확인으로 이번 등록 제외. |
 | SBS | 파워FM, 러브FM | [공식 라디오](https://www.sbs.co.kr/radio/), apis.sbs.co.kr/play-api/1.0/livestream/{powerpc/powerfm,lovepc/lovefm}?protocol=hls&ssl=Y. ssl=Y 옵션으로 공식 서버가 HTTPS URL을 직접 반환하며 응답 URL을 그대로 사용. HLS·조각200. 고릴라 부가 음악채널은 이번 연결 미확인. |
 | EBS | FM | [공식 온에어](https://www.ebs.co.kr/onair?channelCodeString=radio) 현재 HTML src의 liveotu.ebs.co.kr/fm/ 서명 URL을 매번 읽음. JS 실행 없이 허용된 URL 문자열만 추출. HLS·조각200. 반디 외국어는 별도 확인 전 등록 제외. |
 | CBS | 표준FM, 음악FM, JOY4U | [공식 onair](https://cbs.co.kr/onair/fm)의 onairUrl. 현재 m-aac.cbs.co.kr/mweb_{cbs981,cbs939,cbscmc}/_definst_/{key}.stream/playlist.m3u8. 3개 HLS·조각200. www.cbs.co.kr 홈페이지 연결종료와 구 aac.cbs.co.kr DNS 실패는 현재 스트림 실패가 아님. |
@@ -49,3 +49,7 @@
 후속 검토 반영: SBS·cpbc API 모두 ssl=Y의 HTTPS 직접 반환을 실측하여 URL scheme 변환을 제거했다. 서명·경로·scheme 모두 응답 원문 유지. 미등록ID 직접 resolver 테스트를 추가했다.
 
 FEBC 후속 검증: 공식 플레이어·streamKey·허용 CDN 매핑 테스트 선작성 후 기존 unavailable에 대해 RED exit101 확인. 현재 공식 source로 resolver·카탈로그·probe를 연결했다. 실제 청취 품질 검증과 배포 허가 판단은 여전히 별도다.
+
+### KBS 프로그램 이미지 — 2026-10-10
+
+공식 `onair_now` 편성 응답의 `schedules[].image_w`를 사용한다. 외부 채널·행의 채널 코드와 지역 `00`, 프로그램명이 모두 일치할 때만 표시한다. 이미지 호스트는 `programres.kbs.co.kr` 및 `mediafactory.play.kbs.co.kr`로 제한한다. 현재 6개 채널의 이미지 주소를 실제 확인했으며 HappyFM 이미지의 HTTP 200·JPEG 응답을 확인했다. 이미지 이용 허가와 기술 연결 성공은 별개다.

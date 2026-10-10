@@ -58,6 +58,8 @@ pub fn run() {
             tray::set_player_pinned,
             tray::start_player_drag,
             tray::set_tray_playing,
+            tray::set_tray_state,
+            tray::set_player_opacity,
             tray::open_station_page,
             settings::load_settings,
             settings::save_settings,

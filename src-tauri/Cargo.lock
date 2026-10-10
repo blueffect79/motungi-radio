@@ -2106,11 +2106,12 @@ dependencies = [
 
 [[package]]
 name = "motungi-radio"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "block2",
  "chrono",
  "gio",
+ "gtk",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
