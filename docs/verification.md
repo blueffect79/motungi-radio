@@ -12,7 +12,7 @@ Mac·Windows 실기기 UI·청취·로그인·절전 및 Windows WebView2 미설
 
 [Linux 설치본 실행 38045565423](https://github.com/devsejong/motungi-radio/actions/runs/38045565423)에서 Debian·AppImage의 WebKit/IPC·무음 시작·채널 접기 높이·고정·35% 투명도·트레이 설정/정지·EBS 재생/정지 통과. 실행 검사 소스도 `9ac40d1`.
 
-[0.2.5 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.5)
+[0.2.5 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.5). 설치파일 5개와 SHA256SUMS.txt의 익명 다운로드·해시 일치를 확인했다. 내려받은 Mac 두 DMG의 공증 확인표도 유효하다. [Pages 38045742549](https://github.com/devsejong/motungi-radio/actions/runs/38045742549)는 홈페이지 소스 `0073dae`에서 성공했으며 공개 링크·새 이미지 6장·화면을 확인했다.
 
 | 설치파일 | SHA256 |
 | --- | --- |
