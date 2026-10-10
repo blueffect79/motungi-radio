@@ -1,5 +1,25 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.4 공개 시험판 — 2026-10-10
+
+앱 소스 `d0795541f79fbfe5190238fe37d9c668b34e74e4`. 고정 모드 상단 오른쪽의 작은 투명도 슬라이더. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. UI 미리보기에서 기본·미니·라이트·다크·편성표 화면을 캡처하고 키보드 조절·고정 해제 시 불투명 복원을 확인했다. OS 바탕화면 합성 캡처는 아니다.
+
+- Mac arm64·x64: 최종 DMG와 내부 앱의 버전 0.2.4·앱 ID·CPU·Developer ID·hardened runtime·공증 확인표·Gatekeeper 통과. 공증 Accepted, issues 없음. arm64 `21a4c647-d438-42bf-afd0-ca850db323d8`, x64 `3853db03-7dce-4097-9a2a-34942755d507`.
+- [Windows 빌드 38037608394](https://github.com/devsejong/motungi-radio/actions/runs/38037608394): 테스트·NSIS·내부 앱 AMD64·형식·해시 통과. 미서명. 실기기 설치·UI·청취·로그인·절전은 미검증.
+- [Linux 빌드 38037610609](https://github.com/devsejong/motungi-radio/actions/runs/38037610609): 두 설치 형식 생성, CPU·형식·해시 및 Debian 설치본 WebKit/IPC 검사 통과. [설치본 실행 38038072869](https://github.com/devsejong/motungi-radio/actions/runs/38038072869)에서 Debian·AppImage의 WebKit/IPC·무음 시작·미니 높이·고정·35% 투명도·고정 해제·트레이 설정/정지·EBS 재생/정지 통과. 가상 화면·가상 음원 출력이며 사람의 청취·물리 트레이·로그인·절전·Wayland는 미검증. 실행 검사 소스도 `d079554`.
+
+[0.2.4 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.4)
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.4-macos-arm64.dmg` | `2c4e5a9957999d98a3565f5438601b542ced0ffe1ece0c1e0282463656da06aa` |
+| `motungi-radio-0.2.4-macos-x64.dmg` | `f5e81a96ffc8064b74ccd1080b2c48bbd9809f3b9217856f8b7cdcbbc0288ea3` |
+| `motungi-radio-0.2.4-windows-x64.exe` | `12cd40ba4128c9014c133097a9a891d834c1b7423be0a7ed869c1a8ad53ef4c5` |
+| `motungi-radio-0.2.4-linux-x64.deb` | `920e7f3a38cec260278cc53c79c6693762543d21b51442d7d67b1df71da5f025` |
+| `motungi-radio-0.2.4-linux-x64.AppImage` | `c9b3578760a4ecfb856b7438902668034e2338ab5492e08a917a403c100c1d6e` |
+
+공개 설치파일 5개를 인증 없이 내려받아 통합 SHA256SUMS.txt 및 원본과 대조했다. Mac 다운로드 사본의 공증 확인표도 확인했다. Mac 실기기 UI·청취·로그인·절전 및 Intel 실행은 미검증이다.
+
 ## 0.2.3 공개 시험판 — 2026-10-10
 
 앱 소스 `5fd59318b3d4e0f01bff387f24b05fc9393cf196`. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. KBS 6개 채널의 현재 썸네일을 실제 조회했다.
