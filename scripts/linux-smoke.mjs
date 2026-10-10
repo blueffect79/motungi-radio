@@ -41,6 +41,13 @@ async function wait(check) {
 }
 const execute = (script, args = []) =>
   request(`/session/${session}/execute/sync`, "POST", { script, args });
+async function native(command, args) {
+  const result = await request(`/session/${session}/execute/async`, "POST", {
+    script: `const done = arguments[arguments.length - 1]; window.__TAURI_INTERNALS__.invoke(arguments[0], arguments[1]).then(() => done({ok:true}), error => done({error:String(error)}));`,
+    args: [command, args],
+  });
+  assert.equal(result.error, undefined, `native ${command}: ${result.error}`);
+}
 async function screenshot() {
   let pixels;
   // GTK may return a blank frame immediately after resizing the WebKit surface.
@@ -106,7 +113,35 @@ try {
     `dist-packages/linux-x64/proof/${proofLabel}-mini.png`,
     await screenshot(),
   );
-  await click("설정");
+  await click("플레이어 고정");
+  await wait(() =>
+    execute(
+      'return !!document.querySelector("input[aria-label=\"플레이어 투명도\"]")',
+    ),
+  );
+  await execute(
+    `const slider = document.querySelector('input[aria-label="플레이어 투명도"]'); slider.value = "35"; slider.dispatchEvent(new Event("input", {bubbles:true}));`,
+  );
+  await native("set_player_opacity", { percent: 65 });
+  assert.equal(
+    await execute(
+      'return document.querySelector(".transparency-control output").textContent',
+    ),
+    "35%",
+  );
+  writeFileSync(
+    `dist-packages/linux-x64/proof/${proofLabel}-pinned.png`,
+    await screenshot(),
+  );
+  await click("플레이어 고정 해제");
+  await wait(() =>
+    execute('return !document.querySelector(".transparency-control")'),
+  );
+  await native("set_player_opacity", { percent: 100 });
+  await native("plugin:event|emit", {
+    event: "tray-action",
+    payload: "settings",
+  });
   await wait(() =>
     execute(
       'return !!document.querySelector("input[aria-label=\\"음량\\"]") && innerHeight >= 600',
@@ -148,7 +183,10 @@ try {
       `dist-packages/linux-x64/proof/${proofLabel}-live.png`,
       await screenshot(),
     );
-    await click("방송 정지");
+    await native("plugin:event|emit", {
+      event: "tray-action",
+      payload: "playback",
+    });
     await delay(2000);
     assert.equal(
       await execute(
@@ -162,7 +200,7 @@ try {
     );
   }
   console.log(
-    "Linux 설치본: 실제 IPC 채널 로드, 무음 시작, 미니 모드, 설정·기본 음량·화면 크기 검사 통과. 실제 청취·트레이·로그인·절전 미검증.",
+    "Linux 설치본: 실제 IPC 채널 로드, 무음 시작, 미니 모드, 고정·투명도 명령, 트레이 설정·정지 이벤트, 설정·기본 음량·화면 크기 검사 통과. 실제 청취·트레이·로그인·절전 미검증.",
   );
 } finally {
   if (session) await request(`/session/${session}`, "DELETE").catch(() => {});
