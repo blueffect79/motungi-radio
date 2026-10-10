@@ -1057,3 +1057,25 @@ h1 em {
   width: 13px;
   height: 13px;
 }
+
+/* Captured from the shared 0.2.3 app UI. */
+.app-screenshot {
+  width: min(340px, 100%);
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 22px 55px rgb(20 25 40 / 12%);
+  position: relative;
+  z-index: 1;
+}
+.app-screenshot img { display: block; width: 100%; height: auto; }
+.app-screenshot .screenshot-dark { display: none; }
+:root[data-theme="dark"] .app-screenshot .screenshot-light { display: none; }
+:root[data-theme="dark"] .app-screenshot .screenshot-dark { display: block; }
+.compact-slide .screenshot-stage::before { display: none; }
+.pinned-screenshot { width: min(380px, 100%); }
+@media (max-width: 600px) {
+  .app-screenshot { width: min(300px, 100%); }
+  .pinned-screenshot { width: min(340px, 100%); }
+}
