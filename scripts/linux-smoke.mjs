@@ -116,7 +116,7 @@ try {
   await click("플레이어 고정");
   await wait(() =>
     execute(
-      'return !!document.querySelector("input[aria-label=\"플레이어 투명도\"]")',
+      `return !!document.querySelector('input[aria-label="플레이어 투명도"]')`,
     ),
   );
   await execute(
