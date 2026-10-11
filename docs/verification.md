@@ -12,6 +12,8 @@ Mac·Windows 실기기 UI·청취·로그인·절전·Windows WebView2 미설치
 
 [0.2.6 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.6)
 
+설치파일 5개와 SHA256SUMS.txt를 인증 없이 내려받아 원본과 해시 일치를 확인했다. 공개 Mac 두 DMG의 공증 확인표도 유효하다. [Pages 38123355025](https://github.com/devsejong/motungi-radio/actions/runs/38123355025)는 홈페이지 소스 `1a9a110`에서 성공했으며 공개 0.2.6 링크·새 이미지 6장·기능 캐러셀 화면을 확인했다.
+
 | 설치파일 | SHA256 |
 | --- | --- |
 | `motungi-radio-0.2.6-macos-arm64.dmg` | `21d34d2657f08dc15dcf02eb169e8fc0e0b8eab3762dc78bc8e600eee1dabcf2` |
