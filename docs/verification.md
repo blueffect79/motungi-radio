@@ -1,5 +1,25 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.6 공개 시험판 — 2026-10-11
+
+앱 소스 `2e6ee59d8868fb42e38441f074e3906c3aaa94a7`. 라디오 눈금·현재 채널·이전/다음 방송국과 오른쪽 사각 재생 버튼, 슬림한 여백·앱 로고·흰색 Mac 트레이 아이콘을 포함한다. 프런트 53개·네이티브 48개·형식 6개 검사 통과. 실제 앱 코드의 380px UI 미리보기에서 밝은·어두운 화면, 채널 전환·접기, 긴 제목과 채널명 말줄임을 확인했다. 홈페이지 이미지 6장은 같은 미리보기 캡처이며 OS 합성 화면은 아니다.
+
+- Mac arm64·x64: DMG·내부 앱 버전 0.2.6, 앱 ID, CPU, Developer ID, hardened runtime, 공증 확인표, Gatekeeper 통과. 공증 arm64 `5f1d50ba-9f75-4b5e-bf22-191cc6c5c90d`, x64 `6522b3f2-6b56-4417-bf3a-6d0a560b6dcb`, 모두 Accepted.
+- [Windows 빌드 38122776584](https://github.com/devsejong/motungi-radio/actions/runs/38122776584): 테스트·설치기·내부 AMD64·형식·해시 통과. 미서명.
+- [Linux 빌드 38122778535](https://github.com/devsejong/motungi-radio/actions/runs/38122778535), [설치본 실행 38123121402](https://github.com/devsejong/motungi-radio/actions/runs/38123121402): Debian·AppImage의 WebKit/IPC, 무음 시작, 채널 접기, 고정·투명도·트레이 설정/정지, EBS 스트리밍 5초·정지 통과.
+
+Mac·Windows 실기기 UI·청취·로그인·절전·Windows WebView2 미설치 환경은 미검증. Linux 가상 화면·가상 음원 출력은 사람의 청취·물리 트레이·Wayland 검증을 대신하지 않는다.
+
+[0.2.6 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.6)
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.6-macos-arm64.dmg` | `21d34d2657f08dc15dcf02eb169e8fc0e0b8eab3762dc78bc8e600eee1dabcf2` |
+| `motungi-radio-0.2.6-macos-x64.dmg` | `94ac5730fddf0ae4202f445430081b6b359855e6cc65ac8a1ef95d6875a290fd` |
+| `motungi-radio-0.2.6-windows-x64.exe` | `24afc791d984d72cd5c74f09451976d09305e0dd6d29ad6b8b067eb10eefb00a` |
+| `motungi-radio-0.2.6-linux-x64.deb` | `a28bbe6b86e2c57044d3a9df7f7c100f76da4e7b70ef51036a757e8e1f85d9b8` |
+| `motungi-radio-0.2.6-linux-x64.AppImage` | `13cf0be0200a6ac6ac48107bb1526a59c078c41f31daa1c59c93206ea4c5377c` |
+
 ## 0.2.5 공개 시험판 — 2026-10-10
 
 앱 빌드 소스 `9ac40d1ea70d7bcad38e739414c5386fbe28909c`. 상단 투명도·압정·설정 톱니바퀴를 한 줄에 배치하고 채널 보기·접기를 플레이어 카드 하단에 통합했다. 별도 미니 스타일은 제거했다. 프런트 53개·네이티브 48개·형식 6개 테스트 통과. 같은 앱 코드의 UI 미리보기에서 밝은·어두운 플레이어·목록 접기·편성표 화면을 다시 캡처했다. OS 합성 캡처는 아니다.
