@@ -163,7 +163,10 @@ export async function mountApp(root: HTMLElement) {
     "이전 채널",
     () => {
       const station = neighbors().previous;
-      if (station) void player.select(station.id);
+      if (station) {
+        animateDial(-1);
+        void player.select(station.id);
+      }
     },
     "previous-channel",
   );
@@ -172,7 +175,10 @@ export async function mountApp(root: HTMLElement) {
     "다음 채널",
     () => {
       const station = neighbors().next;
-      if (station) void player.select(station.id);
+      if (station) {
+        animateDial(1);
+        void player.select(station.id);
+      }
     },
     "next-channel",
   );
@@ -187,13 +193,38 @@ export async function mountApp(root: HTMLElement) {
   };
   previousChannel.className = nextChannel.className = "channel-step";
   previousChannel.append(
-    glyph("M6 5h2v14H6zM18 5v14L8 12z"),
+    node("span", "‹ 이전 채널", "tuner-direction"),
     previousChannelName,
   );
-  nextChannel.append(glyph("M16 5h2v14h-2zM6 5l10 7-10 7z"), nextChannelName);
+  nextChannel.append(
+    node("span", "다음 채널 ›", "tuner-direction"),
+    nextChannelName,
+  );
+  const tunedName = node("strong", undefined, "tuned-name");
+  const tuned = node("div", undefined, "tuned-channel");
+  tuned.append(node("span", "현재 채널", "tuner-direction"), tunedName);
+  const dialLabels = node("div", undefined, "dial-labels");
+  dialLabels.append(previousChannel, tuned, nextChannel);
+  const ruler = node("div", undefined, "tuner-ruler");
+  ruler.setAttribute("aria-hidden", "true");
+  const ticks = node("div", undefined, "tuner-ticks");
+  const animateDial = (direction: number) => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)
+      return;
+    ticks.animate?.(
+      [
+        { transform: `translateX(${direction * 32}px)` },
+        { transform: "translateX(0)" },
+      ],
+      { duration: 240, easing: "ease-out" },
+    );
+  };
+  ruler.append(ticks, node("div", undefined, "tuner-needle"));
+  const dial = node("div", undefined, "tuner-dial");
+  dial.append(dialLabels, ruler);
   heroText.append(stationName, title, next);
   heroTop.append(cover, heroText);
-  heroBottom.append(previousChannel, control, nextChannel);
+  heroBottom.append(dial, control);
   error.setAttribute("role", "alert");
   hero.append(heroTop, heroBottom, error);
   hero.setAttribute("aria-label", "현재 프로그램");
@@ -367,6 +398,14 @@ export async function mountApp(root: HTMLElement) {
             : "모퉁이 라디오",
       );
       heading.title = pinned ? "드래그해서 플레이어 이동" : "모퉁이 라디오";
+      if (panel === "channels") {
+        const logo = glyph(
+          "M3 6h12.5L20 10.5V18H3V6 M15.5 6v4.5H20 M6 6V3.5l10-2 M13.5 14h3 M10.5 12a2.5 2.5 0 1 0-5 0a2.5 2.5 0 1 0 5 0",
+        );
+        logo.classList.add("brand-logo");
+        heading.classList.add("brand-heading");
+        heading.replaceChildren(logo, node("span", "모퉁이 라디오"));
+      }
       heading.onpointerdown = (event) => {
         if (!pinned || event.button !== 0) return;
         void invoke("start_player_drag").catch(() => {
@@ -491,6 +530,9 @@ export async function mountApp(root: HTMLElement) {
         : busy
           ? "방송 정지"
           : "방송 재생";
+    tunedName.textContent = current?.name ?? "채널 선택";
+    tunedName.title = tunedName.textContent;
+    control.setAttribute("aria-pressed", String(busy));
     const adjacent = neighbors();
     previousChannelName.textContent = adjacent.previous?.name ?? "이전 채널";
     nextChannelName.textContent = adjacent.next?.name ?? "다음 채널";

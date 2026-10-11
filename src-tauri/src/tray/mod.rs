@@ -1,3 +1,5 @@
+#[cfg(target_os = "macos")]
+mod icon;
 mod opacity;
 use std::{
     sync::{
@@ -240,7 +242,13 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// A blue radio glyph plus a separate play/pause badge on every platform.
+#[cfg(target_os = "macos")]
+fn status_pixels(playing: bool) -> Vec<u8> {
+    icon::pixels(playing)
+}
+
+/// Keep the existing colored tray glyph on Windows and Linux.
+#[cfg(not(target_os = "macos"))]
 fn status_pixels(playing: bool) -> Vec<u8> {
     let mut pixels = vec![0u8; 30 * 22 * 4];
     for y in 0usize..22 {
