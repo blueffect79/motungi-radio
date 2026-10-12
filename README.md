@@ -12,7 +12,7 @@
 
 ## 설치
 
-macOS 13 이상(Apple Silicon·Intel), Windows 10/11 x64를 목표로 합니다. Mac·Windows 무료 시험판을 GitHub Releases에서 제공합니다. Linux x64 시험판은 Ubuntu·Mint를 우선 대상으로 준비합니다.
+macOS 13 이상(Apple Silicon·Intel), Windows 10/11 x64를 목표로 합니다. Mac·Windows 무료 시험판을 GitHub Releases에서 제공합니다. Linux x64용 Debian·AppImage 시험판도 제공합니다.
 
 [홈페이지](https://devsejong.github.io/motungi-radio/) · [설치 안내](docs/install.md) · [지원 채널](docs/station-support.md) · [검증 기록](docs/verification.md)
 

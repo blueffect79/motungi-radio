@@ -1,5 +1,24 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.7 배포 검증 — 2026-10-12
+
+앱 소스 `a70f96627d376ac715b76e5623facfb4feaf700d`. Mac Dock 숨김, CBS 공식 썸네일, 투명도 방향 수정, 슬림한 채널 조작부와 방향 눈금 애니메이션을 포함한다. 프런트 54개·네이티브 49개·형식 6개 검사와 웹 빌드 통과. CBS 3채널 공식 이미지 추출 검사 및 이미지 HTTP 200 확인. 홈페이지 스크린샷 6장은 같은 UI의 개발 미리보기와 공식 정보 스냅샷을 사용했다. 실제 OS 투명도 합성 캡처가 아니다.
+
+- Mac arm64·x64: 최종 DMG와 내부 앱의 0.2.7 버전·앱 ID·CPU·Developer ID·hardened runtime·공증 확인표·Gatekeeper 통과. `LSUIElement=true` 확인. 공증 arm64 `8dce9419-44fe-43ab-a0fc-ff5d4f12ddcc`, x64 `8c99a5ee-b0cc-42d3-af00-edc60a5dc79a`, 모두 Accepted.
+- [Windows 빌드 38244830036](https://github.com/devsejong/motungi-radio/actions/runs/38244830036): 테스트·설치기·내부 AMD64·형식·해시 통과. 미서명.
+- [Linux 빌드 38244834475](https://github.com/devsejong/motungi-radio/actions/runs/38244834475): 두 설치 형식과 해시 생성 완료. 최초 실행 검사는 투명도 슬라이더 방향 변경 전 기대값(35% 대신 실제 25%) 때문에 실패했다. 검사 입력만 `857b449`에서 변경했다. 제품 설치파일은 위 소스 그대로이며, [설치본 재검사 38245799292](https://github.com/devsejong/motungi-radio/actions/runs/38245799292)에서 같은 파일의 Debian·AppImage WebKit/IPC·무음 시작·채널 접기·고정·투명도·트레이 설정/정지·EBS 스트리밍 5초와 정지가 통과했다.
+
+Mac·Windows 실제 설치 UI·Dock·청취·로그인·절전·Windows WebView2 미설치 환경은 미검증이다. Linux 가상 환경은 사람의 청취·물리 트레이·Wayland 검증을 대신하지 않는다.
+
+
+| 설치파일 | SHA256 |
+| --- | --- |
+| `motungi-radio-0.2.7-linux-x64.AppImage` | `2f6b9f1300a98c418a7c9e2dc970eff028f8fbc8c76282f391288b4de0738fd1` |
+| `motungi-radio-0.2.7-linux-x64.deb` | `17052f90128275beae60818ae3a7b294a2a4c8ee3bf41d13f1762acb4490baa3` |
+| `motungi-radio-0.2.7-macos-arm64.dmg` | `46f19245a3548790652d82ed29e0ab207793faf1507ec1d3e7fd05e4d9a372df` |
+| `motungi-radio-0.2.7-macos-x64.dmg` | `5cd98ee85e899ca13f9efb7ad444f97b5bf792ab87e6a71699268b22c5f68c96` |
+| `motungi-radio-0.2.7-windows-x64.exe` | `240fb1873574f998ca7d6d5e80a7a4f39e4fbb5a06db3a4c2b80ade9d24c7679` |
+
 ## 0.2.6 공개 시험판 — 2026-10-11
 
 앱 소스 `2e6ee59d8868fb42e38441f074e3906c3aaa94a7`. 라디오 눈금·현재 채널·이전/다음 방송국과 오른쪽 사각 재생 버튼, 슬림한 여백·앱 로고·흰색 Mac 트레이 아이콘을 포함한다. 프런트 53개·네이티브 48개·형식 6개 검사 통과. 실제 앱 코드의 380px UI 미리보기에서 밝은·어두운 화면, 채널 전환·접기, 긴 제목과 채널명 말줄임을 확인했다. 홈페이지 이미지 6장은 같은 미리보기 캡처이며 OS 합성 화면은 아니다.
