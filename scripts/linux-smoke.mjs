@@ -120,7 +120,7 @@ try {
     ),
   );
   await execute(
-    `const slider = document.querySelector('input[aria-label="플레이어 투명도"]'); slider.value = "35"; slider.dispatchEvent(new Event("input", {bubbles:true}));`,
+    `const slider = document.querySelector('input[aria-label="플레이어 투명도"]'); slider.value = "25"; slider.dispatchEvent(new Event("input", {bubbles:true}));`,
   );
   await native("set_player_opacity", { percent: 65 });
   assert.equal(
