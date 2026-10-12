@@ -420,3 +420,55 @@ fn live_kbs_artwork() {
         assert!(images > 0, "no current KBS artwork found");
     });
 }
+
+#[test]
+fn cbs_artwork_is_channel_scoped_and_rejects_untrusted_paths() {
+    let mut v = serde_json::json!({"musicfm":[{"name":"동행","program":{"image":{
+        "radioProfil":"/data/cbs/upload/save/program/profile.png",
+        "mobileTop":"/data/cbs/upload/save/program/mobile.png"
+    }}}]});
+    assert_eq!(
+        artwork("cbs-music", &v, "동행").as_deref(),
+        Some("https://cbs.co.kr/data/cbs/upload/save/program/profile.png")
+    );
+    assert!(artwork("cbs-standard", &v, "동행").is_none());
+    assert!(artwork("cbs-music", &v, "다른 프로그램").is_none());
+    for bad in [
+        "",
+        "//evil.test/a.png",
+        "https://cbs.co.kr.evil.test/a.png",
+        "http://cbs.co.kr/data/cbs/upload/save/program/a.png",
+        "/data/cbs/upload/save/program/../secret.png",
+    ] {
+        v["musicfm"][0]["program"]["image"]["radioProfil"] = bad.into();
+        assert_eq!(
+            artwork("cbs-music", &v, "동행").as_deref(),
+            Some("https://cbs.co.kr/data/cbs/upload/save/program/mobile.png")
+        );
+    }
+    v["musicfm"][0]["program"] = Value::Null;
+    assert!(artwork("cbs-music", &v, "동행").is_none());
+}
+
+#[test]
+#[ignore = "live official CBS artwork probe"]
+fn live_cbs_artwork() {
+    tokio::runtime::Runtime::new().unwrap().block_on(async {
+        let value = fetch("https://cbs.co.kr/schedule/all/ajax").await.unwrap();
+        for (id, key) in [
+            ("cbs-standard", "fm"),
+            ("cbs-music", "musicfm"),
+            ("cbs-joy4u", "joy4u"),
+        ] {
+            assert!(
+                value[key].as_array().unwrap().iter().any(|row| artwork(
+                    id,
+                    &value,
+                    cbs_title(row)
+                )
+                .is_some()),
+                "{id}"
+            );
+        }
+    });
+}

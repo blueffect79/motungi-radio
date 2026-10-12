@@ -53,3 +53,7 @@ FEBC 후속 검증: 공식 플레이어·streamKey·허용 CDN 매핑 테스트 
 ### KBS 프로그램 이미지 — 2026-10-10
 
 공식 `onair_now` 편성 응답의 `schedules[].image_w`를 사용한다. 외부 채널·행의 채널 코드와 지역 `00`, 프로그램명이 모두 일치할 때만 표시한다. 이미지 호스트는 `programres.kbs.co.kr` 및 `mediafactory.play.kbs.co.kr`로 제한한다. 현재 6개 채널의 이미지 주소를 실제 확인했으며 HappyFM 이미지의 HTTP 200·JPEG 응답을 확인했다. 이미지 이용 허가와 기술 연결 성공은 별개다.
+
+### CBS 프로그램 이미지 — 2026-10-12
+
+공식 `/schedule/all/ajax`의 해당 채널(fm/musicfm/joy4u)과 프로그램명이 일치하는 행에서 `program.image.radioProfil`을 우선 사용한다. 없거나 허용되지 않는 주소이면 mobileTop·mainTop·programBanner 순으로 확인한다. 상대 경로는 공식 `https://cbs.co.kr/` 기준으로 해석하고 HTTPS·동일 호스트·프로그램 이미지 경로만 허용한다. 대표 음악FM 이미지의 HTTP 200·image/png 응답을 확인했다. 이미지가 없는 편성은 기존 채널 커버를 유지한다. 기술 확인과 이미지 이용 허가는 별개다.

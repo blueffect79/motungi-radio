@@ -784,6 +784,41 @@ async fn acquire_request_budget(
 
 // Artwork is presentation-only: exact official hosts, no credentials or unbounded URLs.
 fn artwork(id: &str, value: &Value, title: &str) -> Option<String> {
+    if id.starts_with("cbs-") {
+        let channel = match id {
+            "cbs-standard" => "fm",
+            "cbs-music" => "musicfm",
+            "cbs-joy4u" => "joy4u",
+            _ => return None,
+        };
+        let base = url::Url::parse("https://cbs.co.kr/").ok()?;
+        return value
+            .get(channel)?
+            .as_array()?
+            .iter()
+            .filter(|row| cbs_title(row) == title)
+            .find_map(|row| {
+                let images = row.pointer("/program/image")?;
+                ["radioProfil", "mobileTop", "mainTop", "programBanner"]
+                    .iter()
+                    .find_map(|key| {
+                        let raw = text(images, key).trim();
+                        if raw.is_empty() {
+                            return None;
+                        }
+                        let u = base.join(raw).ok()?;
+                        (u.scheme() == "https"
+                            && u.host_str() == Some("cbs.co.kr")
+                            && u.username().is_empty()
+                            && u.password().is_none()
+                            && u.port_or_known_default() == Some(443)
+                            && u.fragment().is_none()
+                            && u.path().starts_with("/data/cbs/upload/save/program/")
+                            && u.as_str().len() < 2048)
+                            .then(|| u.into())
+                    })
+            });
+    }
     if let Some(code) = id.strip_prefix("kbs-") {
         let channel = value.as_array()?.iter().find(|row| {
             text(row, "channel_code") == code && text(row, "local_station_code") == "00"

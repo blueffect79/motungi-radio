@@ -68,6 +68,7 @@ export function safeArtwork(raw?: string | null) {
       (!u.port || u.port === "443") &&
       [
         "img.imbc.com",
+        "cbs.co.kr",
         "image.cloud.sbs.co.kr",
         "programres.kbs.co.kr",
         "mediafactory.play.kbs.co.kr",
@@ -193,30 +194,34 @@ export async function mountApp(root: HTMLElement) {
   };
   previousChannel.className = nextChannel.className = "channel-step";
   previousChannel.append(
-    node("span", "‹ 이전 채널", "tuner-direction"),
+    glyph("M15 6l-6 6 6 6"),
     previousChannelName,
   );
   nextChannel.append(
-    node("span", "다음 채널 ›", "tuner-direction"),
     nextChannelName,
+    glyph("M9 6l6 6-6 6"),
   );
   const tunedName = node("strong", undefined, "tuned-name");
   const tuned = node("div", undefined, "tuned-channel");
-  tuned.append(node("span", "현재 채널", "tuner-direction"), tunedName);
+  tuned.setAttribute("aria-label", "현재 채널");
+  tuned.append(tunedName);
   const dialLabels = node("div", undefined, "dial-labels");
   dialLabels.append(previousChannel, tuned, nextChannel);
   const ruler = node("div", undefined, "tuner-ruler");
   ruler.setAttribute("aria-hidden", "true");
   const ticks = node("div", undefined, "tuner-ticks");
+  let dialAnimation: Animation | undefined;
   const animateDial = (direction: number) => {
+    dialAnimation?.cancel();
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)
       return;
-    ticks.animate?.(
+    // One complete tick interval ends on the same pattern, avoiding a reset jump.
+    dialAnimation = ticks.animate?.(
       [
-        { transform: `translateX(${direction * 32}px)` },
         { transform: "translateX(0)" },
+        { transform: `translateX(${direction * 80}px)` },
       ],
-      { duration: 240, easing: "ease-out" },
+      { duration: 360, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
     );
   };
   ruler.append(ticks, node("div", undefined, "tuner-needle"));
@@ -466,13 +471,13 @@ export async function mountApp(root: HTMLElement) {
         slider.min = "0";
         slider.max = "60";
         slider.step = "1";
-        slider.value = String(transparency);
+        slider.value = String(60 - transparency);
         slider.setAttribute("aria-label", "플레이어 투명도");
         slider.title = `투명도 ${transparency}%`;
         slider.setAttribute("aria-valuetext", `투명도 ${transparency}%`);
         slider.dataset.key = "transparency";
         slider.oninput = () => {
-          transparency = Number(slider.value);
+          transparency = 60 - Number(slider.value);
           value.textContent = `${transparency}%`;
           slider.title = `투명도 ${transparency}%`;
           slider.setAttribute("aria-valuetext", `투명도 ${transparency}%`);

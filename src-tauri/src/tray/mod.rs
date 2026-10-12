@@ -132,6 +132,7 @@ pub fn quit_app(app: tauri::AppHandle) {
     app.exit(0);
 }
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    // Info.plist hides the bundled app from launch; keep dev launches accessory-only too.
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
     app.manage(PlayerWindowState::default());

@@ -411,17 +411,26 @@ it("shows transparency only while pinned, preserves the slider during playback u
   const slider = root.querySelector<HTMLInputElement>(
     '[aria-label="플레이어 투명도"]',
   )!;
+  expect(slider.value).toBe("60");
+  expect(slider.getAttribute("aria-valuetext")).toBe("투명도 0%");
   slider.focus();
   slider.value = "35";
   slider.dispatchEvent(new Event("input"));
   await tick();
   expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
-    percent: 65,
+    percent: 75,
   });
   click("방송 재생");
   await tick();
   expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBe(slider);
   expect(slider.value).toBe("35");
+  for (const [position, percent, label] of [[0, 40, "투명도 60%"], [60, 100, "투명도 0%"]] as const) {
+    slider.value = String(position);
+    slider.dispatchEvent(new Event("input"));
+    await tick();
+    expect(mock.invoke).toHaveBeenLastCalledWith("set_player_opacity", { percent });
+    expect(slider.getAttribute("aria-valuetext")).toBe(label);
+  }
   click("플레이어 고정 해제");
   await tick();
   expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
@@ -476,4 +485,10 @@ it("accepts only official HTTPS KBS artwork hosts", () => {
     safeArtwork("https://programres.kbs.co.kr.evil.test/a.jpg"),
   ).toBeNull();
   expect(safeArtwork("https://user@programres.kbs.co.kr/a.jpg")).toBeNull();
+});
+
+it("CBS artwork allows only the official HTTPS host", () => {
+  expect(safeArtwork("https://cbs.co.kr/data/cbs/upload/save/program/a.png")).toBeTruthy();
+  expect(safeArtwork("https://cbs.co.kr.evil.test/a.png")).toBeNull();
+  expect(safeArtwork("http://cbs.co.kr/a.png")).toBeNull();
 });

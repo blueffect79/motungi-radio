@@ -707,14 +707,13 @@ header {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent);
-  background: var(--selected);
+  background: transparent;
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0 0 13px 13px;
 }
-.channel-visibility:hover,
-.channel-visibility[aria-expanded="true"] {
-  background: color-mix(in srgb, var(--accent) 8%, var(--selected));
+.channel-visibility:hover {
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
 .channel-visibility:active {
   background: var(--selected);
@@ -743,7 +742,7 @@ header {
 .hero-bottom {
   grid-template-columns: minmax(0, 1fr) 42px;
   gap: 14px;
-  padding: 12px 0 14px;
+  padding: 8px 0;
 }
 .tuner-dial {
   min-width: 0;
@@ -756,9 +755,10 @@ header {
 }
 .channel-step {
   opacity: 0.67;
-  min-height: 38px;
-  gap: 5px;
-  padding: 5px 2px;
+  min-height: 28px;
+  flex-direction: row;
+  gap: 3px;
+  padding: 4px 2px;
   color: var(--muted);
   border-radius: 7px;
 }
@@ -768,11 +768,13 @@ header {
   color: var(--accent);
   background: var(--selected);
 }
-.tuner-direction {
-  font-size: 9px;
-  color: var(--muted);
-  font-weight: 400;
-  white-space: nowrap;
+.channel-step svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
 }
 .channel-step .neighbor-name {
   font-size: 9px;
@@ -781,7 +783,7 @@ header {
 .tuned-channel {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  justify-content: center;
   text-align: center;
   min-width: 0;
 }
@@ -794,9 +796,9 @@ header {
   text-overflow: ellipsis;
 }
 .tuner-ruler {
-  height: 26px;
+  height: 18px;
   position: relative;
-  margin-top: 3px;
+  margin-top: 0;
   overflow: hidden;
   mask-image: linear-gradient(
     90deg,
