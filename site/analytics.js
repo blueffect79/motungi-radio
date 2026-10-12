@@ -1,5 +1,5 @@
 // Download-page analytics only; the desktop app does not load this script.
-const measurementId = "G-QZ7WT0Y95V";
+const measurementId = "G-QH9GXX3Y6Y";
 const publicSite = location.hostname === "devsejong.github.io" &&
   location.pathname.startsWith("/motungi-radio/");
 
