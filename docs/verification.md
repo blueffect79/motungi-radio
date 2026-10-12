@@ -2,6 +2,8 @@
 
 ## 0.2.7 배포 검증 — 2026-10-12
 
+[0.2.7 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.7)의 설치파일 5개와 SHA256SUMS.txt를 인증 없이 내려받아 원본 해시 일치를 확인했다. 공개 Mac DMG 두 파일의 공증 확인표도 유효하다. 홈페이지 소스 `8e38d46`, [Pages 38246147565](https://github.com/devsejong/motungi-radio/actions/runs/38246147565) 성공. 공개 링크·스크린샷 6장 로드·CBS 기능 화면을 확인했다.
+
 앱 소스 `a70f96627d376ac715b76e5623facfb4feaf700d`. Mac Dock 숨김, CBS 공식 썸네일, 투명도 방향 수정, 슬림한 채널 조작부와 방향 눈금 애니메이션을 포함한다. 프런트 54개·네이티브 49개·형식 6개 검사와 웹 빌드 통과. CBS 3채널 공식 이미지 추출 검사 및 이미지 HTTP 200 확인. 홈페이지 스크린샷 6장은 같은 UI의 개발 미리보기와 공식 정보 스냅샷을 사용했다. 실제 OS 투명도 합성 캡처가 아니다.
 
 - Mac arm64·x64: 최종 DMG와 내부 앱의 0.2.7 버전·앱 ID·CPU·Developer ID·hardened runtime·공증 확인표·Gatekeeper 통과. `LSUIElement=true` 확인. 공증 arm64 `8dce9419-44fe-43ab-a0fc-ff5d4f12ddcc`, x64 `8c99a5ee-b0cc-42d3-af00-edc60a5dc79a`, 모두 Accepted.

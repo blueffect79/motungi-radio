@@ -19,7 +19,7 @@ HLS 라이브러리를 필요할 때만 로드한다. 프로그램·채널 반�
 
 - 2026-10-12 로컬 수정: Mac 번들에 `LSUIElement=true`를 추가해 시작부터 Dock에 나타나지 않도록 선언했다. 기존 Accessory 실행 정책은 유지한다. 프런트 53개·네이티브 48개(실시간 원천 검사 4개 제외)·아키텍처 6개 테스트와 패키지 검사 통과. Apple Silicon 로컬 앱 빌드 및 번들 내 설정·임시 서명 검증 완료. 설치본 Dock·메뉴 막대·설정 창 조작, Developer ID 서명·공증과 공개 배포는 아직 미완료다.
 
-- `2e6ee59`의 0.2.6 Mac·Windows·Linux 설치파일은 GitHub Releases에 공개 완료
+- `a70f966`의 0.2.7 Mac·Windows·Linux 설치파일은 GitHub Releases에 공개 완료
 - Mac·Windows 실기기 설치, 청취, 로그인 실행, 절전 복귀
 - Windows 코드 서명. MBC 영리 목적 제한 고지는 재확인했으며 명시적 제3자 앱 허가와 구분한다.
 
