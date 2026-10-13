@@ -7,6 +7,7 @@ import type {
 } from "../../shared/contracts";
 export const defaults = (): Settings => ({
   schemaVersion: 1,
+  analyticsEnabled: false,
   appearance: "system",
   playerMode: "full",
   favoriteIds: [],

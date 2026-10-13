@@ -93,6 +93,8 @@ use std::{collections::HashSet, fs, io::Write, path::PathBuf, sync::Mutex};
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub schema_version: u32,
+    #[serde(default)]
+    pub analytics_enabled: bool,
     #[serde(default = "system_appearance")]
     pub appearance: String,
     #[serde(default = "full_mode")]
@@ -112,6 +114,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             schema_version: 1,
+            analytics_enabled: false,
             appearance: system_appearance(),
             player_mode: full_mode(),
             favorite_ids: vec![],
@@ -159,6 +162,7 @@ fn restore(v: Value) -> Settings {
     {
         s.player_mode = value.into();
     }
+    s.analytics_enabled = v["analyticsEnabled"].as_bool().unwrap_or(false);
     let mut seen = HashSet::new();
     if let Some(ids) = v["favoriteIds"].as_array() {
         s.favorite_ids = ids

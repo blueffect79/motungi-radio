@@ -1,6 +1,6 @@
 {
   "name": "motungi-radio",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,11 @@
     "verify": "npm run test && npm run build",
     "tauri": "node scripts/desktop.mjs",
     "format": "prettier --write \"src/**/*.{ts,css}\" \"scripts/*.mjs\" vite.config.ts",
-    "preview:ui": "vite --mode ui-preview --host 127.0.0.1 --port 1421 --strictPort"
+    "preview:ui": "vite --mode ui-preview --host 127.0.0.1 --port 1421 --strictPort",
+    "build:appstore": "tsc --noEmit && vite build --mode appstore",
+    "desktop:direct": "node scripts/distribution-build.mjs direct",
+    "desktop:appstore": "node scripts/distribution-build.mjs appstore",
+    "test:distribution": "node --test scripts/distribution-build.test.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.12.1",

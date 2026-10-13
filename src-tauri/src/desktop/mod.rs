@@ -39,16 +39,20 @@ mod tests {
 use crate::radio::{ApiResult, AppError, ErrorCode};
 use serde::Serialize;
 use tauri::Manager;
+#[cfg(not(feature = "app-store"))]
 use tauri_plugin_autostart::ManagerExt;
 #[derive(Debug, Serialize)]
 pub struct AutostartState {
     pub enabled: bool,
 }
+#[cfg(any(test, not(feature = "app-store")))]
 trait Registration {
     fn enabled(&self) -> Result<bool, ()>;
     fn set(&self, enabled: bool) -> Result<(), ()>;
 }
+#[cfg(not(feature = "app-store"))]
 struct OsRegistration<'a>(&'a tauri::AppHandle);
+#[cfg(not(feature = "app-store"))]
 impl Registration for OsRegistration<'_> {
     fn enabled(&self) -> Result<bool, ()> {
         self.0.autolaunch().is_enabled().map_err(|_| ())
@@ -70,11 +74,13 @@ fn error() -> AppError {
         true,
     )
 }
+#[cfg(any(test, not(feature = "app-store")))]
 fn query(os: &impl Registration) -> Result<AutostartState, AppError> {
     Ok(AutostartState {
         enabled: os.enabled().map_err(|_| error())?,
     })
 }
+#[cfg(any(test, not(feature = "app-store")))]
 fn change(os: &impl Registration, enabled: bool) -> Result<AutostartState, AppError> {
     os.set(enabled).map_err(|_| error())?;
     let actual = query(os)?;
@@ -85,10 +91,22 @@ fn change(os: &impl Registration, enabled: bool) -> Result<AutostartState, AppEr
 }
 #[tauri::command]
 pub fn get_autostart(app: tauri::AppHandle) -> ApiResult<AutostartState> {
+    #[cfg(feature = "app-store")]
+    {
+        let _ = app;
+        return store_autostart::query().into();
+    }
+    #[cfg(not(feature = "app-store"))]
     query(&OsRegistration(&app)).into()
 }
 #[tauri::command]
 pub fn set_autostart(app: tauri::AppHandle, enabled: bool) -> ApiResult<AutostartState> {
+    #[cfg(feature = "app-store")]
+    {
+        let _ = app;
+        return store_autostart::set(enabled).into();
+    }
+    #[cfg(not(feature = "app-store"))]
     change(&OsRegistration(&app), enabled).into()
 }
 pub fn is_autostart<I, S>(args: I) -> bool
@@ -100,20 +118,21 @@ where
 }
 /// Call before other plugins. A duplicate launch never creates another player or writer.
 pub fn plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _| {
+        if !is_autostart(args) {
+            crate::tray::show(
+                app,
+                app.tray_by_id("radio")
+                    .and_then(|t| t.rect().ok().flatten()),
+            );
+        }
+    }));
+    #[cfg(not(feature = "app-store"))]
+    let builder = builder.plugin(tauri_plugin_autostart::init(
+        tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+        Some(vec!["--autostart"]),
+    ));
     builder
-        .plugin(tauri_plugin_single_instance::init(|app, args, _| {
-            if !is_autostart(args) {
-                crate::tray::show(
-                    app,
-                    app.tray_by_id("radio")
-                        .and_then(|t| t.rect().ok().flatten()),
-                );
-            }
-        }))
-        .plugin(tauri_plugin_autostart::init(
-            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            Some(vec!["--autostart"]),
-        ))
 }
 /// Set tauri.conf.json windows.visible=false to avoid an autostart window flash.
 /// Normal launch shows the window; autostart only installs tray via the caller's setup.
@@ -122,3 +141,6 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(crate::settings::SettingsStore::new(path));
     Ok(())
 }
+
+#[cfg(all(feature = "app-store", target_os = "macos"))]
+mod store_autostart;

@@ -1,0 +1,21 @@
+{
+  "build": {
+    "beforeBuildCommand": "npm run build:appstore",
+    "features": [
+      "app-store"
+    ],
+    "frontendDist": "../dist-appstore"
+  },
+  "bundle": {
+    "targets": [
+      "app"
+    ],
+    "createUpdaterArtifacts": false,
+    "macOS": {
+      "entitlements": "Entitlements.appstore.plist"
+    }
+  },
+  "plugins": {
+    "updater": null
+  }
+}

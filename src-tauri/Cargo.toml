@@ -1,6 +1,6 @@
 [package]
 name = "motungi-radio"
-version = "0.2.7"
+version = "0.2.8"
 description = "모퉁이 라디오 — 한국 채널 메뉴 막대·트레이 플레이어"
 edition = "2021"
 license = "MIT"
@@ -12,9 +12,14 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[features]
+default = ["direct"]
+direct = ["dep:tauri-plugin-updater", "dep:tauri-plugin-autostart"]
+app-store = ["dep:objc2-service-management"]
+
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-png"] }
-tauri-plugin-autostart = "2"
+tauri-plugin-autostart = { version = "2", optional = true }
 tauri-plugin-single-instance = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -22,6 +27,7 @@ reqwest = { version = "0.12", default-features = false, features = ["native-tls"
 chrono = { version = "0.4", features = ["serde"] }
 url = "2"
 tokio = { version = "1", features = ["sync", "time"] }
+tauri-plugin-updater = { version = "2", optional = true }
 
 [profile.dev]
 incremental = true
@@ -35,6 +41,7 @@ objc2 = "0.6"
 objc2-app-kit = { version = "0.3", default-features = false, features = ["NSWorkspace"] }
 objc2-foundation = { version = "0.3", default-features = false, features = ["NSNotification", "NSOperation", "NSString", "block2"] }
 block2 = "0.6"
+objc2-service-management = { version = "0.3", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gio = "0.18"

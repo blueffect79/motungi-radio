@@ -826,6 +826,7 @@ header {
     var(--muted) 0 2px,
     transparent 2px 80px
   );
+  background-position-x: inherit;
   opacity: 0.45;
 }
 .tuner-needle {
@@ -875,3 +876,13 @@ header {
     inset 0 1px 3px #00000012;
   transform: translateY(2px);
 }
+
+.update-setting { margin: 16px 0; border-top: 1px solid var(--line); padding-top: 12px; }
+.update-setting h3 { font-size: 13px; }
+.update-setting button { border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; }
+.update-notice { color: var(--accent); background: transparent; border: 0; font-size: 11px; padding: 8px 0; }
+.update-notice[hidden] { display: none; }
+.about-app { margin: 16px 0; border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; }
+.about-app summary { cursor: pointer; padding: 4px 0; }
+.about-app button { background: transparent; color: var(--accent); margin: 4px 8px 4px 0; padding: 6px 0; }
+.about-app summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }

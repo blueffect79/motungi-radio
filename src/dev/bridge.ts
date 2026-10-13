@@ -39,6 +39,7 @@ const schedule = longTitles
   : snapshot.schedule;
 let settings = {
   schemaVersion: 1,
+  analyticsEnabled: false,
   volume: 100,
   lastStationId: "mbc-mfm",
   tbnStationId: null,
@@ -47,6 +48,8 @@ let settings = {
   playerMode: "full",
 };
 export async function invoke(command: string, args: any = {}): Promise<any> {
+  if (command === "prepare_update") return {version: null, supported: true};
+  if (command === "install_update") throw new Error("미리보기에서는 설치하지 않습니다.");
   if (command === "load_settings") return { ok: true, data: settings };
   if (command === "save_settings") {
     settings = args.settings;

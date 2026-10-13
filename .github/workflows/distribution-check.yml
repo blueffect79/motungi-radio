@@ -1,0 +1,40 @@
+name: 배포 경로 분리 검사
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'src-tauri/**'
+      - 'scripts/distribution*'
+      - 'scripts/check-distribution*'
+      - 'package*.json'
+      - 'vite.config.ts'
+      - '.github/workflows/distribution-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run build:appstore
+      - run: npm run test:distribution
+      - run: node scripts/check-distribution-bundles.mjs
+      - run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - run: cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features --features app-store
+      - name: Store native dependency boundary
+        run: |
+          cargo tree --locked --manifest-path src-tauri/Cargo.toml --no-default-features --features app-store > /tmp/store-dependencies.txt
+          if grep -E 'tauri-plugin-(updater|autostart)' /tmp/store-dependencies.txt; then
+            echo 'Store build contains a direct-distribution dependency'
+            exit 1
+          fi
