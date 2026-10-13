@@ -292,3 +292,14 @@ Mac은 ad-hoc 서명이며 Developer ID 서명/공증이 아니다. Windows는 �
 공식 방송사 원천을 직접 사용하며 원천 응답 성공은 제3자 배포 허가가 아니다. MBC 공개 조건 해결, 직접 사용 결과와 최종 사용자 확인이 남아 있으므로 전체 검증 완료 또는 공개 배포 완료로 판정하지 않는다.
 
 Windows 파일은 `release-artifacts/0.1.0-91ffeb4/windows-x64/`에 보관했다. GitHub 실행 37873884953의 Windows 작업은 성공이며, 같은 실행의 Mac 작업은 플랫폼 선택 때문에 생략됐다. Mac 두 파일은 별도 로컬 빌드 결과다. Windows 설치기 자체가 x86 형식이어도 내부 앱은 검증한 x64 대상이다.
+
+## 0.2.8 (2026-10-13)
+
+- 제품 소스: `427bfc589389fab2ccf19bb5ff655fa4de487957`. 이후 홈페이지·문서 커밋은 제품 코드와 구분한다.
+- 프런트 59개, Rust direct 50개(외부 실시간 5개 제외), 배포 경로 3개, CPU 6개 검사 통과. GitHub 배포 경로 분리 검사 `38395056599` 통과.
+- Mac arm64 공증 `86b97684-30a2-4dda-a8bb-5e90b93fbe83`, x64 `31aca38d-4cea-492e-bdad-f78be5e9bfa6`: Accepted. 두 DMG·내부 앱의 Developer ID/hardened runtime/버전/ID/CPU/Gatekeeper 확인.
+- Mac 업데이트 tarball은 공증된 앱에 확인표를 첨부한 뒤 생성했다. 추출 후에도 codesign·stapler·Gatekeeper 통과. 실제 공개키 서명 검증과 변조 거부 확인.
+- Windows x64 Actions `38395048578`, Linux x64 Actions `38395052335` 성공. Windows는 Authenticode 미서명. Linux는 설치·가상 화면/실제 IPC 스모크 검사까지 통과했으며 이 실행에서 실제 청취·로그인·절전은 확인하지 않았다.
+- UI 눈금은 매번 다른 위치에서 정지하며 작은/큰 눈금 위치가 일치하고 정지 후 유지됨을 브라우저에서 확인.
+- 로컬 통계 동의/해제·재시작 저장을 시험했고 사용자가 PostHog 수신을 확인했다. 90일 보관은 운영 정책이며 프로젝트 자동 삭제 설정은 미검증이다.
+- 공개 파일·업데이트 피드·실제 Mac 업그레이드 검증은 배포 완료 후 아래에 기록한다.
