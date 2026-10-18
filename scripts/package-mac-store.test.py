@@ -7,6 +7,6 @@ class ProfileTests(unittest.TestCase):
         now=datetime.datetime(2026,10,18)
         valid={'TeamIdentifier':['TEAM'], 'ExpirationDate':datetime.datetime(2027,1,1), 'DeveloperCertificates':[b'cert'], 'Entitlements':{'com.apple.application-identifier':'TEAM.io.example.radio'}}
         self.assertEqual(m.validate_profile(valid,'io.example.radio',now)[0],'TEAM')
-        for change in [{'ExpirationDate':now},{'ProvisionedDevices':['device']},{'Entitlements':{'com.apple.application-identifier':'TEAM.*'}},{'DeveloperCertificates':[]}]:
+        for change in [{'ExpirationDate':now},{'ProvisionedDevices':['device']},{'ProvisionsAllDevices':True},{'Entitlements':{'com.apple.application-identifier':'TEAM.io.example.radio','com.apple.security.get-task-allow':True}},{'Entitlements':{'com.apple.application-identifier':'TEAM.*'}},{'DeveloperCertificates':[]}]:
             with self.assertRaises(ValueError):m.validate_profile({**valid,**change},'io.example.radio',now)
 if __name__=='__main__':unittest.main()

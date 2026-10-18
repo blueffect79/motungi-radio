@@ -18,7 +18,7 @@ def validate_profile(profile, bundle_id, now):
         raise ValueError('Provisioning profile must match the explicit app and team')
     if profile.get('ExpirationDate', now) <= now:
         raise ValueError('Provisioning profile expired')
-    if profile.get('ProvisionedDevices') or ent.get('get-task-allow'):
+    if profile.get('ProvisionedDevices') or profile.get('ProvisionsAllDevices') or ent.get('get-task-allow') or ent.get('com.apple.security.get-task-allow'):
         raise ValueError('Use a Mac App Store distribution profile, not development/adhoc')
     if not profile.get('DeveloperCertificates'):
         raise ValueError('Profile has no distribution certificate')
