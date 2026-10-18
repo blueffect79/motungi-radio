@@ -8,6 +8,7 @@ import type {
 export const defaults = (): Settings => ({
   schemaVersion: 1,
   analyticsEnabled: false,
+  onboardingCompleted: false,
   appearance: "system",
   playerMode: "full",
   favoriteIds: [],

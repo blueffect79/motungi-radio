@@ -665,6 +665,43 @@ mod tests;
 
 // Parse only the official live-heading fragment. Layout changes fail closed.
 fn parse_wbs(body: &str) -> Result<Value, AppError> {
+    // The current official popup embeds its complete day schedule as inert JSON.
+    if let Some((_, rest)) =
+        body.split_once("<script type=\"application/json\" class=\"wbs-onair-day-data\">")
+    {
+        if let Some((raw, _)) = rest.split_once("</script>") {
+            if let Ok(data) = serde_json::from_str::<Value>(raw) {
+                if let Some(rows) = data.get("items").and_then(Value::as_array) {
+                    let at = now();
+                    if let Some(row) = rows.iter().find(|r| {
+                        r.get("start")
+                            .and_then(Value::as_i64)
+                            .is_some_and(|s| s <= at.timestamp_millis())
+                            && r.get("end")
+                                .and_then(Value::as_i64)
+                                .is_some_and(|e| at.timestamp_millis() < e)
+                    }) {
+                        let start = chrono::DateTime::from_timestamp_millis(
+                            row["start"].as_i64().ok_or_else(invalid)?,
+                        )
+                        .ok_or_else(invalid)?
+                        .with_timezone(at.offset());
+                        let end = chrono::DateTime::from_timestamp_millis(
+                            row["end"].as_i64().ok_or_else(invalid)?,
+                        )
+                        .ok_or_else(invalid)?
+                        .with_timezone(at.offset());
+                        return Ok(
+                            serde_json::json!({"title":text(row,"title"),"startTime":start.format("%H%M").to_string(),
+                            "endTime":end.format("%H%M").to_string(),"days":[start.weekday().num_days_from_monday()],
+                            "image":text(row,"image")}),
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     let heading = body
         .split_once("<li class=\"onair-program-heading\">")
         .ok_or_else(invalid)?
@@ -706,7 +743,20 @@ fn parse_wbs(body: &str) -> Result<Value, AppError> {
     if time(now().date_naive(), start).is_none() || time(now().date_naive(), end).is_none() {
         return Err(invalid());
     }
-    Ok(serde_json::json!({"title":title,"startTime":start,"endTime":end,"days":selected}))
+    let image = body
+        .split_once("<script type=\"application/json\" class=\"wbs-onair-day-data\">")
+        .and_then(|(_, s)| s.split_once("</script>"))
+        .and_then(|(json, _)| serde_json::from_str::<Value>(json).ok())
+        .and_then(|v| {
+            v.get("items")?
+                .as_array()?
+                .iter()
+                .find(|row| text(row, "title") == title)
+                .map(|row| text(row, "image").to_owned())
+        });
+    Ok(
+        serde_json::json!({"title":title,"startTime":start,"endTime":end,"days":selected,"image":image}),
+    )
 }
 
 fn parse_bbs(body: &str) -> Result<Value, AppError> {
@@ -723,7 +773,15 @@ fn parse_bbs(body: &str) -> Result<Value, AppError> {
         .filter(|s| !s.contains(['<', '>', '&']))
         .ok_or_else(invalid)?;
     // Reuse the strict Korean weekday and time parser, without executing page scripts.
-    parse_wbs(&format!("<li class=\"onair-program-heading\"><div class=\"tit\">{title}</div>지금 방송 중</li><p>방송시간 | {time}</p>"))
+    let mut parsed = parse_wbs(&format!("<li class=\"onair-program-heading\"><div class=\"tit\">{title}</div>지금 방송 중</li><p>방송시간 | {time}</p>"))?;
+    let poster = body
+        .split_once("<video id=\"main-player\"")
+        .and_then(|(_, s)| s.split_once('>'))
+        .and_then(|(tag, _)| tag.split_once("poster=\""))
+        .and_then(|(_, s)| s.split_once('"'))
+        .map(|(url, _)| url);
+    parsed["image"] = serde_json::json!(poster);
+    Ok(parsed)
 }
 
 fn parse_tbn(body: &str, region: &str) -> Result<Value, AppError> {
@@ -819,6 +877,23 @@ fn artwork(id: &str, value: &Value, title: &str) -> Option<String> {
                     })
             });
     }
+    if id == "ebs-fm" {
+        let row = value.get("nowProgram")?;
+        if text(row, "channelCode") != "RADIO" || text(row, "title") != title {
+            return None;
+        }
+        return ["thumbnail9", "programThumbnail"].iter().find_map(|key| {
+            let path = text(row, key);
+            if !path.starts_with("/public/courses/")
+                || path.contains(['?', '#', '\\'])
+                || path.contains("..")
+            {
+                return None;
+            }
+            let u = url::Url::parse(&format!("https://static.ebs.co.kr/images{path}")).ok()?;
+            (u.as_str().len() < 2048).then(|| u.into())
+        });
+    }
     if let Some(code) = id.strip_prefix("kbs-") {
         let channel = value.as_array()?.iter().find(|row| {
             text(row, "channel_code") == code && text(row, "local_station_code") == "00"
@@ -846,46 +921,78 @@ fn artwork(id: &str, value: &Value, title: &str) -> Option<String> {
                     .then(|| u.into())
             });
     }
-    fn walk(v: &Value, title: &str, host: &str) -> Option<String> {
-        match v {
-            Value::Object(map) => {
-                let matches = ["ProgramTitle", "title", "program_title", "name"]
-                    .iter()
-                    .any(|k| text(v, k) == title);
-                if matches {
-                    for key in [
-                        "ThumbnailPicture",
-                        "MiniAppPicture",
-                        "image",
-                        "image_square",
-                    ] {
-                        if let Ok(u) = url::Url::parse(text(v, key)) {
-                            if u.scheme() == "https"
-                                && u.host_str() == Some(host)
-                                && u.username().is_empty()
-                                && u.password().is_none()
-                                && u.port_or_known_default() == Some(443)
-                                && u.as_str().len() < 2048
-                            {
-                                return Some(u.into());
-                            }
-                        }
-                    }
-                }
-                map.values().find_map(|v| walk(v, title, host))
-            }
-            Value::Array(rows) => rows.iter().find_map(|v| walk(v, title, host)),
-            _ => None,
-        }
-    }
-    let host = if id.starts_with("mbc-") {
-        "img.imbc.com"
+    let (row, host, keys): (&Value, &str, &[&str]) = if id.starts_with("mbc-") {
+        let channel = match id {
+            "mbc-sfm" => "STFM",
+            "mbc-mfm" => "FM4U",
+            "mbc-chm" => "CHAM",
+            _ => return None,
+        };
+        let row = value
+            .as_array()?
+            .iter()
+            .find(|r| text(r, "Channel") == channel && text(r, "ProgramTitle") == title)?;
+        (row, "img.imbc.com", &["MiniAppPicture", "ThumbnailPicture"])
     } else if id.starts_with("sbs-") {
-        "image.cloud.sbs.co.kr"
+        let channel = match id {
+            "sbs-powerpc" => "power",
+            "sbs-lovepc" => "love",
+            _ => return None,
+        };
+        let row = value
+            .get("schedule")?
+            .get(channel)?
+            .as_array()?
+            .iter()
+            .find(|r| text(r, "channel") == channel && text(r, "title") == title)?;
+        let square = value
+            .get("main_clip")
+            .and_then(Value::as_array)
+            .and_then(|rows| {
+                rows.iter().find(|clip| {
+                    !text(row, "hom_url").is_empty()
+                        && text(clip, "link_url").trim_end_matches('/')
+                            == text(row, "hom_url").trim_end_matches('/')
+                        && text(clip, "image_alt") == title
+                        && !text(clip, "image_square").is_empty()
+                })
+            });
+        (
+            square.unwrap_or_else(|| row.get("onair").unwrap_or(row)),
+            "image.cloud.sbs.co.kr",
+            &["image_square", "image", "image_center"],
+        )
+    } else if id == "cpbc-seoul" {
+        let row = value.pointer("/onair/info")?;
+        if !text(row, "channelid").eq_ignore_ascii_case("radio") || text(row, "title") != title {
+            return None;
+        }
+        (row, "img.cpbc.co.kr", &["program_image", "thumbimg"])
+    } else if id == "febc-seoul" && text(value, "title") == title {
+        (value, "seoul.febc.net", &["poster"])
+    } else if id == "bbs-seoul" && text(value, "title") == title {
+        (value, "m.bbsi.co.kr", &["image"])
+    } else if id == "wbs-seoul" && text(value, "title") == title {
+        (value, "wbsi.kr", &["image"])
     } else {
         return None;
     };
-    walk(value, title, host)
+    keys.iter().find_map(|key| {
+        let raw = text(row, key).trim();
+        if raw.is_empty() {
+            return None;
+        }
+        let base = url::Url::parse(&format!("https://{host}/")).ok()?;
+        let u = base.join(raw).ok()?;
+        (u.scheme() == "https"
+            && u.host_str() == Some(host)
+            && u.username().is_empty()
+            && u.password().is_none()
+            && u.port_or_known_default() == Some(443)
+            && u.fragment().is_none()
+            && u.as_str().len() < 2048)
+            .then(|| u.into())
+    })
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]

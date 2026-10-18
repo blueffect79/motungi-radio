@@ -103,6 +103,7 @@ pub fn run() {
             desktop::get_autostart,
             desktop::set_autostart,
             tray::quit_app,
+            tray::frontend_ready,
         ])
         .run(tauri::generate_context!())
         .expect("앱 실행에 실패했습니다");

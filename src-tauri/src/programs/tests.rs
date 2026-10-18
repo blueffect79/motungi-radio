@@ -472,3 +472,82 @@ fn live_cbs_artwork() {
         }
     });
 }
+
+#[test]
+fn artwork_uses_official_nested_images_and_exact_channel() {
+    let v = serde_json::json!({"schedule":{"power":[{"channel":"power","title":"방송",
+        "onair":{"image":"https://image.cloud.sbs.co.kr/cover.png"}}],
+        "love":[{"channel":"love","title":"방송","onair":{"image":"https://evil.test/a"}}]}});
+    assert_eq!(
+        artwork("sbs-powerpc", &v, "방송").as_deref(),
+        Some("https://image.cloud.sbs.co.kr/cover.png")
+    );
+    assert!(artwork("sbs-lovepc", &v, "방송").is_none());
+    assert!(artwork("sbs-powerpc", &v, "다른 방송").is_none());
+    let v = serde_json::json!([
+        {"Channel":"STFM","ProgramTitle":"방송","MiniAppPicture":"https://img.imbc.com/wrong.jpg"},
+        {"Channel":"FM4U","ProgramTitle":"방송","MiniAppPicture":"https://img.imbc.com/large.jpg","ThumbnailPicture":"https://img.imbc.com/small.jpg"}]);
+    assert_eq!(
+        artwork("mbc-mfm", &v, "방송").as_deref(),
+        Some("https://img.imbc.com/large.jpg")
+    );
+}
+
+#[test]
+fn additional_artwork_rejects_cross_host_and_wrong_program() {
+    let mut v = serde_json::json!({"title":"방송","poster":"/fileupload/program.png"});
+    assert_eq!(
+        artwork("febc-seoul", &v, "방송").as_deref(),
+        Some("https://seoul.febc.net/fileupload/program.png")
+    );
+    assert!(artwork("febc-seoul", &v, "다른 방송").is_none());
+    for url in [
+        "https://evil.test/a",
+        "//evil.test/a",
+        "https://user@seoul.febc.net/a",
+        "https://seoul.febc.net/a#fragment",
+    ] {
+        v["poster"] = serde_json::json!(url);
+        assert!(artwork("febc-seoul", &v, "방송").is_none());
+    }
+    let v = serde_json::json!({"onair":{"info":{"channelid":"radio","title":"방송","program_image":"https://img.cpbc.co.kr/a.png"}}});
+    assert!(artwork("cpbc-seoul", &v, "방송").is_some());
+}
+
+#[test]
+fn ebs_artwork_requires_radio_and_official_course_path() {
+    let mut v = serde_json::json!({"nowProgram":{"channelCode":"RADIO","title":"경청","thumbnail9":"/public/courses/cover.png"}});
+    assert_eq!(
+        artwork("ebs-fm", &v, "경청").as_deref(),
+        Some("https://static.ebs.co.kr/images/public/courses/cover.png")
+    );
+    v["nowProgram"]["channelCode"] = serde_json::json!("TV");
+    assert!(artwork("ebs-fm", &v, "경청").is_none());
+}
+
+#[test]
+fn sbs_prefers_square_program_cover_over_cutout_presenter() {
+    let v = serde_json::json!({"schedule":{"power":[{"channel":"power","title":"방송","hom_url":"https://programs.sbs.co.kr/radio/show",
+        "onair":{"image":"https://image.cloud.sbs.co.kr/cutout.png"}}]},
+        "main_clip":[{"image_alt":"방송","link_url":"https://programs.sbs.co.kr/radio/show","image_square":"https://image.cloud.sbs.co.kr/square.jpg"}]});
+    assert_eq!(
+        artwork("sbs-powerpc", &v, "방송").as_deref(),
+        Some("https://image.cloud.sbs.co.kr/square.jpg")
+    );
+}
+
+#[test]
+fn wbs_embedded_schedule_and_bbs_poster_are_extracted_without_scripts() {
+    let at = now();
+    let rows = serde_json::json!({"items":[{"start":(at-chrono::Duration::minutes(20)).timestamp_millis(),
+        "end":(at+chrono::Duration::minutes(20)).timestamp_millis(),"title":"현재 방송","image":"/data/file/gr_image/a.jpg"}]});
+    let html =
+        format!("<script type=\"application/json\" class=\"wbs-onair-day-data\">{rows}</script>");
+    let v = parse_wbs(&html).unwrap();
+    assert_eq!(
+        artwork("wbs-seoul", &v, "현재 방송").as_deref(),
+        Some("https://wbsi.kr/data/file/gr_image/a.jpg")
+    );
+    let v = parse_bbs("<video id=\"main-player\" poster=\"https://m.bbsi.co.kr/M/UploadProgramImg/a.jpg\"></video><h4 id=\"ProgramNamePage\">방송</h4><span id=\"BroadCastTimePage\">월-금 21:00-23:00</span>").unwrap();
+    assert!(artwork("bbs-seoul", &v, "방송").is_some());
+}

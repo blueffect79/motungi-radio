@@ -63,6 +63,7 @@ export interface ProgramState {
 export interface Settings {
   schemaVersion: 1;
   analyticsEnabled?: boolean;
+  onboardingCompleted?: boolean;
   appearance?: "system" | "light" | "dark";
   playerMode?: "full" | "mini";
   favoriteIds: string[];

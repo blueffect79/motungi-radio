@@ -69,9 +69,16 @@ export function safeArtwork(raw?: string | null) {
     return u.protocol === "https:" &&
       !u.username &&
       !u.password &&
+      !u.hash &&
+      raw.length < 2048 &&
       (!u.port || u.port === "443") &&
       [
         "img.imbc.com",
+        "img.cpbc.co.kr",
+        "seoul.febc.net",
+        "m.bbsi.co.kr",
+        "wbsi.kr",
+        "static.ebs.co.kr",
         "cbs.co.kr",
         "image.cloud.sbs.co.kr",
         "programres.kbs.co.kr",
@@ -305,7 +312,60 @@ export async function mountApp(root: HTMLElement) {
   main.id = "channel-panel";
   hero.append(channelToggle);
   shell.append(header, hero, main);
-  root.replaceChildren(shell);
+  const welcome = node("section", undefined, "welcome");
+  welcome.setAttribute("aria-label", "모퉁이 라디오 시작 안내");
+  welcome.hidden = true;
+  const intro = node("h1", "모퉁이 라디오");
+  const optLabel = node("label", undefined, "welcome-consent");
+  const opt = node("input");
+  opt.type = "checkbox";
+  opt.disabled = !analytics.configured;
+  optLabel.append(opt, node("span", "익명 사용 통계 보내기 (선택)"));
+  const welcomeError = node("p", undefined, "error");
+  welcomeError.setAttribute("role", "alert");
+  let welcomeBusy = false, welcomeInitialized = false;
+  const begin = button("라디오 시작하기", "라디오 시작하기", () => {
+    if (welcomeBusy) return;
+    welcomeBusy = true;
+    begin.disabled = true;
+    void settings.update(s => ({...s, onboardingCompleted:true, analyticsEnabled:opt.checked})).then(() => {
+      welcomeBusy = false;
+      begin.disabled = false;
+      welcomeError.textContent = settings.error?.message ?? "";
+      render();
+    });
+  });
+  begin.className = "welcome-start";
+  const welcomeLogo = node("img", undefined, "welcome-logo");
+  welcomeLogo.src = new URL("../src-tauri/icons/128x128@2x.png", import.meta.url).href;
+  welcomeLogo.alt = "모퉁이 라디오 로고";
+  welcomeLogo.width = 96;
+  welcomeLogo.height = 96;
+  const identity = node("div", undefined, "welcome-identity");
+  const website = button("홈페이지 ↗", "모퉁이 라디오 홈페이지 열기", () => {
+    void invoke("open_about_page", {page:"website"}).catch(() => {
+      welcomeError.textContent = "홈페이지를 열 수 없습니다. 잠시 후 다시 시도해 주세요.";
+    });
+  });
+  website.className = "welcome-website";
+  const meta = node("div", undefined, "welcome-meta");
+  meta.append(node("span", `버전 ${appMetadata.version}`, "welcome-version"), website);
+  identity.append(welcomeLogo, node("p", "화면 한켠에, 늘 함께", "welcome-eyebrow"), intro,
+    node("p", "좋아하는 한국 라디오를 한곳에서, 무료로.", "welcome-description"), meta);
+  const tips = node("div", undefined, "welcome-tips");
+  tips.append(node("span", "메뉴 막대·트레이에서 간편하게"), node("span", "즐겨찾는 채널을 나만의 목록으로"));
+  const consentCard = node("div", undefined, "welcome-consent-card");
+  consentCard.append(optLabel, node("p", "더 편한 라디오를 만드는 데 도움이 됩니다. 선택하지 않아도 모든 기능을 이용할 수 있어요.", "welcome-privacy"));
+  const privacy = node("details", undefined, "welcome-details");
+  privacy.append(node("summary", "어떤 정보를 보내나요?"),
+    node("p", "앱 실행·재생·기능 사용과 무작위 설치 식별자를 PostHog 미국 리전으로 전송합니다. 채널명·프로그램명·화면은 수집하지 않습니다. 통계는 90일 보관 정책이며, 설정에서 언제든 끌 수 있습니다.", "welcome-privacy"));
+  consentCard.append(privacy);
+  const welcomeBody = node("div", undefined, "welcome-body");
+  welcomeBody.append(identity, tips, consentCard, welcomeError);
+  const welcomeActions = node("div", undefined, "welcome-actions");
+  welcomeActions.append(node("p", "방송은 재생 버튼을 눌렀을 때만 시작됩니다.", "welcome-footnote"), begin);
+  welcome.append(welcomeBody, welcomeActions);
+  root.replaceChildren(welcome, shell);
   let headerState = "";
   let poller: ProgramPoller | undefined,
     resized = "",
@@ -356,7 +416,18 @@ export async function mountApp(root: HTMLElement) {
       img.src = url;
       img.alt = small ? "" : `${p?.title ?? s?.name} 프로그램 이미지`;
       img.referrerPolicy = "no-referrer";
-      img.onerror = fallback;
+      img.onload = () => {
+        if (target.dataset.art !== key) return;
+        // Near-square portraits fill the cover; wide artwork keeps its lettering.
+        img.classList.toggle(
+          "portrait",
+          img.naturalWidth / img.naturalHeight > 0.8 &&
+            img.naturalWidth / img.naturalHeight < 1.25,
+        );
+      };
+      img.onerror = () => {
+        if (target.dataset.art === key) fallback();
+      };
       target.append(img);
     } else fallback();
   }
@@ -398,6 +469,18 @@ export async function mountApp(root: HTMLElement) {
   function render() {
     updateNotice.hidden = !updater.ready;
     if (disposed) return;
+    const onboarding = ready && !settings.settings.onboardingCompleted;
+    welcome.hidden = !onboarding;
+    shell.hidden = onboarding;
+    if (onboarding) {
+      if (!welcomeInitialized) {
+        opt.checked = settings.settings.analyticsEnabled === true;
+        welcomeInitialized = true;
+      }
+      document.documentElement.dataset.theme = settings.settings.appearance ?? "system";
+      welcomeError.textContent = settings.error?.message ?? "";
+      return;
+    }
     const focused = (document.activeElement as HTMLElement | null)?.dataset.key,
       scroll = main.scrollTop;
     document.documentElement.dataset.theme =
@@ -997,6 +1080,9 @@ export async function mountApp(root: HTMLElement) {
   }
   ready = true;
   render();
+  // Let the first layout settle and native resizing finish before revealing the window.
+  await sizeQueue;
+  await invoke("frontend_ready").catch(() => {});
   if (player.state.stationId) void loadSchedule(player.state.stationId);
   poller = new ProgramPoller(
     stations.map((s) => s.id),

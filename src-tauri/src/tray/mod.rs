@@ -87,6 +87,7 @@ fn clamped_position(
 }
 pub fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
     if let Some(window) = app.get_webview_window("main") {
+        let mut positioned = false;
         if let Some(rect) = rect.filter(|_| {
             !app.try_state::<PlayerWindowState>()
                 .is_some_and(|s| s.pinned.load(Ordering::SeqCst))
@@ -118,9 +119,14 @@ pub fn show(app: &tauri::AppHandle, rect: Option<tauri::Rect>) {
                         (ws.width, ws.height),
                         cfg!(target_os = "macos"),
                     );
-                    let _ = window.set_position(PhysicalPosition::new(x, y));
+                    positioned = window.set_position(PhysicalPosition::new(x, y)).is_ok();
                 }
             }
+        }
+        if cfg!(target_os = "macos") && !positioned
+            && !window.is_visible().unwrap_or(false)
+            && !app.try_state::<PlayerWindowState>().is_some_and(|s| s.pinned.load(Ordering::SeqCst)) {
+            return;
         }
         let _ = window.unminimize();
         let _ = window.show();
@@ -233,14 +239,19 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             }
         })
         .build(app)?;
-    if !crate::desktop::is_autostart(std::env::args()) {
-        show(
-            app.handle(),
-            app.tray_by_id("radio")
-                .and_then(|t| t.rect().ok().flatten()),
-        );
-    }
     Ok(())
+}
+
+// The webview starts hidden. Open only after the first complete UI and resize.
+#[tauri::command]
+pub fn frontend_ready(app: tauri::AppHandle) {
+    if crate::desktop::is_autostart(std::env::args()) { return; }
+    let rect = app.tray_by_id("radio").and_then(|t| t.rect().ok().flatten());
+    // If macOS has not published the status item position, leave the window hidden.
+    // A subsequent tray click supplies its position instead of flashing at the center.
+    #[cfg(target_os = "macos")]
+    if rect.is_none() { return; }
+    show(&app, rect);
 }
 
 #[cfg(target_os = "macos")]

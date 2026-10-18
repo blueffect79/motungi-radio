@@ -51,7 +51,7 @@ let root: HTMLElement,
 beforeEach(() => {
   vi.clearAllMocks();
   mock.events.clear();
-  saved = { ...defaults(), lastStationId: "mbc-mfm" };
+  saved = { ...defaults(), onboardingCompleted: true, lastStationId: "mbc-mfm" };
   root = document.createElement("div");
   document.body.append(root);
   mock.invoke.mockImplementation(async (command, args) => {
@@ -491,4 +491,35 @@ it("CBS artwork allows only the official HTTPS host", () => {
   expect(safeArtwork("https://cbs.co.kr/data/cbs/upload/save/program/a.png")).toBeTruthy();
   expect(safeArtwork("https://cbs.co.kr.evil.test/a.png")).toBeNull();
   expect(safeArtwork("http://cbs.co.kr/a.png")).toBeNull();
+});
+
+it("first-run introduction is optional, persists dismissal, and never starts audio", async () => {
+  saved = { ...defaults(), lastStationId: "mbc-mfm" };
+  dispose = await mountApp(root);
+  const intro = root.querySelector<HTMLElement>(".welcome")!;
+  expect(intro.hidden).toBe(false);
+  expect(root.querySelector<HTMLInputElement>(".welcome input")!.checked).toBe(false);
+  root.querySelector<HTMLButtonElement>(".welcome-start")!.click();
+  await tick();
+  expect(saved.onboardingCompleted).toBe(true);
+  expect(saved.analyticsEnabled).toBe(false);
+  expect(intro.hidden).toBe(true);
+  expect(mock.start).not.toHaveBeenCalled();
+  dispose();
+  dispose = await mountApp(root);
+  expect(root.querySelector<HTMLElement>(".welcome")!.hidden).toBe(true);
+});
+
+it("failed onboarding save keeps the introduction and reports the error", async () => {
+  saved = { ...defaults() };
+  dispose = await mountApp(root);
+  const previous = mock.invoke.getMockImplementation()!;
+  mock.invoke.mockImplementation(async (cmd, args) => cmd === "save_settings"
+    ? {ok:false,error:{code:"storage",message:"저장 실패",retryable:true}}
+    : previous(cmd,args));
+  root.querySelector<HTMLButtonElement>(".welcome-start")!.click();
+  await tick();
+  expect(root.querySelector<HTMLElement>(".welcome")!.hidden).toBe(false);
+  expect(root.querySelector(".welcome .error")!.textContent).toBe("저장 실패");
+  expect(saved.onboardingCompleted).toBe(false);
 });

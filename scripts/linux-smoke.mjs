@@ -87,6 +87,12 @@ try {
     },
   });
   session = created.sessionId;
+  await wait(() => execute('return !!document.querySelector(".welcome:not([hidden])") || document.querySelectorAll(".station").length > 0'));
+  if (await execute('return !!document.querySelector(".welcome:not([hidden])")')) {
+    assert.equal(await execute('return document.querySelector(".welcome input").checked'), false, "통계 기본 해제");
+    await click("라디오 시작하기");
+  }
+
   await wait(() =>
     execute(
       'return !!document.querySelector("button[aria-label=\\"방송 재생\\"]") && document.querySelectorAll(".station").length > 0',

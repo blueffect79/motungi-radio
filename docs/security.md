@@ -11,3 +11,5 @@
 자체 MIT 코드는 방송 콘텐츠의 이용 허가를 포함하지 않는다. 기술 응답 성공과 공개 권한을 분리한다. 현재 인증서 비밀은 없으며, 향후 서명 비밀을 쓰면 저장소 대신 빌드 환경의 비밀 저장소에 두고 공개 로그에 출력하지 않는다.
 
 프로그램 이미지는 HTTPS의 cbs.co.kr, img.imbc.com, image.cloud.sbs.co.kr, programres.kbs.co.kr, mediafactory.play.kbs.co.kr만 네이티브 정규화·프런트 검증·CSP에서 허용한다. 실패하면 채널 커버를 표시하고 재생은 유지한다. 공식 페이지 열기 명령은 채널 ID만 받아 정적 카탈로그 URL만 연다. 브라우저 검증 어댑터는 Vite serve의 ui-preview 모드에서만 연결되고 배포 빌드에는 포함하지 않는다.
+
+프로그램 이미지 추가 허용 호스트(2026-10-14): img.cpbc.co.kr, seoul.febc.net, static.ebs.co.kr, m.bbsi.co.kr, wbsi.kr. 네이티브 선택·프런트 URL 검사·CSP에 함께 반영했다. EBS 상대 경로는 공식 /public/courses/ 아래만 허용한다. HTML의 JSON과 poster는 데이터로만 읽으며 스크립트를 실행하지 않는다.

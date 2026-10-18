@@ -57,3 +57,16 @@ FEBC 후속 검증: 공식 플레이어·streamKey·허용 CDN 매핑 테스트 
 ### CBS 프로그램 이미지 — 2026-10-12
 
 공식 `/schedule/all/ajax`의 해당 채널(fm/musicfm/joy4u)과 프로그램명이 일치하는 행에서 `program.image.radioProfil`을 우선 사용한다. 없거나 허용되지 않는 주소이면 mobileTop·mainTop·programBanner 순으로 확인한다. 상대 경로는 공식 `https://cbs.co.kr/` 기준으로 해석하고 HTTPS·동일 호스트·프로그램 이미지 경로만 허용한다. 대표 음악FM 이미지의 HTTP 200·image/png 응답을 확인했다. 이미지가 없는 편성은 기존 채널 커버를 유지한다. 기술 확인과 이미지 이용 허가는 별개다.
+
+## 2026-10-14 프로그램 이미지 보완
+
+- MBC: 같은 Channel·ProgramTitle의 MiniAppPicture(확인 표본 1125×1224)를 우선하고 ThumbnailPicture를 다음 후보로 사용한다.
+- SBS: schedule의 채널·제목을 확인한 뒤 main_clip의 동일 홈페이지·동일 제목 image_square를 우선한다. 없으면 해당 편성의 onair.image를 사용한다. 이벤트·SNS 이미지는 선택하지 않는다.
+- KBS·CBS: 기존 공식 프로그램 이미지 선택을 유지한다. CBS radioProfil은 브라우저에서 400×400 로딩 확인. Python 요청의 연결 종료와 실제 브라우저 로딩 결과를 구분한다.
+- EBS: RADIO 현재 제목을 확인하고 thumbnail9 → programThumbnail 순으로 선택한다. 공식 라디오 페이지에서 확인한 https://static.ebs.co.kr/images + /public/courses/ 경로만 조합한다.
+- cpbc: radio 채널의 현재 제목과 일치하는 onair.info.program_image → thumbimg.
+- FEBC: 현재 제목의 poster를 seoul.febc.net 기준으로 해석한다.
+- BBS: 공식 온에어 main-player의 poster를 현재 프로그램 정보에 연결한다. 이미지 호스트는 m.bbsi.co.kr.
+- WBS: 공식 팝업의 wbs-onair-day-data JSON에서 현재 시간 구간의 프로그램·이미지를 읽는다. 기존 HTML 파싱도 유지한다. 이미지 호스트는 wbsi.kr.
+- 조회 시점 TBN을 제외한 19개 채널 이미지가 브라우저에서 로딩됐다. TBN은 프로그램 이미지 원천을 확인하지 못해 기본 커버를 유지한다.
+- 정사각형에 가까운 이미지는 채우고 가로형은 전체를 보존한다. 모든 주소는 HTTPS·정확한 호스트·자격증명/fragment 없음으로 제한하며 이미지 실패는 청취에 영향을 주지 않는다. 이미지 제공 확인은 별도 재배포 허가를 의미하지 않는다.

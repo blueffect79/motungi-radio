@@ -182,6 +182,9 @@ p {
   height: 100%;
   object-fit: contain;
 }
+.cover img.portrait {
+  object-fit: cover;
+}
 .cover-mark {
   font-size: 20px;
   letter-spacing: 1px;
@@ -886,3 +889,33 @@ header {
 .about-app summary { cursor: pointer; padding: 4px 0; }
 .about-app button { background: transparent; color: var(--accent); margin: 4px 8px 4px 0; padding: 6px 0; }
 .about-app summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* First-run introduction shares the player width and native window. */
+[hidden] { display: none !important; }
+.welcome { box-sizing: border-box; width: 100%; max-width: 380px; margin: auto; height: 100dvh; display: flex; flex-direction: column; padding: 26px 24px 20px; }
+.welcome-identity { text-align: center; }
+.welcome-logo { display: block; width: 96px; height: 96px; margin: 0 auto 15px; filter: drop-shadow(0 8px 12px #00000014); }
+.welcome h1 { font-size: 27px; line-height: 1.3; letter-spacing: -1px; margin: 4px 0 10px; }
+.welcome p { line-height: 1.6; }
+.welcome .welcome-eyebrow { margin: 0; font-size: 12px; color: var(--muted); }
+.welcome-description { margin: 0; font-size: 13px; }
+.welcome-meta { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; font-size: 12px; }
+.welcome-version { color: var(--muted); }
+.welcome-website { padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 12px; }
+.welcome-tips { display: grid; gap: 7px; margin: 23px 0; font-size: 12px; color: var(--muted); }
+.welcome-tips span::before { content: "✓"; color: var(--accent); margin-right: 9px; }
+.welcome-consent-card { padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.welcome-consent { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 13px; }
+.welcome-consent input { flex-shrink: 0; width: 17px; height: 17px; margin: 0; accent-color: var(--accent); }
+.welcome .welcome-privacy { margin: 9px 0 0; font-size: 11px; color: var(--muted); line-height: 1.65; }
+.welcome-details { margin-top: 10px; font-size: 11px; color: var(--muted); }
+.welcome-details summary { cursor: pointer; }
+.welcome-start { width: 100%; padding: 13px; margin-top: 16px; background: var(--accent); color: var(--on); border: 0; border-radius: 10px; font-weight: 700; }
+.welcome-start:disabled { opacity: .55; }
+.welcome .error:empty { display: none; }
+.welcome .welcome-footnote { text-align: center; font-size: 10px; margin: 10px 0 0; color: var(--muted); }
+
+.welcome-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 2px; }
+.welcome-actions { flex-shrink: 0; padding-top: 12px; }
+.welcome-start:hover { background: var(--accent); color: var(--on); }
+.welcome-website:hover { background: var(--surface); color: var(--ink); }
