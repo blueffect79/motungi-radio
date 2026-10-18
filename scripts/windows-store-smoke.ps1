@@ -23,30 +23,36 @@ try {
  $pkg = Get-AppxPackage -Name 'EA466DAE.395942762A201'
  if (-not $pkg -or $pkg.PackageFamilyName -ne 'EA466DAE.395942762A201_46m7zv2hp1s6j') { throw 'Installed package identity mismatch' }
  Start-Process explorer.exe "shell:AppsFolder\$($pkg.PackageFamilyName)!MotungiRadio"
- $process = $null
- for ($i=0; $i -lt 40; $i++) {
-  Start-Sleep -Milliseconds 500
-  $process = Get-Process -Name motungi-radio -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $pkg.InstallLocation 'motungi-radio.exe') } | Select-Object -First 1
-  if ($process -and $process.MainWindowHandle -ne 0) { break }
- }
- if (-not $process -or $process.MainWindowHandle -eq 0) { throw 'Packaged app did not show a window' }
- Start-Sleep -Seconds 3
  Add-Type -AssemblyName System.Drawing
  Add-Type @'
 using System;
 using System.Runtime.InteropServices;
 public class MotungiCapture {
+ public delegate bool EnumProc(IntPtr hwnd,IntPtr data);
+ [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc callback,IntPtr data);
+ [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+ [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint id);
+ public static IntPtr FindWindow(uint process) { IntPtr result=IntPtr.Zero; EnumWindows((h,d)=>{uint id; GetWindowThreadProcessId(h,out id); if(id==process && IsWindowVisible(h)) {result=h; return false;} return true;},IntPtr.Zero);return result;}
  [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left,Top,Right,Bottom; }
  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd,out RECT rect);
  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hwnd,IntPtr hdc,uint flags);
 }
 '@
+ $process = $null
+ $window = [IntPtr]::Zero
+ for ($i=0; $i -lt 40; $i++) {
+  Start-Sleep -Milliseconds 500
+  $process = Get-Process -Name motungi-radio -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $pkg.InstallLocation 'motungi-radio.exe') } | Select-Object -First 1
+  if ($process) { $window = [MotungiCapture]::FindWindow($process.Id); if ($window -ne [IntPtr]::Zero) { break } }
+ }
+ if (-not $process -or $window -eq [IntPtr]::Zero) { throw 'Packaged app did not show a window' }
+ Start-Sleep -Seconds 3
  $rect = New-Object MotungiCapture+RECT
- [MotungiCapture]::GetWindowRect($process.MainWindowHandle,[ref]$rect) | Out-Null
+ [MotungiCapture]::GetWindowRect($window,[ref]$rect) | Out-Null
  $image = New-Object Drawing.Bitmap(($rect.Right-$rect.Left),($rect.Bottom-$rect.Top))
  $graphics = [Drawing.Graphics]::FromImage($image)
  $hdc=$graphics.GetHdc()
- try { if (-not [MotungiCapture]::PrintWindow($process.MainWindowHandle,$hdc,2)) { throw 'Window capture failed' } }
+ try { if (-not [MotungiCapture]::PrintWindow($window,$hdc,2)) { throw 'Window capture failed' } }
  finally { $graphics.ReleaseHdc($hdc); $graphics.Dispose() }
  try { $image.Save("$proof/windows-onboarding.png",[Drawing.Imaging.ImageFormat]::Png) } finally { $image.Dispose() }
  @("Source workflow run: $env:SOURCE_RUN", "Installed identity: $($pkg.PackageFullName)", "MSIX SHA256: $expected", 'Installed and launched. Audio, login, sleep and upgrade not verified.') | Set-Content "$proof/verification.txt" -Encoding utf8
