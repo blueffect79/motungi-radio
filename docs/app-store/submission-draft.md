@@ -47,7 +47,7 @@ Optional usage analytics: describe the final PostHog configuration only after th
 
 ## 제출을 막는 항목
 
-- App Store 배포/Installer 인증서와 앱 프로비저닝 프로파일 미확인
+- 배포/Installer 인증서와 프로파일 발급 및 서명 pkg 내부 검사 완료(2026-10-18). Apple 업로드 결과 확인 필요
 - 방송 스트리밍·편성표·이미지 이용 권한 자료 미완성
 - 샌드박스 실제 설치·청취·재로그인·절전 복귀 미검증
 - 로그인 자동 실행 어댑터는 구현 중이며 UI 활성화 전 실제 등록/해제 검증 필요
@@ -56,3 +56,9 @@ Optional usage analytics: describe the final PostHog configuration only after th
 - 직접 배포판 설정 이전 UI 미구현, 자동 이전 없음
 
 확인 근거: https://tauri.app/distribute/app-store/ · https://developer.apple.com/app-store/review/guidelines/ · https://developer.apple.com/app-store/app-privacy-details/
+
+## 2026-10-18 준비 결과
+
+App Store Connect 앱 ID `6824204878`, Bundle ID `io.github.devsejong.motungiradio`, 버전 0.2.9. 한국어 소개·음악 카테고리·개인정보처리방침·심사 연락처·수동 출시를 저장했다. 전화번호는 사용자가 직접 입력했으며 저장소에 기록하지 않는다.
+
+사용자 승인으로 Mac App Distribution·Mac Installer Distribution 인증서와 Mac App Store 프로파일을 발급했다(만료 2027-10-18). 개인키는 저장소 밖 비공개 폴더와 키체인에만 보관한다. 제품 소스 `3ba726f` Universal 0.2.9의 서명 pkg 내부 앱·CPU·버전·ID·샌드박스를 재검증했다. 업로드·심사 제출·공개 전이다.

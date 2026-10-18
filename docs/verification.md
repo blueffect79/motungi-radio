@@ -320,3 +320,12 @@ Windows 파일은 `release-artifacts/0.1.0-91ffeb4/windows-x64/`에 보관했다
 - Windows Actions `39104154927`, Linux `39104157344`, 배포 경로 분리 `39104159348` 성공. Linux 두 설치 형식의 가상 화면·IPC 스모크 통과. CI 설치파일 SHA256 일치 확인.
 - 네 플랫폼 업데이트 파일의 공개키 서명 및 변조 거부 확인. Windows Authenticode는 미서명이다.
 - 공개 자산 12개를 인증 없이 다운로드해 SHA256 일치를 확인했다. Pages 실행 `39105341103` 성공, 공개 업데이트 피드 0.2.9 확인. 브라우저에서 소개→기능→다운로드 순서 확인 후 기존 CSS 캐시 갱신을 위해 스타일 버전도 변경했다.
+
+## 2026-10-18 스토어 준비 — 미제출
+
+- Windows 제품 소스 `8d278ab5f17e703b0aa762778b73920976e79725`, [MSIX 빌드 39124192804](https://github.com/devsejong/motungi-radio/actions/runs/39124192804) 성공. MakeAppx·AMD64·내용 검사 통과. 미서명 원본 SHA256 `8e9c8be766cbdbb6fe9cf3dd92eb111d8c0c375ab9fba435cea0994d182b4485`. Partner Center 0.2.9.0 X64 Validated 확인.
+- [Windows 설치 실행 39125518142](https://github.com/devsejong/motungi-radio/actions/runs/39125518142): 같은 MSIX 사본에 CI 임시 시험 서명을 적용해 설치·실행·창 표시 확인. 동의 화면을 지나 MBC FM4U 선택 후 정지한 실제 화면을 촬영해 소개에 저장했다. 원본 업로드 MSIX에는 시험 서명이 없다. 물리 PC 청취·트레이·로그인·절전·WebView2 없는 환경은 미검증이다.
+- Mac 제품 소스 `3ba726f`, 프런트 61개·Rust app-store 55개(실시간 5개 제외) 통과, Universal release 빌드 성공. 사용자 승인으로 배포 인증서 두 개와 명시적 앱 프로파일 발급/키체인 등록. 개인키는 저장소 외부에만 보관한다.
+- Mac `dist-packages/mac-app-store/0.2.9-3ba726f-final/motungi-radio-0.2.9-mac-app-store.pkg`: 7,166,212 bytes, SHA256 `138776974b5386d7e332b1aeefee0f2c321bb5a90b76b85058d72a6829a03620`. 전체 추출한 내부 앱의 0.2.9, `io.github.devsejong.motungiradio`, arm64+x86_64, app-sandbox+network.client, team/app 식별자, codesign deep/strict 및 Installer 인증서 체인 확인.
+- 한글 이름 .app으로 만든 빈 Payload pkg는 업로드하지 않았다. ASCII 설치 폴더 `Motungi Radio.app`로 패키징하되 앱 표시명은 한국어 유지. 추출 바이너리와 서명 원본 일치 검사 뒤에만 체크섬을 생성한다.
+- 두 스토어 심사·공개 전. Mac 업로드 도구 설치/인증·App Privacy·연령등급·콘텐츠 권리 자료·최종 샌드박스 실기기 확인이 남아 있다. 기존 GitHub 0.2.9 설치파일/업데이트 피드는 변경하지 않았다.

@@ -53,8 +53,12 @@ def main():
     fingerprints = [hashlib.sha1(cert).hexdigest().upper() for cert in profile['DeveloperCertificates']]
     if not any(fingerprint in line and args.application_identity in line for fingerprint in fingerprints for line in identities.splitlines()):
         raise ValueError('Profile certificate must match the application signing identity with its private key')
-    with tempfile.TemporaryDirectory(prefix='motungi-mac-store-') as directory:
-        stage=Path(directory)/args.app.name
+    # Use an ASCII payload directory: productbuild can silently emit an empty
+    # payload for the Korean filename. CFBundleDisplayName remains Korean.
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.motungi-mac-store-', dir=args.output.parent) as directory:
+        Path(directory).chmod(0o755)
+        stage=Path(directory)/'Motungi Radio.app'
         shutil.copytree(args.app,stage,symlinks=True)
         shutil.copyfile(args.profile,stage/'Contents/embedded.provisionprofile')
         entitlements=Path(directory)/'Entitlements.plist'
@@ -70,6 +74,16 @@ def main():
         pkg=args.output/f"motungi-radio-{config['version']}-mac-app-store.pkg"
         run('xcrun','productbuild','--sign',args.installer_identity,'--component',str(stage),'/Applications',str(pkg))
         run('pkgutil','--check-signature',str(pkg))
+        expanded=Path(directory)/'expanded'
+        run('pkgutil','--expand-full',str(pkg),str(expanded))
+        packed_apps=list(expanded.rglob('*.app'))
+        if len(packed_apps) != 1:
+            raise ValueError('Package must contain exactly one application payload')
+        packed_app=packed_apps[0]
+        packed_exe=packed_app/'Contents/MacOS'/info['CFBundleExecutable']
+        if not packed_exe.is_file() or packed_exe.read_bytes() != (stage/'Contents/MacOS'/info['CFBundleExecutable']).read_bytes():
+            raise ValueError('Package executable payload is missing or differs from signed app')
+        run('codesign','--verify','--deep','--strict',str(packed_app))
         (args.output/'SHA256SUMS.txt').write_text(hashlib.sha256(pkg.read_bytes()).hexdigest()+'  '+pkg.name+'\n')
         print('Signed Mac App Store pkg created:', pkg)
 

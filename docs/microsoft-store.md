@@ -23,6 +23,6 @@ Windows 10 build 19041 이상 / Windows 11 x64, Evergreen WebView2 Runtime이 �
 
 `.github/workflows/microsoft-store.yml`을 수동 실행한다. 직접 배포와 Mac 스토어 프런트도 함께 빌드해 updater 명령 분리를 검사하고, Windows 네이티브 단위검증·빌드·아키텍처·MakeAppx·내용 검사를 수행한다. 실제 MSIX 설치/트레이·자동 실행·설정 유지·로그인·절전·청취 검증은 빌드 성공과 구분한다.
 
-Partner Center에 무료 배포·음악 카테고리·개인정보처리방침·지원 링크, 한국어 소개 초안을 저장했다. Windows 캡처와 MSIX, 실시간 방송 콘텐츠 연령 설문 확정이 필요하다. 최종 심사 제출은 이 검증과 방송/이미지 사용 근거를 정리한 뒤 수행한다.
+Partner Center에 무료 배포·음악 카테고리·개인정보처리방침·지원 링크, 한국어 소개 초안을 저장했다. MSIX 서버 검증과 실제 설치 앱 MBC FM4U 화면 업로드를 완료했다. 사용자 확인에 따라 콘텐츠 네 항목을 없음으로 응답하고 IARC 약관·성인 확인 승인을 받아 3+/전체 이용가를 저장했다. 여섯 등록 항목 모두 Complete이며 수동 공개 보류를 선택했다. 최종 심사 제출은 이 검증과 방송/이미지 사용 근거를 정리한 뒤 수행한다.
 
 공식 근거: [Tauri MSIX 가이드](https://learn.microsoft.com/en-us/windows/apps/dev-tools/winapp-cli/guides/tauri), [시작 작업](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/desktop-to-uwp-extensions), [직접 MSIX 패키징](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-manual-conversion).
