@@ -5,9 +5,9 @@ Set-Location $root
 $inputDir = Join-Path $root 'dist-packages/microsoft-store/input'
 $proof = Join-Path $root 'dist-packages/microsoft-store/proof'
 New-Item -ItemType Directory -Path $proof -Force | Out-Null
-$msix = Get-ChildItem "$inputDir/*.msix" | Select-Object -First 1
+$msix = Get-ChildItem $inputDir -Filter *.msix -Recurse | Select-Object -First 1
 if (-not $msix) { throw 'No MSIX artifact' }
-$expected = ((Get-Content "$inputDir/SHA256SUMS.txt").Trim() -split '\s+')[0]
+$expected = ((Get-Content (Join-Path $msix.DirectoryName 'SHA256SUMS.txt')).Trim() -split '\s+')[0]
 if ((Get-FileHash $msix.FullName -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Artifact SHA256 mismatch' }
 $cert = New-SelfSignedCertificate -Type Custom -Subject 'CN=5FE78193-5A43-4768-8FA9-0207BF80006C' -KeyUsage DigitalSignature -FriendlyName 'Motungi ephemeral CI test only' -CertStoreLocation Cert:\CurrentUser\My -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3','2.5.29.19={text}')
 $copy = Join-Path $env:RUNNER_TEMP 'motungi-ci-test.msix'
