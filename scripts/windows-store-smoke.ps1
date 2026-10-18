@@ -28,6 +28,9 @@ try {
 using System;
 using System.Runtime.InteropServices;
 public class MotungiCapture {
+ [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
+ [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
+ [DllImport("user32.dll")] public static extern void mouse_event(uint flags,uint x,uint y,uint data,UIntPtr extra);
  public delegate bool EnumProc(IntPtr hwnd,IntPtr data);
  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc callback,IntPtr data);
  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
@@ -49,12 +52,21 @@ public class MotungiCapture {
  Start-Sleep -Seconds 3
  $rect = New-Object MotungiCapture+RECT
  [MotungiCapture]::GetWindowRect($window,[ref]$rect) | Out-Null
+ # Complete the first-run screen with statistics left unchecked. Coordinates are
+ # relative to the actual CI app window captured in the preceding smoke run.
+ [MotungiCapture]::SetForegroundWindow($window) | Out-Null
+ [MotungiCapture]::SetCursorPos([int](($rect.Left+$rect.Right)/2),$rect.Bottom-40) | Out-Null
+ [MotungiCapture]::mouse_event(2,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Milliseconds 120
+ [MotungiCapture]::mouse_event(4,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Seconds 5
+ [MotungiCapture]::GetWindowRect($window,[ref]$rect) | Out-Null
  $image = New-Object Drawing.Bitmap(($rect.Right-$rect.Left),($rect.Bottom-$rect.Top))
  $graphics = [Drawing.Graphics]::FromImage($image)
  $hdc=$graphics.GetHdc()
  try { if (-not [MotungiCapture]::PrintWindow($window,$hdc,2)) { throw 'Window capture failed' } }
  finally { $graphics.ReleaseHdc($hdc); $graphics.Dispose() }
- try { $image.Save("$proof/windows-onboarding.png",[Drawing.Imaging.ImageFormat]::Png) } finally { $image.Dispose() }
+ try { $image.Save("$proof/windows-player.png",[Drawing.Imaging.ImageFormat]::Png) } finally { $image.Dispose() }
  @("Source workflow run: $env:SOURCE_RUN", "Installed identity: $($pkg.PackageFullName)", "MSIX SHA256: $expected", 'Installed and launched. Audio, login, sleep and upgrade not verified.') | Set-Content "$proof/verification.txt" -Encoding utf8
 } finally {
  Get-Process -Name motungi-radio -ErrorAction SilentlyContinue | Stop-Process -Force
