@@ -1,5 +1,14 @@
 # 검증 기록과 직접 사용 시험
 
+## 스토어 심사 제출 — 2026-10-18 21:50 KST
+
+- Windows 제품 `9P5RR68464SX`, 제출 `1152921505702161989`: **In certification**, 공개 전. 실제 MBC FM4U 플레이어 스크린샷 등록.
+- Mac 앱 `6824204878`, 0.2.9: **심사 대기 중**, 제출 `4d5bb705-2b91-4e9c-99cb-ccb66e557709`. 실제 설치 앱의 EBS FM 재생 화면을 1280×800 배경에 배치하여 등록했다. 동의 화면은 사용하지 않았다.
+- Mac 빌드 `217c8910-97d4-4abe-a4e3-83378e022a8a`: VALID / APP_STORE_ELIGIBLE. 제품 소스 `3ba726f`, Universal arm64·x86_64. 개인정보 레이블 게시, 무료 가격·175개 지역·수동 출시 저장. 글로벌 13+, 한국 12+.
+- 콘텐츠 권한은 운영자의 “외부 사용 가능, 권한 문제 없음” 확인을 근거로 입력했다. 개별 방송사 허가서를 독립 수집한 것은 아니다. EU DSA·중국 콘텐츠 규제 관련 추가 증빙 요구 여부는 심사 및 공개 단계에서 확인한다.
+- 매일 한국 시간 오전 10시 `automation-2`가 두 스토어 심사 상태를 확인하고 승인 시 공개한다. 변경 없는 대기는 반복 알림하지 않는다. 아직 스토어 공개·스토어 설치 검증은 완료하지 않았다.
+
+
 ## 0.2.7 배포 검증 — 2026-10-12
 
 [0.2.7 공개 릴리스](https://github.com/devsejong/motungi-radio/releases/tag/v0.2.7)의 설치파일 5개와 SHA256SUMS.txt를 인증 없이 내려받아 원본 해시 일치를 확인했다. 공개 Mac DMG 두 파일의 공증 확인표도 유효하다. 홈페이지 소스 `8e38d46`, [Pages 38246147565](https://github.com/devsejong/motungi-radio/actions/runs/38246147565) 성공. 공개 링크·스크린샷 6장 로드·CBS 기능 화면을 확인했다.
@@ -328,4 +337,11 @@ Windows 파일은 `release-artifacts/0.1.0-91ffeb4/windows-x64/`에 보관했다
 - Mac 제품 소스 `3ba726f`, 프런트 61개·Rust app-store 55개(실시간 5개 제외) 통과, Universal release 빌드 성공. 사용자 승인으로 배포 인증서 두 개와 명시적 앱 프로파일 발급/키체인 등록. 개인키는 저장소 외부에만 보관한다.
 - Mac `dist-packages/mac-app-store/0.2.9-3ba726f-final/motungi-radio-0.2.9-mac-app-store.pkg`: 7,166,212 bytes, SHA256 `138776974b5386d7e332b1aeefee0f2c321bb5a90b76b85058d72a6829a03620`. 전체 추출한 내부 앱의 0.2.9, `io.github.devsejong.motungiradio`, arm64+x86_64, app-sandbox+network.client, team/app 식별자, codesign deep/strict 및 Installer 인증서 체인 확인.
 - 한글 이름 .app으로 만든 빈 Payload pkg는 업로드하지 않았다. ASCII 설치 폴더 `Motungi Radio.app`로 패키징하되 앱 표시명은 한국어 유지. 추출 바이너리와 서명 원본 일치 검사 뒤에만 체크섬을 생성한다.
-- 두 스토어 심사·공개 전. Mac 업로드 도구 설치/인증·App Privacy·연령등급·콘텐츠 권리 자료·최종 샌드박스 실기기 확인이 남아 있다. 기존 GitHub 0.2.9 설치파일/업데이트 피드는 변경하지 않았다.
+- 두 스토어 심사·공개 전. Mac App Privacy·연령등급·콘텐츠 권리 자료·최종 샌드박스 실기기 확인이 남아 있다. 기존 GitHub 0.2.9 설치파일/업데이트 피드는 변경하지 않았다.
+
+### Mac Store 최종 업로드 파일
+
+`dist-packages/mac-app-store/0.2.9-3ba726f-clean-profile/motungi-radio-0.2.9-mac-app-store.pkg`
+SHA256 `11360a295f146811c181ec04a95bb703b210540f9e43d51f58ab71d1f01e0760`.
+첫 업로드는 embedded.provisionprofile의 quarantine 속성으로 Apple 91109 오류가 발생했다. staging 복사본의 속성만 제거한 후 서명·전체 pkg 추출·원본 실행파일 일치·deep strict signature·속성 부재를 확인하고 재업로드했다. Transporter 성공, Apple 업로드 COMPLETE, errors/warnings 없음, 빌드 VALID를 확인했다. 사용자 키·프로파일 원본을 변경하거나 비밀 정보를 저장소에 추가하지 않았다.
+패키징 프로파일 테스트, 아키텍처 6개 테스트 및 패키지 메타데이터 검사 통과. App Store 설치·샌드박스 청취·로그인·절전 검증과 직접 배포 앱의 실제 화면 캡처를 구분한다.

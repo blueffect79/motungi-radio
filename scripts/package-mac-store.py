@@ -61,6 +61,11 @@ def main():
         stage=Path(directory)/'Motungi Radio.app'
         shutil.copytree(args.app,stage,symlinks=True)
         shutil.copyfile(args.profile,stage/'Contents/embedded.provisionprofile')
+        # Browser-downloaded provisioning profiles carry this metadata. Apple
+        # rejects it in uploaded bundles. Remove it only from our staging copy.
+        for path in [stage, *stage.rglob('*')]:
+            if not path.is_symlink() and b'com.apple.quarantine' in run('xattr',str(path)).splitlines():
+                run('xattr','-d','com.apple.quarantine',str(path))
         entitlements=Path(directory)/'Entitlements.plist'
         entitlements.write_bytes(plistlib.dumps({
             'com.apple.security.app-sandbox':True,
@@ -80,6 +85,8 @@ def main():
         if len(packed_apps) != 1:
             raise ValueError('Package must contain exactly one application payload')
         packed_app=packed_apps[0]
+        if any(b'com.apple.quarantine' in run('xattr',str(path)).splitlines() for path in [packed_app, *packed_app.rglob('*')] if not path.is_symlink()):
+            raise ValueError('Package payload must not contain quarantine metadata')
         packed_exe=packed_app/'Contents/MacOS'/info['CFBundleExecutable']
         if not packed_exe.is_file() or packed_exe.read_bytes() != (stage/'Contents/MacOS'/info['CFBundleExecutable']).read_bytes():
             raise ValueError('Package executable payload is missing or differs from signed app')

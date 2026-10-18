@@ -13,3 +13,5 @@
 - Debian의 Package 필드는 영문·숫자로 시작해야 한다. Linux 내부 productName은 motungi-radio, 앱 목록의 Name은 모퉁이 라디오로 분리한다.
 
 - Mac Store productbuild가 한글 이름 .app에서 종료 코드 0·서명 성공인데도 빈 Payload를 만든 사례를 재현했다. ASCII staging 이름은 실제 앱을 포함했다. pkg 서명만 확인하지 않고 전체 추출 후 원본 바이너리 일치·서명을 재검사한다.
+
+- Apple 업로드 91109: 브라우저로 받은 embedded.provisionprofile에 quarantine 속성이 있으면 서명·pkg 검증이 통과해도 업로드가 거절된다. staging 복사본만 xattr로 제거한 뒤 서명하고, pkg 전체 추출 후 속성 부재와 서명을 재검사한다. 이 경로의 0.2.9가 Apple VALID를 받았다.

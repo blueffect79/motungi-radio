@@ -26,3 +26,11 @@ Windows 10 build 19041 이상 / Windows 11 x64, Evergreen WebView2 Runtime이 �
 Partner Center에 무료 배포·음악 카테고리·개인정보처리방침·지원 링크, 한국어 소개 초안을 저장했다. MSIX 서버 검증과 실제 설치 앱 MBC FM4U 화면 업로드를 완료했다. 사용자 확인에 따라 콘텐츠 네 항목을 없음으로 응답하고 IARC 약관·성인 확인 승인을 받아 3+/전체 이용가를 저장했다. 여섯 등록 항목 모두 Complete이며 수동 공개 보류를 선택했다. 최종 심사 제출은 이 검증과 방송/이미지 사용 근거를 정리한 뒤 수행한다.
 
 공식 근거: [Tauri MSIX 가이드](https://learn.microsoft.com/en-us/windows/apps/dev-tools/winapp-cli/guides/tauri), [시작 작업](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/desktop-to-uwp-extensions), [직접 MSIX 패키징](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-manual-conversion).
+
+## 스토어 심사 제출 — 2026-10-18 21:50 KST
+
+- Windows 제품 `9P5RR68464SX`, 제출 `1152921505702161989`: **In certification**, 공개 전. 실제 MBC FM4U 플레이어 스크린샷 등록.
+- Mac 앱 `6824204878`, 0.2.9: **심사 대기 중**, 제출 `4d5bb705-2b91-4e9c-99cb-ccb66e557709`. 실제 설치 앱의 EBS FM 재생 화면을 1280×800 배경에 배치하여 등록했다. 동의 화면은 사용하지 않았다.
+- Mac 빌드 `217c8910-97d4-4abe-a4e3-83378e022a8a`: VALID / APP_STORE_ELIGIBLE. 제품 소스 `3ba726f`, Universal arm64·x86_64. 개인정보 레이블 게시, 무료 가격·175개 지역·수동 출시 저장. 글로벌 13+, 한국 12+.
+- 콘텐츠 권한은 운영자의 “외부 사용 가능, 권한 문제 없음” 확인을 근거로 입력했다. 개별 방송사 허가서를 독립 수집한 것은 아니다. EU DSA·중국 콘텐츠 규제 관련 추가 증빙 요구 여부는 심사 및 공개 단계에서 확인한다.
+- 매일 한국 시간 오전 10시 `automation-2`가 두 스토어 심사 상태를 확인하고 승인 시 공개한다. 변경 없는 대기는 반복 알림하지 않는다. 아직 스토어 공개·스토어 설치 검증은 완료하지 않았다.
