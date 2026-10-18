@@ -1,6 +1,6 @@
 import { configDefaults, defineConfig } from "vitest/config";
 export default defineConfig(({ command, mode }) => ({
-  define: { __APP_STORE__: JSON.stringify(mode === "appstore") },
+  define: { __APP_STORE__: JSON.stringify(["appstore", "microsoft-store"].includes(mode)), __MICROSOFT_STORE__: JSON.stringify(mode === "microsoft-store") },
   resolve: {
     alias:
       command === "serve" && mode === "ui-preview"
@@ -22,5 +22,5 @@ export default defineConfig(({ command, mode }) => ({
   },
   clearScreen: false,
   server: { port: 1420, strictPort: true },
-  build: { outDir: mode === "appstore" ? "dist-appstore" : "dist", target: ["es2022", "safari16"] },
+  build: { outDir: mode === "microsoft-store" ? "dist-microsoft-store" : mode === "appstore" ? "dist-appstore" : "dist", target: ["es2022", "safari16"] },
 }));

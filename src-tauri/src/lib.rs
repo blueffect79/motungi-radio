@@ -1,5 +1,7 @@
 #[cfg(all(feature = "app-store", not(target_os = "macos")))]
 compile_error!("app-store distribution requires macOS");
+#[cfg(all(feature = "microsoft-store", not(target_os = "windows")))]
+compile_error!("microsoft-store distribution requires Windows");
 use tauri::Manager;
 
 pub mod desktop;
@@ -9,9 +11,9 @@ pub mod programs;
 pub mod radio;
 pub mod settings;
 pub mod tray;
-#[cfg(all(feature = "direct", feature = "app-store"))]
-compile_error!("Choose exactly one distribution: direct or app-store");
-#[cfg(not(any(feature = "direct", feature = "app-store")))]
+#[cfg(any(all(feature = "direct", feature = "app-store"), all(feature = "direct", feature = "microsoft-store"), all(feature = "app-store", feature = "microsoft-store")))]
+compile_error!("Choose exactly one distribution: direct, app-store or microsoft-store");
+#[cfg(not(any(feature = "direct", feature = "app-store", feature = "microsoft-store")))]
 compile_error!("Choose a distribution feature");
 #[cfg(feature = "direct")]
 mod updates;

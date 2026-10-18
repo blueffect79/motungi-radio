@@ -14,7 +14,9 @@
     "build:appstore": "tsc --noEmit && vite build --mode appstore",
     "desktop:direct": "node scripts/distribution-build.mjs direct",
     "desktop:appstore": "node scripts/distribution-build.mjs appstore",
-    "test:distribution": "node --test scripts/distribution-build.test.mjs"
+    "test:distribution": "node --test scripts/distribution-build.test.mjs",
+    "build:microsoft-store": "tsc --noEmit && vite build --mode microsoft-store",
+    "desktop:microsoft-store": "node scripts/distribution-build.mjs microsoft-store"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.12.1",

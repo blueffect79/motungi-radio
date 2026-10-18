@@ -1,5 +1,5 @@
 import { Analytics } from "./features/analytics/controller";
-import { isAppStore, distributionName } from "./shared/distribution";
+import { isAppStore, distributionName, supportsAutostart } from "./shared/distribution";
 import appMetadata from "../src-tauri/tauri.conf.json";
 import { UpdateController } from "./features/updates/controller";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -593,7 +593,7 @@ export async function mountApp(root: HTMLElement) {
       }
       const gear = button("", "설정", () => {
         panel = panel === "settings" ? "channels" : "settings";
-        if (panel === "settings" && !isAppStore) void autostart.refresh();
+        if (panel === "settings" && supportsAutostart) void autostart.refresh();
         render();
       });
       gear.className = "settings-button";
@@ -765,7 +765,7 @@ export async function mountApp(root: HTMLElement) {
         check = node("input");
       check.type = "checkbox";
       check.checked = autostart.enabled;
-      check.disabled = isAppStore;
+      check.disabled = !supportsAutostart;
       check.dataset.key = "autostart";
       check.onchange = () => {
         void autostart.set(check.checked);
@@ -774,7 +774,7 @@ export async function mountApp(root: HTMLElement) {
       section.append(
         appearance,
         label,
-        node("p", isAppStore ? "스토어판의 로그인 시 실행은 준비 중입니다." : "실행 시 자동 재생하지 않습니다.", "muted"),
+        node("p", !supportsAutostart ? "스토어판의 로그인 시 실행은 준비 중입니다." : "실행 시 자동 재생하지 않습니다.", "muted"),
       );
       const settingsError = node(
         "p",
@@ -797,7 +797,7 @@ export async function mountApp(root: HTMLElement) {
       restartNote.hidden = !updater.ready;
       updateSection.append(restartNote);
       section.append(updateSection);
-      } else { section.append(node("p", "업데이트는 App Store에서 제공됩니다.", "muted")); }
+      } else { section.append(node("p", `업데이트는 ${distributionName}에서 제공됩니다.`, "muted")); }
       const about = node("details", undefined, "about-app");
       about.append(node("summary", "모퉁이 라디오 정보"));
       about.append(node("h3", "모퉁이 라디오"), node("p", `버전 ${appMetadata.version} · ${distributionName}`, "muted"), node("p", "화면 한켠에서, 좋아하는 한국 라디오를 한곳에."));
@@ -1054,7 +1054,7 @@ export async function mountApp(root: HTMLElement) {
       else void player.play();
     } else if (payload === "open" || payload === "settings") {
       panel = payload === "settings" ? "settings" : "channels";
-      if (panel === "settings" && !isAppStore) void autostart.refresh();
+      if (panel === "settings" && supportsAutostart) void autostart.refresh();
       render();
     }
   })
@@ -1108,7 +1108,7 @@ export async function mountApp(root: HTMLElement) {
       void poller?.refresh();
       const id = panel === "schedule" ? scheduleId : player.state.stationId;
       if (id) void loadSchedule(id, true);
-      if (panel === "settings" && !isAppStore) void autostart.refresh();
+      if (panel === "settings" && supportsAutostart) void autostart.refresh();
     }
   };
   const timer = setInterval(() => {

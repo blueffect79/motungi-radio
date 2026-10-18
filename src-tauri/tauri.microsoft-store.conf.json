@@ -1,0 +1,14 @@
+{
+  "build": {
+    "beforeBuildCommand": "npm run build:microsoft-store",
+    "frontendDist": "../dist-microsoft-store"
+  },
+  "bundle": {
+    "active": false,
+    "createUpdaterArtifacts": false
+  },
+  "plugins": {
+    "updater": null
+  },
+  "identifier": "io.github.devsejong.motungiradio.microsoftstore"
+}

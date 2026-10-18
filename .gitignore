@@ -17,3 +17,6 @@ dist-appstore/
 *.provisionprofile
 
 src-tauri/target-appstore/
+
+dist-microsoft-store/
+src-tauri/target-microsoft-store/

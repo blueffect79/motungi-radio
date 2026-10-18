@@ -39,20 +39,20 @@ mod tests {
 use crate::radio::{ApiResult, AppError, ErrorCode};
 use serde::Serialize;
 use tauri::Manager;
-#[cfg(not(feature = "app-store"))]
+#[cfg(feature = "direct")]
 use tauri_plugin_autostart::ManagerExt;
 #[derive(Debug, Serialize)]
 pub struct AutostartState {
     pub enabled: bool,
 }
-#[cfg(any(test, not(feature = "app-store")))]
+#[cfg(any(test, feature = "direct"))]
 trait Registration {
     fn enabled(&self) -> Result<bool, ()>;
     fn set(&self, enabled: bool) -> Result<(), ()>;
 }
-#[cfg(not(feature = "app-store"))]
+#[cfg(feature = "direct")]
 struct OsRegistration<'a>(&'a tauri::AppHandle);
-#[cfg(not(feature = "app-store"))]
+#[cfg(feature = "direct")]
 impl Registration for OsRegistration<'_> {
     fn enabled(&self) -> Result<bool, ()> {
         self.0.autolaunch().is_enabled().map_err(|_| ())
@@ -74,13 +74,13 @@ fn error() -> AppError {
         true,
     )
 }
-#[cfg(any(test, not(feature = "app-store")))]
+#[cfg(any(test, feature = "direct"))]
 fn query(os: &impl Registration) -> Result<AutostartState, AppError> {
     Ok(AutostartState {
         enabled: os.enabled().map_err(|_| error())?,
     })
 }
-#[cfg(any(test, not(feature = "app-store")))]
+#[cfg(any(test, feature = "direct"))]
 fn change(os: &impl Registration, enabled: bool) -> Result<AutostartState, AppError> {
     os.set(enabled).map_err(|_| error())?;
     let actual = query(os)?;
@@ -90,23 +90,27 @@ fn change(os: &impl Registration, enabled: bool) -> Result<AutostartState, AppEr
     Ok(actual)
 }
 #[tauri::command]
-pub fn get_autostart(app: tauri::AppHandle) -> ApiResult<AutostartState> {
+pub async fn get_autostart(app: tauri::AppHandle) -> ApiResult<AutostartState> {
     #[cfg(feature = "app-store")]
     {
         let _ = app;
         return store_autostart::query().into();
     }
-    #[cfg(not(feature = "app-store"))]
+    #[cfg(feature = "microsoft-store")]
+    { let _ = app; return windows_store_autostart::query().await.into(); }
+    #[cfg(feature = "direct")]
     query(&OsRegistration(&app)).into()
 }
 #[tauri::command]
-pub fn set_autostart(app: tauri::AppHandle, enabled: bool) -> ApiResult<AutostartState> {
+pub async fn set_autostart(app: tauri::AppHandle, enabled: bool) -> ApiResult<AutostartState> {
     #[cfg(feature = "app-store")]
     {
         let _ = app;
         return store_autostart::set(enabled).into();
     }
-    #[cfg(not(feature = "app-store"))]
+    #[cfg(feature = "microsoft-store")]
+    { let _ = app; return windows_store_autostart::set(enabled).await.into(); }
+    #[cfg(feature = "direct")]
     change(&OsRegistration(&app), enabled).into()
 }
 pub fn is_autostart<I, S>(args: I) -> bool
@@ -127,7 +131,7 @@ pub fn plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry
             );
         }
     }));
-    #[cfg(not(feature = "app-store"))]
+    #[cfg(feature = "direct")]
     let builder = builder.plugin(tauri_plugin_autostart::init(
         tauri_plugin_autostart::MacosLauncher::LaunchAgent,
         Some(vec!["--autostart"]),
@@ -144,3 +148,6 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(all(feature = "app-store", target_os = "macos"))]
 mod store_autostart;
+
+#[cfg(all(feature = "microsoft-store", target_os = "windows"))]
+mod windows_store_autostart;
