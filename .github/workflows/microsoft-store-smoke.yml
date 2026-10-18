@@ -1,0 +1,41 @@
+name: Microsoft Store install smoke
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful MSIX workflow run ID
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download verified Store package
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.run_id }}
+        run: |
+          $run = gh api "repos/${{ github.repository }}/actions/runs/$env:SOURCE_RUN" | ConvertFrom-Json
+          if ($run.path -ne '.github/workflows/microsoft-store.yml' -or $run.conclusion -ne 'success' -or $run.head_branch -ne 'main') { throw 'Expected successful main MSIX build' }
+          gh run download $env:SOURCE_RUN --repo '${{ github.repository }}' --pattern 'motungi-radio-msix-*' --dir dist-packages/microsoft-store/input
+          if ($LASTEXITCODE -ne 0) { throw 'Artifact download failed' }
+      - name: Install and launch test-signed copy
+        shell: pwsh
+        env:
+          SOURCE_RUN: ${{ inputs.run_id }}
+        run: ./scripts/windows-store-smoke.ps1
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: motungi-radio-store-smoke-${{ inputs.run_id }}
+          path: dist-packages/microsoft-store/proof/
+          if-no-files-found: warn
+          retention-days: 14
