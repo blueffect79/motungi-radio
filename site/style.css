@@ -529,7 +529,7 @@ h1 em {
 .hero-visual {
   max-width: none;
   width: 100%;
-  margin-top: 38px;
+  margin-top: 24px;
 }
 .preview-note {
   margin-top: 12px;
@@ -555,7 +555,7 @@ h1 em {
     font-size: 14px;
   }
   .hero-visual {
-    margin-top: 34px;
+    margin-top: 24px;
   }
   .preview-note {
     font-size: 10px;
@@ -637,19 +637,10 @@ h1 em {
   opacity: 0.75;
 }
 .platform-note {
-  margin: 16px 0 0;
+  margin: 8px 0 0;
   color: var(--muted);
   font-size: 12px;
   word-break: keep-all;
-}
-.download-status {
-  margin: 5px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-.download-status a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .footer {
   max-width: 1096px;
@@ -1079,3 +1070,7 @@ h1 em {
   .app-screenshot { width: min(300px, 100%); }
   .pinned-screenshot { width: min(340px, 100%); }
 }
+
+.download-section { margin: 48px auto 0; text-align: center; scroll-margin-top: 28px; }
+.download-section h2 { margin: 0; font-size: 26px; letter-spacing: -0.05em; }
+@media (max-width: 700px) { .download-section { margin-top: 32px; } .download-section h2 { font-size: 23px; } }

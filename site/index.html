@@ -150,77 +150,7 @@
             좋아하는 한국 라디오를 한곳에서, 무료로.<br />작은 플레이어로, 하던
             일을 이어가며 들어보세요.
           </p>
-          <div
-            class="downloads"
-            id="downloads"
-            role="group"
-            aria-label="앱 다운로드"
-          >
-            <a
-              class="download-button"
-              href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.8/motungi-radio-0.2.8-macos-arm64.dmg"
-              aria-describedby="download-status"
-              aria-label="Mac Apple Silicon 설치파일 다운로드" data-download-platform="macos" data-download-architecture="arm64"
-            >
-              <svg class="platform-icon" aria-hidden="true">
-                <use href="#apple" />
-              </svg>
-              <span
-                ><strong>Mac용 다운로드</strong
-                ><small>Apple Silicon · M 시리즈</small></span
-              >
-              <svg class="download-icon" aria-hidden="true">
-                <use href="#download" />
-              </svg>
-            </a>
-            <a
-              class="download-button"
-              href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.8/motungi-radio-0.2.8-windows-x64.exe"
-              aria-describedby="download-status"
-              aria-label="Windows 설치파일 다운로드" data-download-platform="windows" data-download-architecture="x64"
-            >
-              <svg class="platform-icon" aria-hidden="true">
-                <use href="#windows" />
-              </svg>
-              <span
-                ><strong>Windows용 다운로드</strong
-                ><small>Intel · AMD x64</small></span
-              >
-              <svg class="download-icon" aria-hidden="true">
-                <use href="#download" />
-              </svg>
-            </a>
-          </div>
-          <p class="secondary-download">
-            <span>Intel Mac을 사용하시나요?</span>
-            <a
-              href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.8/motungi-radio-0.2.8-macos-x64.dmg"
-              aria-label="Mac Intel 설치파일 다운로드" data-download-platform="macos" data-download-architecture="x64"
-              aria-describedby="download-status"
-              >Intel Mac용 다운로드
-              <svg aria-hidden="true"><use href="#download" /></svg
-            ></a>
-          </p>
-          <p class="secondary-download">
-            <span>Linux x64</span>
-            <a
-              href="https://github.com/devsejong/motungi-radio/releases/tag/v0.2.8"
-              data-download-platform="linux" data-download-architecture="x64"
-              >시험판 다운로드
-              <svg aria-hidden="true"><use href="#download" /></svg
-            ></a>
-          </p>
-          <p class="platform-note">
-            0.2.8 · 모바일(iOS·Android)은 지원하지 않습니다.
-          </p>
-          <p class="platform-note">0.2.7 이하는 한 번 수동 설치해 주세요. 다음 버전부터 앱에서 업데이트할 수 있습니다.</p>
-          <p class="download-status" id="download-status">
-            Mac 서명·공증 완료 · Windows 미서명
-            <a
-              href="https://github.com/devsejong/motungi-radio/releases/tag/v0.2.8"
-              >설치 안내</a
-            >
-          </p>
+
         </div>
         <section
           class="hero-visual feature-carousel"
@@ -336,6 +266,58 @@
           <p class="preview-note">
             좌우로 넘겨보세요 · 프로그램 이름과 시간은 화면 예시입니다.
           </p>
+        </section>
+        <section class="download-section" id="downloads" aria-labelledby="download-title">
+          <h2 id="download-title">지금 들어보세요</h2>
+          <div
+            class="downloads"
+            role="group"
+            aria-label="앱 다운로드"
+          >
+            <a
+              class="download-button"
+              href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.9/motungi-radio-0.2.9-macos-arm64.dmg"
+              aria-describedby="mac-download-info"
+              aria-label="Mac Apple Silicon 설치파일 다운로드" data-download-platform="macos" data-download-architecture="arm64"
+            >
+              <svg class="platform-icon" aria-hidden="true">
+                <use href="#apple" />
+              </svg>
+              <span
+                ><strong>Mac용 다운로드</strong
+                ><small id="mac-download-info">M 시리즈 · 서명·공증 완료</small></span
+              >
+              <svg class="download-icon" aria-hidden="true">
+                <use href="#download" />
+              </svg>
+            </a>
+            <a
+              class="download-button"
+              href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.9/motungi-radio-0.2.9-windows-x64.exe"
+              aria-describedby="windows-download-info"
+              aria-label="Windows 설치파일 다운로드" data-download-platform="windows" data-download-architecture="x64"
+            >
+              <svg class="platform-icon" aria-hidden="true">
+                <use href="#windows" />
+              </svg>
+              <span
+                ><strong>Windows용 다운로드</strong
+                ><small id="windows-download-info">Intel · AMD x64 · 미서명</small></span
+              >
+              <svg class="download-icon" aria-hidden="true">
+                <use href="#download" />
+              </svg>
+            </a>
+          </div>
+          <nav class="secondary-download" aria-label="다른 다운로드와 설치 안내">
+            <a href="https://github.com/devsejong/motungi-radio/releases/download/v0.2.9/motungi-radio-0.2.9-macos-x64.dmg"
+              aria-label="Mac Intel 설치파일 다운로드" aria-describedby="mac-download-info"
+              data-download-platform="macos" data-download-architecture="x64">Intel Mac <svg aria-hidden="true"><use href="#download" /></svg></a>
+            <a href="https://github.com/devsejong/motungi-radio/releases/tag/v0.2.9"
+              data-download-platform="linux" data-download-architecture="x64">Linux 시험판 <svg aria-hidden="true"><use href="#download" /></svg></a>
+            <a href="https://github.com/devsejong/motungi-radio/releases/tag/v0.2.9">설치·업데이트 안내 ↗</a>
+          </nav>
+          <p class="platform-note">v0.2.9 · PC 전용 · 모바일 미지원</p>
         </section>
       </section>
     </main>
