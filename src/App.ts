@@ -801,7 +801,7 @@ export async function mountApp(root: HTMLElement) {
       const about = node("details", undefined, "about-app");
       about.append(node("summary", "모퉁이 라디오 정보"));
       about.append(node("h3", "모퉁이 라디오"), node("p", `버전 ${appMetadata.version} · ${distributionName}`, "muted"), node("p", "화면 한켠에서, 좋아하는 한국 라디오를 한곳에."));
-      for (const [page, label] of [["website", "홈페이지 ↗"], ["github", "GitHub ↗"], ["license", "오픈소스 라이선스 ↗"]]) {
+      for (const [page, label] of [["website", "홈페이지 ↗"], ["privacy", "개인정보처리방침 ↗"], ["github", "GitHub ↗"], ["license", "오픈소스 라이선스 ↗"]]) {
         about.append(button(label, label, () => {
           void invoke("open_about_page", { page }).catch(() => { actionError = "페이지를 열 수 없습니다."; render(); });
         }));

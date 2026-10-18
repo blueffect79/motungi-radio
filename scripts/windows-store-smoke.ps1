@@ -61,6 +61,18 @@ public class MotungiCapture {
  [MotungiCapture]::mouse_event(4,0,0,0,[UIntPtr]::Zero)
  Start-Sleep -Seconds 5
  [MotungiCapture]::GetWindowRect($window,[ref]$rect) | Out-Null
+ # Choose the visible second channel (MBC FM4U), then stop its explicit play
+ # request before taking the screenshot. No startup/consent event plays audio.
+ [MotungiCapture]::SetCursorPos($rect.Left+180,$rect.Top+404) | Out-Null
+ [MotungiCapture]::mouse_event(2,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Milliseconds 100
+ [MotungiCapture]::mouse_event(4,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Milliseconds 250
+ [MotungiCapture]::SetCursorPos($rect.Left+339,$rect.Top+190) | Out-Null
+ [MotungiCapture]::mouse_event(2,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Milliseconds 100
+ [MotungiCapture]::mouse_event(4,0,0,0,[UIntPtr]::Zero)
+ Start-Sleep -Seconds 4
  $image = New-Object Drawing.Bitmap(($rect.Right-$rect.Left),($rect.Bottom-$rect.Top))
  $graphics = [Drawing.Graphics]::FromImage($image)
  $hdc=$graphics.GetHdc()

@@ -23,6 +23,7 @@ fn open_about_page(page: String) -> Result<(), String> {
         "website" => "https://devsejong.github.io/motungi-radio/",
         "github" => "https://github.com/devsejong/motungi-radio",
         "license" => "https://github.com/devsejong/motungi-radio/blob/main/LICENSE",
+        "privacy" => "https://devsejong.github.io/motungi-radio/privacy.html",
         _ => return Err("등록되지 않은 페이지입니다.".into()),
     };
     #[cfg(target_os = "macos")]
