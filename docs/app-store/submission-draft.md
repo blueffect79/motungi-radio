@@ -9,7 +9,7 @@
 - 가격: 무료
 - 플랫폼: macOS 13 이상 (실제 스토어 빌드 대상 CPU별 검증 필요)
 - 지원 URL: https://devsejong.github.io/motungi-radio/
-- 개인정보처리방침 URL: 미게시 — 아래 초안을 실제 수집 설정과 대조한 후 게시해야 한다.
+- 개인정보처리방침 URL: https://devsejong.github.io/motungi-radio/privacy.html
 - 키워드 후보: 라디오,한국,메뉴바,음악,실시간,편성표
 - 연령 등급/수출 규정/배포 국가: App Store Connect 질문에 실제 기능과 권리 범위로 답한다. 자동 추정해 제출하지 않는다.
 
@@ -31,7 +31,7 @@ No account or login is required. The app does not record or save radio audio. Sc
 
 Content authorization evidence: NOT YET COMPLETE. Attach broadcaster-specific terms/permission evidence before submission. Do not submit this draft as an assertion that permissions have been granted.
 
-Optional usage analytics: describe the final PostHog configuration only after the project and privacy disclosures are finalized. A US PostHog project is configured in the current source; collection is opt-in and disabled by default. Retention and final disclosures remain pending.
+Optional usage analytics: describe the final PostHog configuration only after the project and privacy disclosures are finalized. A US PostHog project is configured in the current source; collection is opt-in and disabled by default. The published privacy policy describes the configured data flow and a 90-day retention policy; automated deletion settings still require operational verification.
 
 ## 실제 스크린샷 준비
 
@@ -51,8 +51,8 @@ Optional usage analytics: describe the final PostHog configuration only after th
 - 방송 스트리밍·편성표·이미지 이용 권한 자료 미완성
 - 샌드박스 실제 설치·청취·재로그인·절전 복귀 미검증
 - 로그인 자동 실행 어댑터는 구현 중이며 UI 활성화 전 실제 등록/해제 검증 필요
-- PostHog US 프로젝트 연결 완료, 보관 기간·최종 고지 미확정
-- 개인정보처리방침 게시, App Privacy 답변, 지원 연락처 최종 확인 필요
+- PostHog US 프로젝트 연결 완료, 보관 운영 정책 90일·고지 게시 완료, 자동 삭제 설정 미확인
+- 개인정보처리방침 게시 완료, 문의 devsejong@gmail.com. App Privacy 답변 및 통계 보관/삭제 설정 확인 필요
 - 직접 배포판 설정 이전 UI 미구현, 자동 이전 없음
 
 확인 근거: https://tauri.app/distribute/app-store/ · https://developer.apple.com/app-store/review/guidelines/ · https://developer.apple.com/app-store/app-privacy-details/

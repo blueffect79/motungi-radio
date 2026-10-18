@@ -12,8 +12,10 @@
     ],
     "createUpdaterArtifacts": false,
     "macOS": {
-      "entitlements": "Entitlements.appstore.plist"
-    }
+      "entitlements": "Entitlements.appstore.plist",
+      "infoPlist": "Info.appstore.plist"
+    },
+    "category": "Music"
   },
   "plugins": {
     "updater": null
