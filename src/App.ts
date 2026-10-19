@@ -97,6 +97,7 @@ export async function mountApp(root: HTMLElement) {
     disposed = false;
   let panel: "channels" | "settings" | "schedule" = "channels",
     scheduleId: string | null = null;
+  let miniPlayer = false;
   let channelsVisible = true,
     filter: "all" | "favorites" = "all",
     catalogError = "",
@@ -134,7 +135,7 @@ export async function mountApp(root: HTMLElement) {
     airtime = node("span", undefined, "program-time"),
     error = node("p", undefined, "error");
   const titleFlow = flowingTitle(title);
-  stationName.append(stationLabel, document.createTextNode(" · "), airtime);
+  stationName.append(stationLabel, node("span", " · ", "program-separator"), airtime);
   const control = button(
     "재생",
     "방송 재생",
@@ -370,9 +371,11 @@ export async function mountApp(root: HTMLElement) {
   let poller: ProgramPoller | undefined,
     resized = "",
     sizeQueue = Promise.resolve();
+  const miniControls = node("div", undefined, "mini-controls");
   function resize() {
-    const compact = !channelsVisible && panel === "channels";
-    const height = compact
+    const isMini = miniPlayer && panel === "channels";
+    const compact = isMini || (!channelsVisible && panel === "channels");
+    const height = isMini ? Math.max(98, header.offsetHeight + hero.offsetHeight + 20) : compact
       ? Math.max(
           200,
           header.offsetHeight
@@ -380,12 +383,12 @@ export async function mountApp(root: HTMLElement) {
             : 240,
         )
       : 640;
-    const sizeKey = `${compact}:${height}`;
+    const sizeKey = `${isMini}:${compact}:${height}`;
     if (sizeKey === resized) return;
     resized = sizeKey;
     sizeQueue = sizeQueue.then(async () => {
       try {
-        await invoke("set_player_size", { mini: compact, height });
+        await invoke("set_player_size", { mini: compact, height, miniPlayer: isMini });
       } catch {
         actionError = "창 크기를 변경하지 못했습니다.";
         if (!disposed) render();
@@ -486,6 +489,17 @@ export async function mountApp(root: HTMLElement) {
     document.documentElement.dataset.theme =
       settings.settings.appearance ?? "system";
     const compact = !channelsVisible && panel === "channels";
+    const isMini = miniPlayer && panel === "channels";
+    shell.classList.toggle("mini-player", isMini);
+    if (isMini && control.parentElement !== miniControls) {
+      miniControls.append(previousChannel, control, nextChannel);
+      heroTop.append(miniControls);
+    } else if (!isMini && control.parentElement === miniControls) {
+      dialLabels.prepend(previousChannel);
+      dialLabels.append(nextChannel);
+      heroBottom.append(control);
+      miniControls.remove();
+    }
     shell.classList.toggle("channels-collapsed", compact);
     channelToggle.hidden = panel !== "channels";
     channelToggleLabel.textContent = channelsVisible
@@ -493,8 +507,8 @@ export async function mountApp(root: HTMLElement) {
       : "채널 보기";
     channelToggle.setAttribute("aria-expanded", String(channelsVisible));
     shell.classList.toggle("panel-open", panel !== "channels");
-    if (headerState !== `${panel}:${pinned}:${pinBusy}:${scheduleId}`) {
-      headerState = `${panel}:${pinned}:${pinBusy}:${scheduleId}`;
+    if (headerState !== `${panel}:${pinned}:${pinBusy}:${scheduleId}:${isMini}`) {
+      headerState = `${panel}:${pinned}:${pinBusy}:${scheduleId}:${isMini}`;
       const heading = node(
         "h1",
         panel === "settings"
@@ -523,6 +537,16 @@ export async function mountApp(root: HTMLElement) {
       header.classList.toggle("draggable", pinned);
       if (panel !== "channels")
         header.append(button("← 돌아가기", "돌아가기", showChannels));
+      if (panel === "channels") {
+        const mode = button("", isMini ? "일반 화면으로" : "미니모드로 전환", () => {
+          miniPlayer = !miniPlayer;
+          render();
+        }, "player-mode");
+        mode.className = "mode-button";
+        mode.title = isMini ? "일반 화면으로" : "미니모드로 전환";
+        mode.append(glyph(isMini ? "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" : "M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5"));
+        header.append(mode);
+      }
       header.append(
         (() => {
           const pin = button(
@@ -565,7 +589,7 @@ export async function mountApp(root: HTMLElement) {
           return pin;
         })(),
       );
-      if (pinned) {
+      if (pinned && !isMini) {
         const row = node("label", undefined, "transparency-control"),
           slider = node("input"),
           value = node("output", `${transparency}%`);
@@ -604,7 +628,7 @@ export async function mountApp(root: HTMLElement) {
           "M9.5 3h5l.7 2.5 2 .9 2.4-.6 2.5 4.3-1.7 1.8v2.2l1.7 1.8-2.5 4.3-2.4-.6-2 .9-.7 2.5h-5l-.7-2.5-2-.9-2.4.6L1.9 16l1.7-1.8V12.1l-1.7-1.8 2.5-4.3 2.4.6 2-.9z M15.5 12.5a3.5 3.5 0 1 0-7 0a3.5 3.5 0 1 0 7 0",
         ),
       );
-      header.append(gear);
+      if (!isMini) header.append(gear);
     }
     const state = player.state,
       current = stations.find((s) => s.id === state.stationId),
@@ -659,7 +683,7 @@ export async function mountApp(root: HTMLElement) {
     control.setAttribute("aria-label", busy ? "방송 정지" : "방송 재생");
     control.disabled = !current;
     error.textContent = state.error ? `오디오: ${state.error.message}` : "";
-    if (compact)
+    if (compact || isMini)
       error.textContent = [
         error.textContent,
         settings.error?.message,

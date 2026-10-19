@@ -41,3 +41,7 @@ gh workflow run package.yml --ref codex/player-redesign -f platform=linux
 ```
 
 CI는 `.deb`를 설치하고 Xvfb·Openbox·Tauri WebDriver로 실제 IPC 채널 목록, 무음 시작, 미니·설정 화면을 확인합니다. 결과 PNG는 설치파일 artifact의 `proof/`에 저장합니다. 실제 소리 출력·트레이·로그인·절전 시험을 대신하지 않습니다.
+
+## 0.2.10 미니모드
+
+상단 축소 아이콘으로 320×98px 미니모드에 진입하고 확대 아이콘으로 복귀한다. 채널 목록 접기와 별개이며 같은 재생기를 유지한다. 미니모드에서도 이전·재생/정지·다음 버튼과 고정을 제공한다. 오류가 있으면 높이가 늘어난다. 앱을 새로 실행하면 일반 화면으로 시작한다. Linux는 모드 전환 시 창 폭 제한도 함께 변경한다.

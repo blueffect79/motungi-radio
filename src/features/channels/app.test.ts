@@ -523,3 +523,25 @@ it("failed onboarding save keeps the introduction and reports the error", async 
   expect(root.querySelector(".welcome .error")!.textContent).toBe("저장 실패");
   expect(saved.onboardingCompleted).toBe(false);
 });
+
+it("mini mode reuses controls and preserves playback and list state", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  click("방송 재생");
+  await tick();
+  const play = root.querySelector(".play-button");
+  const stops = mock.stop.mock.calls.length;
+  click("미니모드로 전환");
+  await tick();
+  expect(root.querySelector(".mini-player")).toBeTruthy();
+  expect(root.querySelector(".mini-controls .play-button")).toBe(play);
+  expect(root.querySelectorAll(".mini-controls button")).toHaveLength(3);
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", expect.objectContaining({miniPlayer:true,height:98}));
+  expect(mock.stop).toHaveBeenCalledTimes(stops);
+  click("일반 화면으로");
+  await tick();
+  expect(root.querySelector(".hero-bottom .play-button")).toBe(play);
+  expect(root.querySelector(".mini-player")).toBeNull();
+  expect(root.querySelector(".channel-visibility")?.getAttribute("aria-expanded")).toBe("true");
+  expect(mock.stop).toHaveBeenCalledTimes(stops);
+});

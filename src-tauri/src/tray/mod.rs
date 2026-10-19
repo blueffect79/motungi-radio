@@ -476,26 +476,49 @@ mod tests {
     }
 }
 
+fn player_dimensions(collapsed: bool, mini_player: bool, height: Option<u32>) -> (f64, f64) {
+    if mini_player { (320.0, height.unwrap_or(98).clamp(98, 360) as f64) }
+    else if collapsed { (380.0, height.unwrap_or(240).clamp(200, 360) as f64) }
+    else { (380.0, 640.0) }
+}
+
+#[test]
+fn layout_bounds_allow_mini_without_shrinking_settings() {
+    assert_eq!(player_dimensions(true, true, Some(0)), (320.0, 98.0));
+    assert_eq!(player_dimensions(true, true, Some(u32::MAX)), (320.0, 360.0));
+    assert_eq!(player_dimensions(true, false, Some(0)), (380.0, 200.0));
+    assert_eq!(player_dimensions(false, false, Some(98)), (380.0, 640.0));
+}
+
 /// Resize the existing webview, preserving the one audio controller.
 #[tauri::command]
 pub fn set_player_size(
     mini: bool,
     height: Option<u32>,
+    mini_player: Option<bool>,
     app: tauri::AppHandle,
 ) -> Result<(), String> {
     let window = app
         .get_webview_window("main")
         .ok_or("창을 찾을 수 없습니다.")?;
-    window
-        .set_size(tauri::LogicalSize::new(
-            380.0,
-            if mini {
-                height.unwrap_or(240).clamp(200, 360) as f64
-            } else {
-                640.0
-            },
-        ))
+    let (width, height) = player_dimensions(mini, mini_player.unwrap_or(false), height);
+    #[cfg(target_os = "linux")]
+    {
+        // GTK requires a resizable window; constrain its width to the selected layout.
+        window.set_min_size(Some(tauri::LogicalSize::new(320.0, 98.0)))
+            .map_err(|_| "창 최소 크기를 변경할 수 없습니다.")?;
+        window.set_max_size(Some(tauri::LogicalSize::new(380.0, 900.0)))
+            .map_err(|_| "창 최대 크기를 변경할 수 없습니다.")?;
+    }
+    window.set_size(tauri::LogicalSize::new(width, height))
         .map_err(|_| "창 크기를 변경할 수 없습니다.")?;
+    #[cfg(target_os = "linux")]
+    {
+        window.set_min_size(Some(tauri::LogicalSize::new(width, 98.0)))
+            .map_err(|_| "창 최소 크기를 변경할 수 없습니다.")?;
+        window.set_max_size(Some(tauri::LogicalSize::new(width, 900.0)))
+            .map_err(|_| "창 최대 크기를 변경할 수 없습니다.")?;
+    }
     if !app
         .state::<PlayerWindowState>()
         .pinned

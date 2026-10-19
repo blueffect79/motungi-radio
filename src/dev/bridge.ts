@@ -14,11 +14,12 @@ const catalog = longTitles
       })),
     }
   : snapshot.catalog;
-const programs = longTitles
+const sample = new URLSearchParams(location.search).has("sample");
+const programs = (longTitles || sample)
   ? snapshot.programs.map((p) => ({
       ...p,
       status: "available",
-      title: fixtureTitle,
+      title: longTitles ? fixtureTitle : p.title,
       startsAt: new Date(fixtureNow - 1800000).toISOString(),
       endsAt: new Date(fixtureNow + 1800000).toISOString(),
     }))
@@ -72,6 +73,7 @@ export async function invoke(command: string, args: any = {}): Promise<any> {
   if (command === "get_autostart" || command === "set_autostart")
     return { ok: true, data: { enabled: false } };
   if (command === "set_player_size") {
+    document.documentElement.style.setProperty("--preview-width", args.miniPlayer ? "320px" : "380px");
     document.documentElement.style.setProperty(
       "--preview-height",
       args.mini ? `${args.height ?? 240}px` : "640px",

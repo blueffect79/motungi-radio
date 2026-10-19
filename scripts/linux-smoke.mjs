@@ -109,6 +109,11 @@ try {
     `dist-packages/linux-x64/proof/${proofLabel}-player.png`,
     await screenshot(),
   );
+  await click("미니모드로 전환");
+  await wait(() => execute('return !!document.querySelector(".mini-player") && innerWidth === 320 && innerHeight >= 98 && innerHeight <= 360'));
+  writeFileSync(`dist-packages/linux-x64/proof/${proofLabel}-mini-player.png`, await screenshot());
+  await click("일반 화면으로");
+  await wait(() => execute('return !document.querySelector(".mini-player") && innerWidth === 380 && innerHeight === 640'));
   await click("채널 목록 표시 전환");
   await wait(() =>
     execute(

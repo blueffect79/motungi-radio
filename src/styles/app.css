@@ -919,3 +919,36 @@ header {
 .welcome-actions { flex-shrink: 0; padding-top: 12px; }
 .welcome-start:hover { background: var(--accent); color: var(--on); }
 .welcome-website:hover { background: var(--surface); color: var(--ink); }
+
+/* Compact outer frame shared by both player layouts. */
+header { padding: 8px; }
+.now-playing { margin-left: 8px; margin-right: 8px; }
+main { padding-left: 8px; padding-right: 8px; }
+.mode-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.mini-player.shell { height: auto; padding: 6px 8px 8px; }
+.mini-player header { height: 24px; padding: 0; margin-bottom: 6px; gap: 4px; }
+.mini-player header h1 { font-size: 11px; }
+.mini-player .brand-logo { width: 16px; height: 16px; }
+.mini-player header button { padding: 4px; height: 24px; }
+.mini-player .now-playing { margin: 0; padding: 0; border: 0; background: transparent; }
+.mini-player .hero-top { gap: 8px; }
+.mini-player .cover { width: 52px; height: 52px; border-radius: 8px; }
+.mini-player .cover-mark { font-size: 13px; }
+.mini-player .hero-copy { flex: 1; min-width: 0; }
+.mini-player .current-station { font-size: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-player .current-station > :first-child { font-size: 11px; font-weight: 650; color: var(--ink); }
+.mini-player .program-time, .mini-player .next-program, .mini-player .hero-bottom,
+.mini-player .channel-visibility, .mini-player main, .mini-player .update-notice { display: none; }
+.mini-player .current-title { font-size: 10px; font-weight: 400; color: var(--muted); letter-spacing: 0; margin: 3px 0 0; }
+.mini-player .current-title .title-track { display: block; width: 100%; animation: none; transform: none; }
+.mini-player .current-title .title-text { width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.mini-player .current-title .title-copy { display: none; }
+.mini-controls { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.mini-player .mini-controls button { box-sizing: border-box; display: grid; place-items: center; flex: 0 0 30px; width: 30px; min-width: 30px; height: 34px; min-height: 34px; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); box-shadow: none; color: var(--ink); opacity: 1; transform: none; }
+.mini-player .mini-controls button svg { display: block; width: 16px; height: 16px; }
+.mini-player .mini-controls .neighbor-name { display: none; }
+.mini-player .mini-controls .play-button { background: var(--accent); border-color: var(--accent); color: var(--on); }
+.mini-player .mini-controls button:hover { border-color: var(--accent); filter: none; transform: none; }
+.mini-player .mini-controls button:active { transform: none; box-shadow: none; }
+
+.mini-player .program-separator { display: none; }
