@@ -1,6 +1,6 @@
 # 개발과 시험본 생성
 
-UI 검증은 `cargo run --locked --manifest-path src-tauri/Cargo.toml --example preview_fixture > src/dev/metadata.json`으로 공식 정보 스냅샷을 갱신한 뒤 `npm run preview:ui`로 실행한다. http://127.0.0.1:1421/preview.html 에서 같은 App.ts를 사용한다. 오디오·네이티브 창·설정 저장은 개발 어댑터이므로 실제 OS 동작으로 판정하지 않는다. 라이트/다크는 380×640, 미니는 내용에 따라 높이가 조정되며 최신 짧은 제목 화면은 380×243으로 확인했다. 배포 빌드에는 검증 어댑터가 연결되지 않는다.
+UI 검증은 `cargo run --locked --manifest-path src-tauri/Cargo.toml --example preview_fixture > src/dev/metadata.json`으로 공식 정보 스냅샷을 갱신한 뒤 `npm run preview:ui`로 실행한다. http://127.0.0.1:1421/preview.html 에서 같은 App.ts를 사용한다. 오디오·네이티브 창·설정 저장은 개발 어댑터이므로 실제 OS 동작으로 판정하지 않는다. 일반 화면은 380×640, 미니모드는 320×98이며 오류가 있으면 높이가 늘어난다. 채널 목록만 접은 화면은 380px 폭을 유지한다. 배포 빌드에는 검증 어댑터가 연결되지 않는다.
 
 Node.js 22, npm, Rust stable을 먼저 설치한다. Mac은 Xcode Command Line Tools, Windows는 MSVC C++ 도구와 WebView2가 필요하다. 저장소 루트에서 다음 순서로 실행한다.
 

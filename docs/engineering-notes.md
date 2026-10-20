@@ -9,7 +9,7 @@
 
 - macOS에서 tray-icon 사각형은 물리 픽셀이지만 Tao monitor_from_point는 CoreGraphics의 논리 좌표로 조회한다. Retina의 오른쪽 아이콘은 화면 밖으로 잘못 판정될 수 있다. 트레이 물리 좌표를 available_monitors의 물리 경계와 비교한 뒤 같은 단위로 창을 배치한다.
 
-- Linux GTK에서는 `resizable=false`가 프로그램의 창 높이 변경도 막았다. Linux 창은 폭 380px을 고정하고 높이 변경을 허용한다. 미니 모드 전환 후 실제 WebKit 창 높이 200–360px을 검사한다.
+- Linux GTK에서는 `resizable=false`가 프로그램의 창 높이 변경도 막았다. Linux 창은 현재 모드의 폭(일반 380px, 미니 320px)을 고정하고 높이 변경을 허용한다. GTK의 최소·최대 크기 제약을 먼저 갱신하고 마지막에 실제 크기를 적용해야 미니→일반 복귀가 정상 동작한다. 실제 WebKit에서 미니 320×98px와 일반 380×640px 복귀를 검사한다.
 - Debian의 Package 필드는 영문·숫자로 시작해야 한다. Linux 내부 productName은 motungi-radio, 앱 목록의 Name은 모퉁이 라디오로 분리한다.
 
 - Mac Store productbuild가 한글 이름 .app에서 종료 코드 0·서명 성공인데도 빈 Payload를 만든 사례를 재현했다. ASCII staging 이름은 실제 앱을 포함했다. pkg 서명만 확인하지 않고 전체 추출 후 원본 바이너리 일치·서명을 재검사한다.

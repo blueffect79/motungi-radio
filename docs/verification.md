@@ -345,3 +345,18 @@ Windows 파일은 `release-artifacts/0.1.0-91ffeb4/windows-x64/`에 보관했다
 SHA256 `11360a295f146811c181ec04a95bb703b210540f9e43d51f58ab71d1f01e0760`.
 첫 업로드는 embedded.provisionprofile의 quarantine 속성으로 Apple 91109 오류가 발생했다. staging 복사본의 속성만 제거한 후 서명·전체 pkg 추출·원본 실행파일 일치·deep strict signature·속성 부재를 확인하고 재업로드했다. Transporter 성공, Apple 업로드 COMPLETE, errors/warnings 없음, 빌드 VALID를 확인했다. 사용자 키·프로파일 원본을 변경하거나 비밀 정보를 저장소에 추가하지 않았다.
 패키징 프로파일 테스트, 아키텍처 6개 테스트 및 패키지 메타데이터 검사 통과. App Store 설치·샌드박스 청취·로그인·절전 검증과 직접 배포 앱의 실제 화면 캡처를 구분한다.
+
+
+## 0.2.10 — 미니 플레이어
+
+- Mac·Windows 제품 소스: `b4f1dd5105acbdffe510dffd471aa52c5450291d`.
+- Linux 창 크기 적용 순서 수정 소스: `002fcfe55d017fbf187fe89bc03a35a94001bd8b`.
+- 프런트 62개, Rust 56개 통과(외부 연결 5개 제외), 패키지 아키텍처 6개 통과.
+- 실제 앱 컴포넌트를 사용하는 브라우저 프리뷰에서 일반·미니·라이트·다크·긴 제목을 확인했다. 미니 320×98px, 세 버튼 30×34px/곡률 6px/동일 y 좌표, 가로 넘침 없음. 이는 Mac 설치 앱의 창·청취 검증과 구분한다.
+- Mac Apple Silicon 공증 `87bcc0cb-5529-4c36-8798-3fa448cc3a44`, Intel 공증 `a516ad22-596b-4dbf-bf03-360c30698e4a`: Accepted. 두 DMG 확인표·서명 및 읽기 전용 마운트 내부 앱의 Developer ID, hardened runtime, 버전 0.2.10, CPU, 앱 ID, Gatekeeper 통과. 업데이트용 앱에도 공증 확인표 첨부 후 검증했다.
+- Windows CI `39343367900` 성공. x64 설치파일·실제 앱 아키텍처와 SHA256 확인. Authenticode 미서명.
+- 업데이트용 Mac tarball·Windows 설치파일·Linux AppImage 네 파일의 Ed25519 서명 및 변조 거절 확인. 개인 키는 저장소 밖에 보관한다.
+- Linux 최초 CI `39343371292`: 미니 진입 통과 후 일반 화면 복귀 크기 검사 실패. 제약 적용 순서를 수정한 CI `39346132159` 성공. Debian 설치 후 실제 WebKit/IPC에서 미니 320px·일반 380×640px 복귀, 채널 접기, 고정, 투명도, 트레이 설정·정지 이벤트를 통과했다.
+- Mac 앱 교체·실제 네이티브 UI, Windows 실기기 청취·로그인·절전과 OS별 자동 업데이트 설치는 이번 버전 미검증이다. 기존 스토어 심사 제출은 변경하지 않았다.
+
+- GitHub `v0.2.10` 공개 완료. 설치·업데이트 파일과 서명·SHA256SUMS.txt 12개를 인증 없이 다시 내려받아 로컬 해시와 전부 일치함을 확인했다. 홈페이지와 업데이트 피드 배포 결과는 아래에 기록한다.

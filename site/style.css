@@ -1101,3 +1101,5 @@ h1 em {
   .downloads { margin-top: 0; }
   .download-button { padding: 12px 18px; }
 }
+
+.mini-screenshot { width: min(320px, 100%); border-radius: 10px; }

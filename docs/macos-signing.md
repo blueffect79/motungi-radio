@@ -46,3 +46,5 @@ CI=true node scripts/build-signed-macos.mjs x86_64-apple-darwin
 - Mac 개발자 가입·서명은 Windows 설치파일 서명을 해결하지 않는다.
 
 참고: [Tauri Mac 서명·공증](https://tauri.app/distribute/sign/macos/)
+
+2026-10-20: 로컬 `motungi-radio` 키체인 프로필이 없어 0.2.10은 기존 App Store Connect API 키로 공증했다. 두 DMG와 복사한 업데이트용 앱 모두 확인표·Developer ID·Gatekeeper 검증을 통과했다. 인증 재등록 없이 기존 비공개 키 파일을 사용했으며 개인 키는 배포물에 포함하지 않았다.
