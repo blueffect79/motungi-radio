@@ -10,7 +10,7 @@ Mac·Windows·Linux AppImage 지원. Debian 설치는 홈페이지에서 새 패
 
 업데이트 번들 빌드에는 `TAURI_SIGNING_PRIVATE_KEY`를 키 파일 경로로 설정하고 `--config src-tauri/tauri.updater.conf.json`을 사용한다. 일반 빌드는 업데이트 번들을 생성하지 않는다. CI는 운영자가 동일 키를 GitHub Actions secret으로 등록한 뒤 해당 빌드 단계에만 전달해야 한다. 현재 CI에 개인키를 업로드하지 않았다.
 
-Mac은 Developer ID 서명과 공증이 끝난 .app을 사용한다. DMG 공증만으로 updater tarball의 최종 내용을 검증했다고 판단하지 않는다. 앱 자체에 공증 확인표를 첨부하고 검증한 뒤 .app.tar.gz를 만들고 최종 tarball을 `tauri signer sign`으로 서명한다. 이후 파일을 변경하지 않는다. Windows NSIS와 Linux AppImage에도 동일 업데이트 키로 서명한다.
+Mac은 Developer ID 서명과 공증이 끝난 .app을 사용한다. DMG 공증만으로 updater tarball의 최종 내용을 검증했다고 판단하지 않는다. 앱 자체에 공증 확인표를 첨부하고 검증한 뒤 `python3 scripts/package-macos-update.py APP OUTPUT.app.tar.gz`로 압축한다. 이 도구는 AppleDouble 메타데이터를 배제하고 검사한다. 일반 macOS tar 명령은 `._` 항목을 넣어 Tauri 설치를 실패시킬 수 있다. 최종 tarball을 `tauri signer sign`으로 서명한다. 이후 파일을 변경하지 않는다. Windows NSIS와 Linux AppImage에도 동일 업데이트 키로 서명한다.
 
 파일명은 `scripts/create-update-manifest.mjs`의 네 플랫폼 이름을 따른다. 각 파일과 `.sig`를 준비하고 스크립트로 latest.json을 생성한다. 이 스크립트는 누락·서명 형식만 검사하며 실제 암호학적 검증과 설치 시험을 대체하지 않는다.
 
@@ -22,3 +22,5 @@ Mac은 Developer ID 서명과 공증이 끝난 .app을 사용한다. DMG 공증�
 0.2.8부터 업데이트를 지원한다. 네 플랫폼의 서명된 파일을 GitHub Release로 제공하며 공개 피드는 site/updates/latest.json이다. OS별 실제 앱 교체 검증 범위는 docs/verification.md에 기록한다. 피드 요청 실패 시 청취를 유지한다.
 
 자동 다운로드 ON/OFF 설정은 추후 구현한다. 현재 자동 확인·다운로드는 기본 동작이다. 설정 하단의 모퉁이 라디오 정보에서 빌드 버전과 소개·공식 링크·프로젝트 라이선스를 확인한다.
+
+Mac 업데이트 회귀 검사: `python3 scripts/test-package-macos-update.py`. `src-tauri/examples/check_update.rs`는 공개 피드·다운로드·서명을 검사하며, `--install-copy`는 artifacts/update-probe/Radio.app 시험 복사본에만 설치한다. 실제 설치 앱은 변경하지 않는다. 원격 파일 수정 전에 내려받은 파일은 메모리에 남으므로 앱을 완전히 종료하고 다시 실행해야 새 파일을 받는다.

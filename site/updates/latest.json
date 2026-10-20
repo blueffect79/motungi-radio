@@ -4,12 +4,12 @@
   "notes": "모퉁이 라디오 업데이트",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSEJmUjRWQ0pjQmZIVnJZeUZJNkticXhIRm85ZE1zNEJjeTBMRlN2THJjZGdNaDlYWGRvME5pUlRSaVlXbmFLMU5YbkIwcSsyU2M0dFFTNG4zaDlCKzdSVnVvVlhjTHdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDUzNjg5CWZpbGU6bW90dW5naS1yYWRpby0wLjIuMTAtbWFjb3MtYXJtNjQuYXBwLnRhci5negl2ZXJzaW9uOjAuMi4xMApFVUFCcVJ1QmdldytCK0M1Qi9lbE9XV2JBcHIwcGVhbU9OeWkzMVh6U1VYaXpUek5KUzB4dFIxOUxjUmdmRWtZR2RTSHpuYVVhOFZod3NnZU05OWVDdz09Cg==",
-      "url": "https://github.com/devsejong/motungi-radio/releases/download/v0.2.10/motungi-radio-0.2.10-macos-arm64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSEJmUjRWQ0pjQmZqQjN6YXY4U0s0MHlwekZmdTVlb29RNmFEalNYcW9xcm5aeFREbENnZ1JrTXM2VGNiVCtDRFJxQjNzN1hRMWliRGxyc29PdEIyTko3bHNxcGdJUVEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDU3Mzc0CWZpbGU6bW90dW5naS1yYWRpby0wLjIuMTAtbWFjb3MtYXJtNjQtY2xlYW4uYXBwLnRhci5negl2ZXJzaW9uOjAuMi4xMApKN1FWUkw4N2FINnFIcDVJNzU4Zmp5d2M1YWJZekpjYmRUVW9XRWd4NnpmcGRCS1hVR3Naa2J0YVdyVjVGWWorZnA1R0hUdGgwL0s3V3BCT1pOTWpEUT09Cg==",
+      "url": "https://github.com/devsejong/motungi-radio/releases/download/v0.2.10/motungi-radio-0.2.10-macos-arm64-clean.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSEJmUjRWQ0pjQmF6VjlDbmtSS08zYUdVU2Eva0drdWhQWWdyQWtHdEtFeDRXNGtGalNMQWNpZitmczBlS291SXZDTll6bzlrK0VsRkh0dkRTTi82aHNiRVFwT3hia2c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDUzNjg5CWZpbGU6bW90dW5naS1yYWRpby0wLjIuMTAtbWFjb3MteDY0LmFwcC50YXIuZ3oJdmVyc2lvbjowLjIuMTAKdEJ1bzQ3Z1FrMFlYNU9XTk5zNS9CQzBwT0dZM0Rod291RG5xL1phL2ZTUVQxRmh6R2ZBVzNoelFoVDRVUmQxNTdmdHVkeVA0ZDVlZ1cvMVVaN25rQXc9PQo=",
-      "url": "https://github.com/devsejong/motungi-radio/releases/download/v0.2.10/motungi-radio-0.2.10-macos-x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSEJmUjRWQ0pjQlVVeGlNdzNYR2xWVnFYcmEyVnN5R1J1cDlWbThhNFIzM2ZzSU9BU2lBeXY5bEUvTnowYzJrblltcks5ZmFEZUMzVU9GZ2lQVnNDSU85V1dWMmg0REF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDU3Mzc0CWZpbGU6bW90dW5naS1yYWRpby0wLjIuMTAtbWFjb3MteDY0LWNsZWFuLmFwcC50YXIuZ3oJdmVyc2lvbjowLjIuMTAKNXM0VlRFaWtKSHVFWWFVL1pEU241Z0ZIY1hHaHM4NWYzZlZUeXg2ZU13aEFTc2FqL1g2RmZ5L2hDMW4wcVNXN2ZiRlBIMkMrSGQ0Rkp0clhDTTY0RGc9PQo=",
+      "url": "https://github.com/devsejong/motungi-radio/releases/download/v0.2.10/motungi-radio-0.2.10-macos-x64-clean.app.tar.gz"
     },
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSEJmUjRWQ0pjQlFCdkZYaGlUcTR5QUR4eDZrS3laNjJIZUY2bmk3SWQwYzRJWjVZMVBWMWVySXR5NnpDQW9PNzN0Ti9vMmdXSUZuWURwWjN5MmJaSGhmTmpROFFLcVE4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyNDU1MDU5CWZpbGU6bW90dW5naS1yYWRpby0wLjIuMTAtd2luZG93cy14NjQuZXhlCXZlcnNpb246MC4yLjEwCnJ5bk5BOEFiQThOL3hkYzA0TU83V3c2bWlLMVZ1Z29SVnJWZ3NnVnFCc0lBdEdPRll2amdCelV5c2g2Uy9OaXRHMGlTTEgvb1B1cEprSzNNWldHdkFBPT0K",
