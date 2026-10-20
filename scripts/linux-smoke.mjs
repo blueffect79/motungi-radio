@@ -37,6 +37,10 @@ async function wait(check) {
     if (await check()) return;
     await delay(250);
   } while (Date.now() < deadline);
+  if (session) {
+    console.error("Window diagnostics", await execute('return {width:innerWidth,height:innerHeight,shell:document.querySelector(".shell")?.className,errors:[...document.querySelectorAll(".error")].map(e=>e.textContent).filter(Boolean)}'));
+    writeFileSync(`dist-packages/linux-x64/proof/${proofLabel}-failure.png`, Buffer.from(await request(`/session/${session}/screenshot`), "base64"));
+  }
   throw new Error("Linux 앱 상태 확인 시간 초과");
 }
 const execute = (script, args = []) =>

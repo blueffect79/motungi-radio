@@ -510,8 +510,6 @@ pub fn set_player_size(
         window.set_max_size(Some(tauri::LogicalSize::new(380.0, 900.0)))
             .map_err(|_| "창 최대 크기를 변경할 수 없습니다.")?;
     }
-    window.set_size(tauri::LogicalSize::new(width, height))
-        .map_err(|_| "창 크기를 변경할 수 없습니다.")?;
     #[cfg(target_os = "linux")]
     {
         window.set_min_size(Some(tauri::LogicalSize::new(width, 98.0)))
@@ -519,6 +517,8 @@ pub fn set_player_size(
         window.set_max_size(Some(tauri::LogicalSize::new(width, 900.0)))
             .map_err(|_| "창 최대 크기를 변경할 수 없습니다.")?;
     }
+    window.set_size(tauri::LogicalSize::new(width, height))
+        .map_err(|_| "창 크기를 변경할 수 없습니다.")?;
     if !app
         .state::<PlayerWindowState>()
         .pinned
