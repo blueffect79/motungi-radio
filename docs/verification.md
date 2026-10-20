@@ -366,3 +366,4 @@ SHA256 `11360a295f146811c181ec04a95bb703b210540f9e43d51f58ab71d1f01e0760`.
 - 기존 Mac tarball에 AppleDouble `._모퉁이 라디오.app` 항목이 들어 있었다. Tauri updater 2.13.3이 첫 경로를 제거하며 임시 폴더에 파일을 풀려 해 PermissionDenied가 발생했다. 다운로드·서명 검사만으로는 발견되지 않았다.
 - 동일한 서명·공증 완료 앱을 메타데이터 없이 다시 압축했다. 제품 실행파일은 변경하지 않았으며 새 `-clean.app.tar.gz` 및 서명과 `SHA256SUMS-updater-fix.txt`를 v0.2.10에 추가했다. 기존 파일을 덮어쓰지 않았다.
 - 로컬 시험 복사본에 실제 Tauri updater 설치 성공, 설치 후 버전 0.2.10·codesign deep/strict·stapler validate 통과. 실제 /Applications 앱과 사용자 설정은 변경하지 않았다.
+- 공개 검증: Pages `39350199182` 성공. 수정 파일 5개 익명 다운로드·SHA256 일치, 공개 피드의 네 플랫폼 정보가 로컬과 일치했다. 실제 Tauri updater가 공개 피드에서 arm64 4,719,649 bytes를 받아 서명 검증 후 격리된 0.2.9 앱을 0.2.10으로 교체했다. 설치 후 codesign deep/strict 및 stapler validate 통과. Intel 수정본도 압축 해제 후 두 검사 통과. 실제 /Applications 앱은 0.2.9 그대로이며, 사용자 앱의 재시작·청취 시험과 Windows 업데이트 설치는 별도 미검증이다.
