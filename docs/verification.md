@@ -377,3 +377,5 @@ SHA256 `11360a295f146811c181ec04a95bb703b210540f9e43d51f58ab71d1f01e0760`.
 - Store 최초 CI 39541361341 실패: direct 전용 check_update 예제를 Store 테스트가 컴파일했다. required-features로 direct에 한정해 재빌드한다.
 - Mac·Windows 실제 청취·로그인·절전, Windows updater 설치는 미검증. Mac Store 0.2.9 보완은 별도다.
 - GitHub v0.2.11 파일 12개를 익명 다운로드 후 로컬 SHA256과 일치 확인했다. 공개 피드/페이지는 이 검증 후 전환한다.
+- Pages 39545364455 성공, 공개 홈페이지의 Store/직접 설치 링크와 새 미니 이미지 확인. 공개 피드 네 플랫폼 정보 일치. Tauri updater가 arm64 4,714,511 bytes를 다운로드·서명 검증하고 격리 앱을 0.2.11로 설치했다. 설치 후 codesign deep/strict와 stapler validate 통과. 실제 사용자 앱은 변경하지 않았다.
+- Microsoft Store 0.2.11.0 MSIX CI 39544822718 성공, 별도 시험 서명 복사본 Windows 설치·실행 CI 39545556978 성공. 제출 원본은 미서명, 기존 앱 식별자·x64·해시 확인. Partner Center 재로그인이 필요해 심사 제출 전이다.
