@@ -589,7 +589,7 @@ export async function mountApp(root: HTMLElement) {
           return pin;
         })(),
       );
-      if (pinned && !isMini) {
+      if (pinned) {
         const row = node("label", undefined, "transparency-control"),
           slider = node("input"),
           value = node("output", `${transparency}%`);

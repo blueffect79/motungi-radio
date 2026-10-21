@@ -2210,7 +2210,7 @@ dependencies = [
 
 [[package]]
 name = "motungi-radio"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "block2",
  "chrono",

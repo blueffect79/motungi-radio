@@ -545,3 +545,29 @@ it("mini mode reuses controls and preserves playback and list state", async () =
   expect(root.querySelector(".channel-visibility")?.getAttribute("aria-expanded")).toBe("true");
   expect(mock.stop).toHaveBeenCalledTimes(stops);
 });
+
+it("keeps transparency available in pinned mini mode and retains its value across modes", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  click("미니모드로 전환");
+  await tick();
+  expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
+  click("플레이어 고정");
+  await tick();
+  const slider = root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!;
+  expect(slider).not.toBeNull();
+  slider.value = "20";
+  slider.dispatchEvent(new Event("input"));
+  await tick();
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", { percent: 60 });
+  click("일반 화면으로");
+  await tick();
+  expect(root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!.value).toBe("20");
+  click("미니모드로 전환");
+  await tick();
+  expect(root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!.value).toBe("20");
+  click("플레이어 고정 해제");
+  await tick();
+  expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", { percent: 100 });
+});
