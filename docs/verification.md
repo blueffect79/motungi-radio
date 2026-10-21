@@ -367,3 +367,13 @@ SHA256 `11360a295f146811c181ec04a95bb703b210540f9e43d51f58ab71d1f01e0760`.
 - 동일한 서명·공증 완료 앱을 메타데이터 없이 다시 압축했다. 제품 실행파일은 변경하지 않았으며 새 `-clean.app.tar.gz` 및 서명과 `SHA256SUMS-updater-fix.txt`를 v0.2.10에 추가했다. 기존 파일을 덮어쓰지 않았다.
 - 로컬 시험 복사본에 실제 Tauri updater 설치 성공, 설치 후 버전 0.2.10·codesign deep/strict·stapler validate 통과. 실제 /Applications 앱과 사용자 설정은 변경하지 않았다.
 - 공개 검증: Pages `39350199182` 성공. 수정 파일 5개 익명 다운로드·SHA256 일치, 공개 피드의 네 플랫폼 정보가 로컬과 일치했다. 실제 Tauri updater가 공개 피드에서 arm64 4,719,649 bytes를 받아 서명 검증 후 격리된 0.2.9 앱을 0.2.10으로 교체했다. 설치 후 codesign deep/strict 및 stapler validate 통과. Intel 수정본도 압축 해제 후 두 검사 통과. 실제 /Applications 앱은 0.2.9 그대로이며, 사용자 앱의 재시작·청취 시험과 Windows 업데이트 설치는 별도 미검증이다.
+
+## 0.2.11 — 고정 미니모드 투명도
+
+- 직접 배포 소스: `20491e8e333fd4851bb3499e320a48b452198049`. Store 진단 예제 분리: `83d97e3`.
+- 프런트 63개·Rust 56개(외부 연결 5개 제외)·아키텍처 6개 통과. 실제 컴포넌트 프리뷰 미니 320×98에서 슬라이더 64×20 겹침 없음, 조절과 모드 전환 유지·고정 해제 불투명 복원 검사. 네이티브 실기기 UI와 구분한다.
+- Mac 앱 공증: arm64 f2a90034-1408-400a-827f-8ee4f12639ea, x64 fa6e401c-5e50-4321-9598-daf9f1aa3ebb Accepted. DMG 공증: arm64 c1a581dc-fa8f-425c-9f0e-940e4dd6f6da, x64 35e53c6b-d81b-4821-afb6-d878a6eabc6f Accepted. 두 DMG·내부 앱 서명·확인표·Gatekeeper·버전·CPU·앱 ID 통과.
+- Windows CI 39541354098 및 Linux CI 39541357621 성공. 산출물 SHA256 일치. 네 플랫폼 updater 서명과 변조 거절 검사 통과. Mac 압축파일 AppleDouble 제외.
+- Store 최초 CI 39541361341 실패: direct 전용 check_update 예제를 Store 테스트가 컴파일했다. required-features로 direct에 한정해 재빌드한다.
+- Mac·Windows 실제 청취·로그인·절전, Windows updater 설치는 미검증. Mac Store 0.2.9 보완은 별도다.
+- GitHub v0.2.11 파일 12개를 익명 다운로드 후 로컬 SHA256과 일치 확인했다. 공개 피드/페이지는 이 검증 후 전환한다.
