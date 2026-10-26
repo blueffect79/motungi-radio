@@ -195,7 +195,8 @@ it("disables only stepping, allows direct playback and removes favorites", async
   dispose = await mountApp(root);
   await tick();
   expect(root.textContent).not.toContain("즐겨찾기");
-  click("SBS 파워FM 채널 이동 비활성화");
+  click("채널 편집");
+  root.querySelector<HTMLInputElement>('[aria-label="SBS 파워FM 넘길 때 포함"]')!.click();
   await tick();
   expect(saved.disabledChannelIds).toEqual(["sbs-powerpc"]);
   expect(
@@ -208,6 +209,7 @@ it("disables only stepping, allows direct playback and removes favorites", async
 it("reorders using keyboard without playing and persists the new order", async () => {
   dispose = await mountApp(root);
   await tick();
+  click("채널 편집");
   root
     .querySelector('[data-key="reorder-mbc-mfm"]')!
     .dispatchEvent(
@@ -633,6 +635,7 @@ it("keeps transparency available in pinned mini mode and retains its value acros
 it("persists pointer drop and cancels abandoned drags without playback", async () => {
   dispose = await mountApp(root);
   await tick();
+  click("채널 편집");
   const drag = (cancel: boolean) => {
     const handle = root.querySelector<HTMLElement>(
       '[data-key="reorder-mbc-mfm"]',
@@ -667,4 +670,27 @@ it("persists pointer drop and cancels abandoned drags without playback", async (
     "mbc-mfm",
   ]);
   expect(mock.start).not.toHaveBeenCalled();
+});
+
+it("shows editing controls only in edit mode and keeps excluded channels readable", async () => {
+  saved.disabledChannelIds = ["sbs-powerpc"];
+  dispose = await mountApp(root);
+  await tick();
+  expect(root.querySelector(".channel-drag")).toBeNull();
+  expect(root.querySelector(".channel-include")).toBeNull();
+  expect(root.querySelector(".channel-skip-badge")?.textContent).toBe("넘기기 제외");
+  click("채널 편집");
+  expect(root.querySelectorAll(".channel-include")).toHaveLength(3);
+  expect(root.querySelector(".schedule-button")).toBeNull();
+  click("채널 편집 완료");
+  expect(root.querySelector(".channel-include")).toBeNull();
+  expect(mock.start).not.toHaveBeenCalled();
+});
+it("offers editing when every channel is excluded", async () => {
+  saved.disabledChannelIds = stations.map((s) => s.id);
+  dispose = await mountApp(root);
+  await tick();
+  expect(root.querySelector<HTMLButtonElement>('[data-key="next-channel"]')?.disabled).toBe(true);
+  click("넘길 채널 선택하기");
+  expect(root.querySelectorAll(".channel-include")).toHaveLength(3);
 });

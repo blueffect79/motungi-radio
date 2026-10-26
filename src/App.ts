@@ -107,6 +107,7 @@ export async function mountApp(root: HTMLElement) {
   let panel: "channels" | "settings" | "schedule" = "channels",
     scheduleId: string | null = null;
   let miniPlayer = false;
+  let editingChannels = false;
   let channelsVisible = true,
     catalogError = "",
     infoError = "",
@@ -1056,11 +1057,28 @@ export async function mountApp(root: HTMLElement) {
           }),
         );
     } else if (ready) {
-      main.append(
-        node("p", "채널 · 손잡이를 끌어 순서 변경", "channel-list-hint"),
-      );
-      const rows = channelRows(stations, settings.settings),
-        visible = rows.all;
+      const rows = channelRows(stations, settings.settings), visible = rows.all;
+      const heading = node("div", undefined, "channel-list-heading");
+      const edit = button(editingChannels ? "완료" : "채널 편집", editingChannels ? "채널 편집 완료" : "채널 편집", () => {
+        editingChannels = !editingChannels;
+        render();
+      }, "edit-channels");
+      edit.className = "channel-edit-button";
+      edit.setAttribute("aria-pressed", String(editingChannels));
+      heading.append(node("strong", editingChannels ? "채널 편집" : "채널"), edit);
+      main.append(heading);
+      if (editingChannels) {
+        main.append(node("p", "체크한 채널만 이전·다음으로 이동해요. 목록에서는 모든 채널을 들을 수 있어요.", "channel-edit-help"));
+        const columns = node("div", undefined, "channel-edit-columns");
+        columns.append(node("span", "끌어서 순서 변경"), node("span", "넘길 때 포함"));
+        main.append(columns);
+      }
+      if (visible.length && visible.every((row) => settings.settings.disabledChannelIds.includes(row.id))) {
+        const notice = node("div", undefined, "channel-empty-navigation");
+        notice.append(node("span", "넘길 채널을 선택해 주세요."));
+        if (!editingChannels) notice.append(button("선택하기", "넘길 채널 선택하기", () => { editingChannels = true; render(); }));
+        main.append(notice);
+      }
       for (const row of visible) {
         const item = node("div", undefined, "station");
         item.classList.toggle("selected", row.id === state.stationId);
@@ -1101,23 +1119,22 @@ export async function mountApp(root: HTMLElement) {
         schedule.disabled = !row.available;
         const excluded = settings.settings.disabledChannelIds.includes(row.id);
         item.dataset.stationId = row.id;
-        item.classList.toggle("channel-excluded", excluded);
-        const toggle = button(
-          excluded ? "꺼짐" : "켜짐",
-          `${row.name} 채널 이동 ${excluded ? "활성화" : "비활성화"}`,
-          () => {
-            void settings.update((s) => ({
-              ...s,
-              disabledChannelIds: s.disabledChannelIds.includes(row.id)
-                ? s.disabledChannelIds.filter((id) => id !== row.id)
-                : [...s.disabledChannelIds, row.id],
-            }));
-          },
-          `channel-enabled-${row.id}`,
-        );
-        toggle.className = "channel-enabled";
-        toggle.setAttribute("aria-pressed", String(!excluded));
-        toggle.title = "이전·다음 이동에 포함 · 꺼도 직접 재생할 수 있어요";
+        item.classList.toggle("channel-editing", editingChannels);
+        if (excluded && !editingChannels) {
+          copy.append(node("span", "넘기기 제외", "channel-skip-badge"));
+        }
+        const toggle = node("input");
+        toggle.type = "checkbox";
+        toggle.checked = !excluded;
+        toggle.dataset.key = `channel-enabled-${row.id}`;
+        toggle.className = "channel-include";
+        toggle.setAttribute("aria-label", `${row.name} 넘길 때 포함`);
+        toggle.addEventListener("change", () => {
+          const included = toggle.checked;
+          void settings.update((s) => ({ ...s, disabledChannelIds: included
+            ? s.disabledChannelIds.filter((id) => id !== row.id)
+            : [...new Set([...s.disabledChannelIds, row.id])] }));
+        });
         const handle = button(
           "⠿",
           `${row.name} 순서 변경`,
@@ -1189,7 +1206,8 @@ export async function mountApp(root: HTMLElement) {
           handle.addEventListener("pointerup", finish);
           handle.addEventListener("pointercancel", finish);
         });
-        item.append(handle, choose, schedule, toggle);
+        if (editingChannels) item.append(handle, choose, toggle);
+        else item.append(choose, schedule);
         main.append(item);
       }
       for (const id of rows.removed)
