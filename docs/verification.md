@@ -1,5 +1,14 @@
 # 검증 기록과 직접 사용 시험
 
+## 0.2.12 — 2026-10-26
+
+- 채널 정렬·이동 포함 설정과 즐겨찾기 제거. 프런트 67개, Rust 57개 통과(외부 연결 5개 제외), CPU 회귀 6개·패키지 검사 통과. 브라우저 드래그·비활성 건너뛰기·직접 선택과 라이트/다크 확인.
+- Mac 빌드 소스 `b6ea2825c2e29abe0208c59e215eb80c9b90837e`. Windows/Linux/Store 소스 `2837f023055e65649d7b3c60f55c974fdc5059d8`는 테스트 범위만 수정하며 제품 코드 동일.
+- Mac arm64 앱 공증 `b44a02a2-838d-4fb9-9cb2-c18dc8570569`, DMG `58cb79bb-274e-4233-8b00-ddcd9683883f`. Intel 앱 `d259314c-bcbb-4478-8458-7b0f6c159b36`, DMG `481c3882-d012-4a8c-9daa-35d27a59a783`. 모두 Accepted, 확인표·Developer ID·hardened runtime·0.2.12·CPU·앱 ID·Gatekeeper 검증.
+- Windows CI `40264144745`, Linux CI `40264146914`(Debian 가상 실행 포함), Store MSIX CI `40264142175`, Store 설치 smoke `40266756412` 성공. Store 제출 패키지는 시험 인증서 미포함.
+- GitHub v0.2.12 파일 12개 공개 후 익명 다운로드·SHA256 일치. 4개 업데이트 파일 Ed25519 서명·변조 거절 검사 통과. Mac 업데이트 아카이브 AppleDouble 없음. 근거 `artifacts/release-0.2.12/`.
+- Mac·Windows 실기기 청취·로그인·절전은 미검증. Store 심사 완료/공개는 별도 확인한다.
+
 ## 스토어 심사 제출 — 2026-10-18 21:50 KST
 
 - Windows 제품 `9P5RR68464SX`, 제출 `1152921505702161989`: **In certification**, 공개 전. 실제 MBC FM4U 플레이어 스크린샷 등록.
