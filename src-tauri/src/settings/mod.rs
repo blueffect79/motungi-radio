@@ -17,15 +17,25 @@ mod tests {
     #[test]
     fn restores_valid_fields_and_bounds() {
         let s = restore(
-            json!({"schemaVersion":1,"volume":101,"favoriteIds":["gone","gone",4],"lastStationId":"gone","tbnStationId":"gone"}),
+            json!({"schemaVersion":1,"volume":101,"channelOrder":["gone","gone",4],"disabledChannelIds":["gone","gone",null],"lastStationId":"gone","tbnStationId":"gone"}),
         );
         assert_eq!(s.volume, 100.0);
-        assert_eq!(s.favorite_ids, vec!["gone"]);
+        assert_eq!(s.channel_order, vec!["gone"]);
+        assert_eq!(s.disabled_channel_ids, vec!["gone"]);
         assert_eq!(s.last_station_id.as_deref(), Some("gone"));
         assert_eq!(s.tbn_station_id, None);
         for n in [0.0, 100.0] {
             assert_eq!(restore(json!({"volume":n})).volume, n)
         }
+    }
+    #[test]
+    fn legacy_favorites_are_retired_without_changing_playback_preferences() {
+        let s = restore(json!({"schemaVersion":1,"favoriteIds":["mbc-mfm"],"volume":37,"lastStationId":"mbc-mfm"}));
+        assert!(s.channel_order.is_empty());
+        assert!(s.disabled_channel_ids.is_empty());
+        assert_eq!(s.volume, 37.0);
+        assert_eq!(s.last_station_id.as_deref(), Some("mbc-mfm"));
+        assert!(serde_json::to_value(s).unwrap().get("favoriteIds").is_none());
     }
     #[test]
     fn appearance_and_mode_survive_restart_and_reject_invalid_values() {
@@ -56,7 +66,8 @@ mod tests {
         let p = path();
         let store = SettingsStore::new(p.clone());
         let mut s = Settings::default();
-        s.favorite_ids = vec!["deleted".into()];
+        s.channel_order = vec!["deleted".into(), "mbc-mfm".into()];
+        s.disabled_channel_ids = vec!["mbc-mfm".into()];
         store.save(s.clone()).unwrap();
         assert_eq!(SettingsStore::new(p.clone()).load().unwrap(), s);
         std::fs::write(&p, b"broken json").unwrap();
@@ -102,7 +113,10 @@ pub struct Settings {
     pub appearance: String,
     #[serde(default = "full_mode")]
     pub player_mode: String,
-    pub favorite_ids: Vec<String>,
+    #[serde(default)]
+    pub channel_order: Vec<String>,
+    #[serde(default)]
+    pub disabled_channel_ids: Vec<String>,
     pub volume: f64,
     pub last_station_id: Option<String>,
     pub tbn_station_id: Option<String>,
@@ -121,7 +135,8 @@ impl Default for Settings {
             onboarding_completed: false,
             appearance: system_appearance(),
             player_mode: full_mode(),
-            favorite_ids: vec![],
+            channel_order: vec![],
+            disabled_channel_ids: vec![],
             volume: 100.0,
             last_station_id: None,
             tbn_station_id: None,
@@ -168,16 +183,15 @@ fn restore(v: Value) -> Settings {
     }
     s.analytics_enabled = v["analyticsEnabled"].as_bool().unwrap_or(false);
     s.onboarding_completed = v["onboardingCompleted"].as_bool().unwrap_or(false);
-    let mut seen = HashSet::new();
-    if let Some(ids) = v["favoriteIds"].as_array() {
-        s.favorite_ids = ids
-            .iter()
-            .filter_map(id)
-            .filter(|id| seen.insert(id.clone()))
-            .collect()
-    }
+    let ids = |field: &str| {
+        let mut seen = HashSet::new();
+        v[field].as_array().into_iter().flatten().filter_map(id)
+            .filter(|id| seen.insert(id.clone())).collect()
+    };
+    s.channel_order = ids("channelOrder");
+    s.disabled_channel_ids = ids("disabledChannelIds");
     s.last_station_id = id(&v["lastStationId"]);
-    // The shortcut must target a CURRENT TBN member. Removed IDs survive in last/favorites only.
+    // The shortcut must target a CURRENT TBN member. Removed IDs survive in saved preferences only.
     s.tbn_station_id = id(&v["tbnStationId"]).filter(|id| {
         crate::radio::list_stations().is_ok_and(|c| {
             c.stations

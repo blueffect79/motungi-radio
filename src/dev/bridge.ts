@@ -44,7 +44,8 @@ let settings = {
   volume: 100,
   lastStationId: "mbc-mfm",
   tbnStationId: null,
-  favoriteIds: ["mbc-mfm", "sbs-powerpc", "cbs-music"],
+  channelOrder: [],
+  disabledChannelIds: [],
   appearance: "light",
   playerMode: "full",
 };

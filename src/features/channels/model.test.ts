@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import { channelRows, changeRegion } from "./model";
+import {
+  channelRows,
+  changeRegion,
+  channelNeighbors,
+  moveChannel,
+} from "./model";
 import { PlayerController } from "../player/controller";
 import { defaults } from "../settings/controller";
 import type { Station, Playback } from "../../shared/contracts";
@@ -17,23 +22,20 @@ const playback = (
   stationId: string | null,
 ): Playback => ({ status, stationId, requestId: 0, error: null });
 describe("channel presentation and intent", () => {
-  it("collapses all 13 regions into one row, keeps exact favorites", () => {
+  it("collapses all 13 regions into one row", () => {
     const rows = channelRows(stations, {
       ...defaults(),
       tbnStationId: "tbn-2",
-      favoriteIds: ["tbn-1", "tbn-2"],
     });
     expect(rows.all).toHaveLength(1);
     expect(rows.all[0].id).toBe("tbn-2");
-    expect(rows.favorites.map((s) => s.id)).toEqual(["tbn-1", "tbn-2"]);
   });
   it("retains removed IDs without substituting a channel", () => {
     const rows = channelRows(stations, {
       ...defaults(),
-      favoriteIds: ["gone"],
+      channelOrder: ["gone"],
       lastStationId: "old",
     });
-    expect(rows.favorites[0]).toMatchObject({ id: "gone", available: false });
     expect(rows.removed).toEqual(["old"]);
   });
   it.each(["playing", "loading"] as const)(
@@ -70,5 +72,39 @@ describe("channel presentation and intent", () => {
     expect(transport.start).not.toHaveBeenCalled();
     p.restore(null);
     expect(p.state.stationId).toBeNull();
+  });
+});
+
+it("orders saved channels once and appends newly available ones", () => {
+  const catalog = stations.slice(0, 3).map((s) => ({ ...s, groupId: null }));
+  const settings = { ...defaults(), channelOrder: ["gone", "tbn-2", "tbn-2"] };
+  expect(channelRows(catalog, settings).all.map((r) => r.id)).toEqual([
+    "tbn-2",
+    "tbn-0",
+    "tbn-1",
+  ]);
+  expect(moveChannel(catalog, settings, "tbn-2", "tbn-1")).toEqual([
+    "tbn-0",
+    "tbn-1",
+    "tbn-2",
+    "gone",
+  ]);
+});
+it("skips disabled neighbors from a directly selected disabled channel and wraps", () => {
+  const catalog = stations.slice(0, 4).map((s) => ({ ...s, groupId: null }));
+  const settings = {
+    ...defaults(),
+    channelOrder: ["tbn-2", "tbn-0", "tbn-3", "tbn-1"],
+    disabledChannelIds: ["tbn-0", "tbn-3"],
+  };
+  expect(channelNeighbors(catalog, settings, "tbn-0").next?.id).toBe("tbn-1");
+  expect(channelNeighbors(catalog, settings, "tbn-0").previous?.id).toBe(
+    "tbn-2",
+  );
+  expect(channelNeighbors(catalog, settings, "tbn-1").next?.id).toBe("tbn-2");
+  settings.disabledChannelIds = catalog.map((s) => s.id);
+  expect(channelNeighbors(catalog, settings, "tbn-0")).toEqual({
+    previous: undefined,
+    next: undefined,
   });
 });

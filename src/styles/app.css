@@ -378,7 +378,7 @@ p {
   background: transparent;
   color: var(--muted);
 }
-.favorite {
+.channel-enabled {
   font-size: 18px;
   width: 30px;
   padding: 5px 0;
@@ -609,7 +609,7 @@ header.draggable h1:active {
 }
 .thumbnail,
 .schedule-button,
-.favorite {
+.channel-enabled {
   flex-shrink: 0;
 }
 .schedule-row strong {
@@ -952,3 +952,41 @@ main { padding-left: 8px; padding-right: 8px; }
 .mini-player .mini-controls button:active { transform: none; box-shadow: none; }
 
 .mini-player .program-separator { display: none; }
+
+.channel-list-hint {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 12px 8px 6px;
+}
+.channel-drag {
+  flex: 0 0 20px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  font-size: 19px;
+}
+.channel-drag:active {
+  cursor: grabbing;
+}
+.channel-enabled {
+  font-size: 10px;
+  width: 30px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.channel-enabled[aria-pressed="true"] {
+  color: var(--accent);
+}
+.channel-excluded .station-choice {
+  opacity: 0.55;
+}
+.station.drop-target {
+  box-shadow: inset 0 -2px var(--accent);
+}
+.station {
+  gap: 4px;
+}

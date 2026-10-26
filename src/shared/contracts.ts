@@ -66,7 +66,8 @@ export interface Settings {
   onboardingCompleted?: boolean;
   appearance?: "system" | "light" | "dark";
   playerMode?: "full" | "mini";
-  favoriteIds: string[];
+  channelOrder: string[];
+  disabledChannelIds: string[];
   volume: number;
   lastStationId: string | null;
   tbnStationId: string | null;

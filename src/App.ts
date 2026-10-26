@@ -1,5 +1,9 @@
 import { Analytics } from "./features/analytics/controller";
-import { isAppStore, distributionName, supportsAutostart } from "./shared/distribution";
+import {
+  isAppStore,
+  distributionName,
+  supportsAutostart,
+} from "./shared/distribution";
 import appMetadata from "../src-tauri/tauri.conf.json";
 import { UpdateController } from "./features/updates/controller";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -25,7 +29,11 @@ import {
   unavailable,
 } from "./features/programs";
 import { flowingTitle } from "./features/programs/marquee";
-import { channelRows } from "./features/channels/model";
+import {
+  channelNeighbors,
+  moveChannel,
+  channelRows,
+} from "./features/channels/model";
 function node<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   text?: string,
@@ -94,12 +102,12 @@ export async function mountApp(root: HTMLElement) {
   let stations: Catalog["stations"] = [],
     programs = new Map<string, ProgramState>(),
     ready = false,
-    disposed = false;
+    disposed = false,
+    channelDragging = false;
   let panel: "channels" | "settings" | "schedule" = "channels",
     scheduleId: string | null = null;
   let miniPlayer = false;
   let channelsVisible = true,
-    filter: "all" | "favorites" = "all",
     catalogError = "",
     infoError = "",
     actionError = "",
@@ -113,7 +121,10 @@ export async function mountApp(root: HTMLElement) {
     pending = new Set<string>();
   const analytics = new Analytics();
   const updater = new UpdateController(() => render());
-  const settings = new SettingsController(undefined, () => { analytics.setEnabled(settings.settings.analyticsEnabled === true); render(); });
+  const settings = new SettingsController(undefined, () => {
+    analytics.setEnabled(settings.settings.analyticsEnabled === true);
+    render();
+  });
   const autostart = new AutostartController(undefined, () => render());
   const player = new PlayerController({
     transport: new HtmlAudioTransport(),
@@ -135,7 +146,11 @@ export async function mountApp(root: HTMLElement) {
     airtime = node("span", undefined, "program-time"),
     error = node("p", undefined, "error");
   const titleFlow = flowingTitle(title);
-  stationName.append(stationLabel, node("span", " · ", "program-separator"), airtime);
+  stationName.append(
+    stationLabel,
+    node("span", " · ", "program-separator"),
+    airtime,
+  );
   const control = button(
     "재생",
     "방송 재생",
@@ -159,27 +174,15 @@ export async function mountApp(root: HTMLElement) {
     heroBottom = node("div", undefined, "hero-bottom");
   const previousChannelName = node("span", undefined, "neighbor-name"),
     nextChannelName = node("span", undefined, "neighbor-name");
-  const neighbors = () => {
-    const playable = stations.filter((s) => s.streamKey !== "unavailable");
-    const index = playable.findIndex((s) => s.id === player.state.stationId);
-    return {
-      previous:
-        index >= 0 && playable.length > 1
-          ? playable[(index - 1 + playable.length) % playable.length]
-          : undefined,
-      next:
-        index >= 0 && playable.length > 1
-          ? playable[(index + 1) % playable.length]
-          : undefined,
-    };
-  };
+  const neighbors = () =>
+    channelNeighbors(stations, settings.settings, player.state.stationId);
   const previousChannel = button(
     "",
     "이전 채널",
     () => {
       const station = neighbors().previous;
       if (station) {
-        analytics.capture("channel_changed", {method:"previous"});
+        analytics.capture("channel_changed", { method: "previous" });
         animateDial(-1);
         void player.select(station.id);
       }
@@ -192,7 +195,7 @@ export async function mountApp(root: HTMLElement) {
     () => {
       const station = neighbors().next;
       if (station) {
-        analytics.capture("channel_changed", {method:"next"});
+        analytics.capture("channel_changed", { method: "next" });
         animateDial(1);
         void player.select(station.id);
       }
@@ -209,14 +212,8 @@ export async function mountApp(root: HTMLElement) {
     return svg;
   };
   previousChannel.className = nextChannel.className = "channel-step";
-  previousChannel.append(
-    glyph("M15 6l-6 6 6 6"),
-    previousChannelName,
-  );
-  nextChannel.append(
-    nextChannelName,
-    glyph("M9 6l6 6-6 6"),
-  );
+  previousChannel.append(glyph("M15 6l-6 6 6 6"), previousChannelName);
+  nextChannel.append(nextChannelName, glyph("M9 6l6 6-6 6"));
   const tunedName = node("strong", undefined, "tuned-name");
   const tuned = node("div", undefined, "tuned-channel");
   tuned.setAttribute("aria-label", "현재 채널");
@@ -229,7 +226,8 @@ export async function mountApp(root: HTMLElement) {
   let dialAnimation: Animation | undefined;
   const animateDial = (direction: number) => {
     // Continue from the visible position, including rapid consecutive clicks.
-    const current = parseFloat(getComputedStyle(ticks).backgroundPositionX) || 0;
+    const current =
+      parseFloat(getComputedStyle(ticks).backgroundPositionX) || 0;
     dialAnimation?.cancel();
     const start = ((current % 80) + 80) % 80;
     const end = start + direction * (32 + Math.random() * 32);
@@ -285,7 +283,14 @@ export async function mountApp(root: HTMLElement) {
   volumeHeading.append(volumeLabel, volumeValue);
   volumeControls.append(node("span", "◖))", "speaker"), volume, mute);
   volumeBox.append(volumeHeading, volumeControls);
-  const updateNotice = button("새 버전 설치 준비 완료 · 설정에서 업데이트", "업데이트 알림", () => { panel = "settings"; render(); });
+  const updateNotice = button(
+    "새 버전 설치 준비 완료 · 설정에서 업데이트",
+    "업데이트 알림",
+    () => {
+      panel = "settings";
+      render();
+    },
+  );
   updateNotice.className = "update-notice";
   hero.append(updateNotice);
   const channelToggle = button(
@@ -324,47 +329,89 @@ export async function mountApp(root: HTMLElement) {
   optLabel.append(opt, node("span", "익명 사용 통계 보내기 (선택)"));
   const welcomeError = node("p", undefined, "error");
   welcomeError.setAttribute("role", "alert");
-  let welcomeBusy = false, welcomeInitialized = false;
+  let welcomeBusy = false,
+    welcomeInitialized = false;
   const begin = button("라디오 시작하기", "라디오 시작하기", () => {
     if (welcomeBusy) return;
     welcomeBusy = true;
     begin.disabled = true;
-    void settings.update(s => ({...s, onboardingCompleted:true, analyticsEnabled:opt.checked})).then(() => {
-      welcomeBusy = false;
-      begin.disabled = false;
-      welcomeError.textContent = settings.error?.message ?? "";
-      render();
-    });
+    void settings
+      .update((s) => ({
+        ...s,
+        onboardingCompleted: true,
+        analyticsEnabled: opt.checked,
+      }))
+      .then(() => {
+        welcomeBusy = false;
+        begin.disabled = false;
+        welcomeError.textContent = settings.error?.message ?? "";
+        render();
+      });
   });
   begin.className = "welcome-start";
   const welcomeLogo = node("img", undefined, "welcome-logo");
-  welcomeLogo.src = new URL("../src-tauri/icons/128x128@2x.png", import.meta.url).href;
+  welcomeLogo.src = new URL(
+    "../src-tauri/icons/128x128@2x.png",
+    import.meta.url,
+  ).href;
   welcomeLogo.alt = "모퉁이 라디오 로고";
   welcomeLogo.width = 96;
   welcomeLogo.height = 96;
   const identity = node("div", undefined, "welcome-identity");
   const website = button("홈페이지 ↗", "모퉁이 라디오 홈페이지 열기", () => {
-    void invoke("open_about_page", {page:"website"}).catch(() => {
-      welcomeError.textContent = "홈페이지를 열 수 없습니다. 잠시 후 다시 시도해 주세요.";
+    void invoke("open_about_page", { page: "website" }).catch(() => {
+      welcomeError.textContent =
+        "홈페이지를 열 수 없습니다. 잠시 후 다시 시도해 주세요.";
     });
   });
   website.className = "welcome-website";
   const meta = node("div", undefined, "welcome-meta");
-  meta.append(node("span", `버전 ${appMetadata.version}`, "welcome-version"), website);
-  identity.append(welcomeLogo, node("p", "화면 한켠에, 늘 함께", "welcome-eyebrow"), intro,
-    node("p", "좋아하는 한국 라디오를 한곳에서, 무료로.", "welcome-description"), meta);
+  meta.append(
+    node("span", `버전 ${appMetadata.version}`, "welcome-version"),
+    website,
+  );
+  identity.append(
+    welcomeLogo,
+    node("p", "화면 한켠에, 늘 함께", "welcome-eyebrow"),
+    intro,
+    node(
+      "p",
+      "좋아하는 한국 라디오를 한곳에서, 무료로.",
+      "welcome-description",
+    ),
+    meta,
+  );
   const tips = node("div", undefined, "welcome-tips");
-  tips.append(node("span", "메뉴 막대·트레이에서 간편하게"), node("span", "즐겨찾는 채널을 나만의 목록으로"));
+  tips.append(
+    node("span", "메뉴 막대·트레이에서 간편하게"),
+    node("span", "채널 순서와 이동 대상을 내 취향대로"),
+  );
   const consentCard = node("div", undefined, "welcome-consent-card");
-  consentCard.append(optLabel, node("p", "더 편한 라디오를 만드는 데 도움이 됩니다. 선택하지 않아도 모든 기능을 이용할 수 있어요.", "welcome-privacy"));
+  consentCard.append(
+    optLabel,
+    node(
+      "p",
+      "더 편한 라디오를 만드는 데 도움이 됩니다. 선택하지 않아도 모든 기능을 이용할 수 있어요.",
+      "welcome-privacy",
+    ),
+  );
   const privacy = node("details", undefined, "welcome-details");
-  privacy.append(node("summary", "어떤 정보를 보내나요?"),
-    node("p", "앱 실행·재생·기능 사용과 무작위 설치 식별자를 PostHog 미국 리전으로 전송합니다. 채널명·프로그램명·화면은 수집하지 않습니다. 통계는 90일 보관 정책이며, 설정에서 언제든 끌 수 있습니다.", "welcome-privacy"));
+  privacy.append(
+    node("summary", "어떤 정보를 보내나요?"),
+    node(
+      "p",
+      "앱 실행·재생·기능 사용과 무작위 설치 식별자를 PostHog 미국 리전으로 전송합니다. 채널명·프로그램명·화면은 수집하지 않습니다. 통계는 90일 보관 정책이며, 설정에서 언제든 끌 수 있습니다.",
+      "welcome-privacy",
+    ),
+  );
   consentCard.append(privacy);
   const welcomeBody = node("div", undefined, "welcome-body");
   welcomeBody.append(identity, tips, consentCard, welcomeError);
   const welcomeActions = node("div", undefined, "welcome-actions");
-  welcomeActions.append(node("p", "방송은 재생 버튼을 눌렀을 때만 시작됩니다.", "welcome-footnote"), begin);
+  welcomeActions.append(
+    node("p", "방송은 재생 버튼을 눌렀을 때만 시작됩니다.", "welcome-footnote"),
+    begin,
+  );
   welcome.append(welcomeBody, welcomeActions);
   root.replaceChildren(welcome, shell);
   let headerState = "";
@@ -375,20 +422,26 @@ export async function mountApp(root: HTMLElement) {
   function resize() {
     const isMini = miniPlayer && panel === "channels";
     const compact = isMini || (!channelsVisible && panel === "channels");
-    const height = isMini ? Math.max(98, header.offsetHeight + hero.offsetHeight + 20) : compact
-      ? Math.max(
-          200,
-          header.offsetHeight
-            ? Math.ceil(header.offsetHeight + hero.offsetHeight + 16)
-            : 240,
-        )
-      : 640;
+    const height = isMini
+      ? Math.max(98, header.offsetHeight + hero.offsetHeight + 20)
+      : compact
+        ? Math.max(
+            200,
+            header.offsetHeight
+              ? Math.ceil(header.offsetHeight + hero.offsetHeight + 16)
+              : 240,
+          )
+        : 640;
     const sizeKey = `${isMini}:${compact}:${height}`;
     if (sizeKey === resized) return;
     resized = sizeKey;
     sizeQueue = sizeQueue.then(async () => {
       try {
-        await invoke("set_player_size", { mini: compact, height, miniPlayer: isMini });
+        await invoke("set_player_size", {
+          mini: compact,
+          height,
+          miniPlayer: isMini,
+        });
       } catch {
         actionError = "창 크기를 변경하지 못했습니다.";
         if (!disposed) render();
@@ -457,7 +510,7 @@ export async function mountApp(root: HTMLElement) {
     }
   }
   function openSchedule(id: string) {
-    analytics.capture("feature_used", {feature:"schedule"});
+    analytics.capture("feature_used", { feature: "schedule" });
     scheduleId = id;
     scheduleDate = dayKey(Date.now());
     scheduleFocusPending = true;
@@ -471,7 +524,7 @@ export async function mountApp(root: HTMLElement) {
   }
   function render() {
     updateNotice.hidden = !updater.ready;
-    if (disposed) return;
+    if (disposed || channelDragging) return;
     const onboarding = ready && !settings.settings.onboardingCompleted;
     welcome.hidden = !onboarding;
     shell.hidden = onboarding;
@@ -480,7 +533,8 @@ export async function mountApp(root: HTMLElement) {
         opt.checked = settings.settings.analyticsEnabled === true;
         welcomeInitialized = true;
       }
-      document.documentElement.dataset.theme = settings.settings.appearance ?? "system";
+      document.documentElement.dataset.theme =
+        settings.settings.appearance ?? "system";
       welcomeError.textContent = settings.error?.message ?? "";
       return;
     }
@@ -507,7 +561,9 @@ export async function mountApp(root: HTMLElement) {
       : "채널 보기";
     channelToggle.setAttribute("aria-expanded", String(channelsVisible));
     shell.classList.toggle("panel-open", panel !== "channels");
-    if (headerState !== `${panel}:${pinned}:${pinBusy}:${scheduleId}:${isMini}`) {
+    if (
+      headerState !== `${panel}:${pinned}:${pinBusy}:${scheduleId}:${isMini}`
+    ) {
       headerState = `${panel}:${pinned}:${pinBusy}:${scheduleId}:${isMini}`;
       const heading = node(
         "h1",
@@ -538,13 +594,24 @@ export async function mountApp(root: HTMLElement) {
       if (panel !== "channels")
         header.append(button("← 돌아가기", "돌아가기", showChannels));
       if (panel === "channels") {
-        const mode = button("", isMini ? "일반 화면으로" : "미니모드로 전환", () => {
-          miniPlayer = !miniPlayer;
-          render();
-        }, "player-mode");
+        const mode = button(
+          "",
+          isMini ? "일반 화면으로" : "미니모드로 전환",
+          () => {
+            miniPlayer = !miniPlayer;
+            render();
+          },
+          "player-mode",
+        );
         mode.className = "mode-button";
         mode.title = isMini ? "일반 화면으로" : "미니모드로 전환";
-        mode.append(glyph(isMini ? "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" : "M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5"));
+        mode.append(
+          glyph(
+            isMini
+              ? "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"
+              : "M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5",
+          ),
+        );
         header.append(mode);
       }
       header.append(
@@ -558,7 +625,7 @@ export async function mountApp(root: HTMLElement) {
               render();
               void invoke("set_player_pinned", { pinned: !pinned })
                 .then(() => {
-                  analytics.capture("feature_used", {feature:"pin"});
+                  analytics.capture("feature_used", { feature: "pin" });
                   pinned = !pinned;
                   return applyOpacity();
                 })
@@ -736,13 +803,19 @@ export async function mountApp(root: HTMLElement) {
         ]
           .filter(Boolean)
           .join(" · ");
-      const sharing = main.querySelector<HTMLInputElement>("[data-key=analytics]");
-      if (sharing) sharing.checked = settings.settings.analyticsEnabled === true;
+      const sharing = main.querySelector<HTMLInputElement>(
+        "[data-key=analytics]",
+      );
+      if (sharing)
+        sharing.checked = settings.settings.analyticsEnabled === true;
       const updateStatus = main.querySelector(".update-setting [role=status]");
       if (updateStatus) updateStatus.textContent = updater.message;
-      const updateAction = main.querySelector<HTMLButtonElement>(".update-action");
+      const updateAction =
+        main.querySelector<HTMLButtonElement>(".update-action");
       if (updateAction) {
-        updateAction.textContent = updater.ready ? "업데이트하고 재시작" : "업데이트 확인";
+        updateAction.textContent = updater.ready
+          ? "업데이트하고 재시작"
+          : "업데이트 확인";
         updateAction.disabled = updater.busy;
       }
       const restartNote = main.querySelector<HTMLElement>(".restart-note");
@@ -798,7 +871,13 @@ export async function mountApp(root: HTMLElement) {
       section.append(
         appearance,
         label,
-        node("p", !supportsAutostart ? "스토어판의 로그인 시 실행은 준비 중입니다." : "실행 시 자동 재생하지 않습니다.", "muted"),
+        node(
+          "p",
+          !supportsAutostart
+            ? "스토어판의 로그인 시 실행은 준비 중입니다."
+            : "실행 시 자동 재생하지 않습니다.",
+          "muted",
+        ),
       );
       const settingsError = node(
         "p",
@@ -808,29 +887,61 @@ export async function mountApp(root: HTMLElement) {
       settingsError.setAttribute("role", "alert");
       section.append(settingsError);
       if (!isAppStore) {
-      const updateSection = node("section", undefined, "update-setting");
-      const updateMessage = node("p", updater.message, "muted");
-      updateMessage.setAttribute("role", "status");
-      const updateButton = button(updater.ready ? "업데이트하고 재시작" : "업데이트 확인", "앱 업데이트", () => {
-        void (updater.ready ? updater.install() : updater.check());
-      });
-      updateButton.classList.add("update-action");
-      updateButton.disabled = updater.busy;
-      updateSection.append(node("h3", "앱 업데이트"), updateMessage, updateButton);
-      const restartNote = node("p", "재생이 종료되고 앱이 다시 시작됩니다.", "muted restart-note");
-      restartNote.hidden = !updater.ready;
-      updateSection.append(restartNote);
-      section.append(updateSection);
-      } else { section.append(node("p", `업데이트는 ${distributionName}에서 제공됩니다.`, "muted")); }
+        const updateSection = node("section", undefined, "update-setting");
+        const updateMessage = node("p", updater.message, "muted");
+        updateMessage.setAttribute("role", "status");
+        const updateButton = button(
+          updater.ready ? "업데이트하고 재시작" : "업데이트 확인",
+          "앱 업데이트",
+          () => {
+            void (updater.ready ? updater.install() : updater.check());
+          },
+        );
+        updateButton.classList.add("update-action");
+        updateButton.disabled = updater.busy;
+        updateSection.append(
+          node("h3", "앱 업데이트"),
+          updateMessage,
+          updateButton,
+        );
+        const restartNote = node(
+          "p",
+          "재생이 종료되고 앱이 다시 시작됩니다.",
+          "muted restart-note",
+        );
+        restartNote.hidden = !updater.ready;
+        updateSection.append(restartNote);
+        section.append(updateSection);
+      } else {
+        section.append(
+          node("p", `업데이트는 ${distributionName}에서 제공됩니다.`, "muted"),
+        );
+      }
       const about = node("details", undefined, "about-app");
       about.append(node("summary", "모퉁이 라디오 정보"));
-      about.append(node("h3", "모퉁이 라디오"), node("p", `버전 ${appMetadata.version} · ${distributionName}`, "muted"), node("p", "화면 한켠에서, 좋아하는 한국 라디오를 한곳에."));
-      for (const [page, label] of [["website", "홈페이지 ↗"], ["privacy", "개인정보처리방침 ↗"], ["github", "GitHub ↗"], ["license", "오픈소스 라이선스 ↗"]]) {
-        about.append(button(label, label, () => {
-          void invoke("open_about_page", { page }).catch(() => { actionError = "페이지를 열 수 없습니다."; render(); });
-        }));
+      about.append(
+        node("h3", "모퉁이 라디오"),
+        node("p", `버전 ${appMetadata.version} · ${distributionName}`, "muted"),
+        node("p", "화면 한켠에서, 좋아하는 한국 라디오를 한곳에."),
+      );
+      for (const [page, label] of [
+        ["website", "홈페이지 ↗"],
+        ["privacy", "개인정보처리방침 ↗"],
+        ["github", "GitHub ↗"],
+        ["license", "오픈소스 라이선스 ↗"],
+      ]) {
+        about.append(
+          button(label, label, () => {
+            void invoke("open_about_page", { page }).catch(() => {
+              actionError = "페이지를 열 수 없습니다.";
+              render();
+            });
+          }),
+        );
       }
-      about.ontoggle = () => { if (ready) resize(); };
+      about.ontoggle = () => {
+        if (ready) resize();
+      };
       const sharingLabel = node("label", "사용 통계 공유", "autostart");
       const sharing = node("input");
       sharing.type = "checkbox";
@@ -840,10 +951,19 @@ export async function mountApp(root: HTMLElement) {
       sharing.onchange = () => {
         const enabled = sharing.checked;
         if (!enabled) analytics.setEnabled(false);
-        void settings.update(s => ({...s, analyticsEnabled:enabled}));
+        void settings.update((s) => ({ ...s, analyticsEnabled: enabled }));
       };
       sharingLabel.append(sharing);
-      section.append(sharingLabel, node("p", analytics.configured ? "선택 사항 · 실행·재생·기능 사용을 PostHog 미국(US) 리전으로 전송합니다. 채널명과 화면은 수집하지 않습니다." : "통계 연결 준비 중입니다. 현재 전송하지 않습니다.", "muted"));
+      section.append(
+        sharingLabel,
+        node(
+          "p",
+          analytics.configured
+            ? "선택 사항 · 실행·재생·기능 사용을 PostHog 미국(US) 리전으로 전송합니다. 채널명과 화면은 수집하지 않습니다."
+            : "통계 연결 준비 중입니다. 현재 전송하지 않습니다.",
+          "muted",
+        ),
+      );
       section.append(about);
       section.append(
         button("앱 종료", "앱 종료", () => {
@@ -936,23 +1056,11 @@ export async function mountApp(root: HTMLElement) {
           }),
         );
     } else if (ready) {
-      const tabs = node("nav", undefined, "channel-tabs");
-      for (const [value, label] of [
-        ["all", "전체 채널"],
-        ["favorites", "즐겨찾기"],
-      ] as const) {
-        const b = button(label, label, () => {
-          filter = value;
-          render();
-        });
-        b.setAttribute("aria-pressed", String(filter === value));
-        tabs.append(b);
-      }
-      main.append(tabs);
+      main.append(
+        node("p", "채널 · 손잡이를 끌어 순서 변경", "channel-list-hint"),
+      );
       const rows = channelRows(stations, settings.settings),
-        visible = filter === "all" ? rows.all : rows.favorites;
-      if (!visible.length)
-        main.append(node("p", "별을 눌러 즐겨찾기를 추가하세요.", "muted"));
+        visible = rows.all;
       for (const row of visible) {
         const item = node("div", undefined, "station");
         item.classList.toggle("selected", row.id === state.stationId);
@@ -960,10 +1068,10 @@ export async function mountApp(root: HTMLElement) {
           "",
           `${row.name} 재생`,
           () => {
-            analytics.capture("channel_changed", {method:"list"});
+            analytics.capture("channel_changed", { method: "list" });
             void player.select(row.id);
           },
-          `station-${filter}-${row.id}`,
+          `station-all-${row.id}`,
         );
         choose.className = "station-choice";
         choose.disabled = !row.available;
@@ -987,28 +1095,101 @@ export async function mountApp(root: HTMLElement) {
           "편성표",
           `${row.name} 편성표`,
           () => openSchedule(row.id),
-          `schedule-${filter}-${row.id}`,
+          `schedule-all-${row.id}`,
         );
         schedule.className = "schedule-button";
         schedule.disabled = !row.available;
-        const isFavorite = settings.settings.favoriteIds.includes(row.id),
-          favorite = button(
-            isFavorite ? "★" : "☆",
-            `${row.name} 즐겨찾기 ${isFavorite ? "해제" : "추가"}`,
-            () => {
-              analytics.capture("feature_used", {feature:"favorite"});
+        const excluded = settings.settings.disabledChannelIds.includes(row.id);
+        item.dataset.stationId = row.id;
+        item.classList.toggle("channel-excluded", excluded);
+        const toggle = button(
+          excluded ? "꺼짐" : "켜짐",
+          `${row.name} 채널 이동 ${excluded ? "활성화" : "비활성화"}`,
+          () => {
+            void settings.update((s) => ({
+              ...s,
+              disabledChannelIds: s.disabledChannelIds.includes(row.id)
+                ? s.disabledChannelIds.filter((id) => id !== row.id)
+                : [...s.disabledChannelIds, row.id],
+            }));
+          },
+          `channel-enabled-${row.id}`,
+        );
+        toggle.className = "channel-enabled";
+        toggle.setAttribute("aria-pressed", String(!excluded));
+        toggle.title = "이전·다음 이동에 포함 · 꺼도 직접 재생할 수 있어요";
+        const handle = button(
+          "⠿",
+          `${row.name} 순서 변경`,
+          () => {},
+          `reorder-${row.id}`,
+        );
+        handle.className = "channel-drag";
+        handle.title = "드래그 또는 위·아래 방향키로 순서 변경";
+        handle.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+          event.preventDefault();
+          const ids = channelRows(stations, settings.settings).all.map(
+            (r) => r.id,
+          );
+          const target =
+            ids[ids.indexOf(row.id) + (event.key === "ArrowUp" ? -1 : 1)];
+          if (target)
+            void settings.update((s) => ({
+              ...s,
+              channelOrder: moveChannel(stations, s, row.id, target),
+            }));
+        });
+        handle.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          handle.setPointerCapture(event.pointerId);
+          channelDragging = true;
+          let target: string | undefined;
+          const clear = () =>
+            main
+              .querySelectorAll(".drop-target")
+              .forEach((el) => el.classList.remove("drop-target"));
+          const move = (e: PointerEvent) => {
+            clear();
+            const bounds = main.getBoundingClientRect();
+            if (e.clientY < bounds.top + 28) main.scrollTop -= 18;
+            if (e.clientY > bounds.bottom - 28) main.scrollTop += 18;
+            const over = document
+              .elementFromPoint(e.clientX, e.clientY)
+              ?.closest<HTMLElement>("[data-station-id]");
+            target = over?.dataset.stationId;
+            if (target && target !== row.id) over?.classList.add("drop-target");
+          };
+          const finish = (e: PointerEvent) => {
+            clear();
+            channelDragging = false;
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+            if (handle.hasPointerCapture(event.pointerId))
+              handle.releasePointerCapture(event.pointerId);
+            if (e.type === "pointerup" && target) {
+              const to = target;
               void settings.update((s) => ({
                 ...s,
-                favoriteIds: s.favoriteIds.includes(row.id)
-                  ? s.favoriteIds.filter((v) => v !== row.id)
-                  : [...s.favoriteIds, row.id],
+                channelOrder: moveChannel(stations, s, row.id, to),
               }));
+            }
+          };
+          handle.addEventListener(
+            "lostpointercapture",
+            () => {
+              channelDragging = false;
+              render();
             },
-            `favorite-${filter}-${row.id}`,
+            { once: true },
           );
-        favorite.className = "favorite";
-        favorite.setAttribute("aria-pressed", String(isFavorite));
-        item.append(choose, schedule, favorite);
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish);
+          handle.addEventListener("pointercancel", finish);
+        });
+        item.append(handle, choose, schedule, toggle);
         main.append(item);
       }
       for (const id of rows.removed)

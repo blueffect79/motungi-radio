@@ -11,7 +11,8 @@ export const defaults = (): Settings => ({
   onboardingCompleted: false,
   appearance: "system",
   playerMode: "full",
-  favoriteIds: [],
+  channelOrder: [],
+  disabledChannelIds: [],
   volume: 100,
   lastStationId: null,
   tbnStationId: null,
@@ -69,11 +70,11 @@ export class SettingsController {
     });
   }
 }
-/** Removed favorites and last station remain visible/removable; never choose a replacement. */
+/** Removed ordered IDs and last station remain visible/removable; never choose a replacement. */
 export function rememberedStations(settings: Settings, stations: Station[]) {
   return [
     ...new Set([
-      ...settings.favoriteIds,
+      ...settings.channelOrder,
       ...(settings.lastStationId ? [settings.lastStationId] : []),
     ]),
   ].map((id) => ({

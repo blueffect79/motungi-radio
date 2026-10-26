@@ -2,7 +2,7 @@ import config from "./config.json";
 import app from "../../../src-tauri/tauri.conf.json";
 import type { Playback } from "../../shared/contracts";
 type Event = "app_opened" | "playback_started" | "playback_failed" | "listening_summary" | "channel_changed" | "feature_used" | "app_updated";
-type Properties = { method?: "previous" | "next" | "list"; feature?: "favorite" | "schedule" | "pin"; seconds?: number; previous_version?: string };
+type Properties = { method?: "previous" | "next" | "list"; feature?: "schedule" | "pin"; seconds?: number; previous_version?: string };
 /** Explicit events only. No titles, station identifiers, URLs, device IDs or DOM capture. */
 export class Analytics {
   private enabled = false;

@@ -13,10 +13,10 @@ describe("settings controller", () => {
     await c.load();
     await Promise.all([
       c.update((s) => ({ ...s, volume: 0 })),
-      c.update((s) => ({ ...s, favoriteIds: ["deleted"] })),
+      c.update((s) => ({ ...s, channelOrder: ["deleted"] })),
     ]);
     expect(c.settings.volume).toBe(0);
-    expect(c.settings.favoriteIds).toEqual(["deleted"]);
+    expect(c.settings.channelOrder).toEqual(["deleted"]);
     expect(saved).toHaveLength(2);
     expect(rememberedStations(c.settings, [])).toEqual([
       { id: "deleted", name: "deleted", available: false },

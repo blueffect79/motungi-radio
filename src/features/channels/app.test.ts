@@ -51,7 +51,11 @@ let root: HTMLElement,
 beforeEach(() => {
   vi.clearAllMocks();
   mock.events.clear();
-  saved = { ...defaults(), onboardingCompleted: true, lastStationId: "mbc-mfm" };
+  saved = {
+    ...defaults(),
+    onboardingCompleted: true,
+    lastStationId: "mbc-mfm",
+  };
   root = document.createElement("div");
   document.body.append(root);
   mock.invoke.mockImplementation(async (command, args) => {
@@ -187,17 +191,40 @@ it("keeps volume DOM and focus through saves and metadata refresh; remembers app
   await tick();
   expect(saved.volume).toBe(23);
 });
-it("uses tabs without duplicate favorites, preserving unavailable favorites for removal", async () => {
-  saved.favoriteIds = ["mbc-mfm", "tbn-busan", "deleted"];
+it("disables only stepping, allows direct playback and removes favorites", async () => {
   dispose = await mountApp(root);
   await tick();
-  expect(root.querySelectorAll(".station")).toHaveLength(3);
-  click("즐겨찾기");
-  expect(root.querySelectorAll(".station")).toHaveLength(3);
-  expect(root.textContent).toContain("이용 불가 · 삭제된 채널");
-  click("deleted 즐겨찾기 해제");
+  expect(root.textContent).not.toContain("즐겨찾기");
+  click("SBS 파워FM 채널 이동 비활성화");
   await tick();
-  expect(saved.favoriteIds).not.toContain("deleted");
+  expect(saved.disabledChannelIds).toEqual(["sbs-powerpc"]);
+  expect(
+    root.querySelector('[data-key="next-channel"]')?.getAttribute("aria-label"),
+  ).toContain("TBN 경인");
+  click("SBS 파워FM 재생");
+  await tick();
+  expect(mock.resolve).toHaveBeenCalledWith("sbs-powerpc", expect.anything());
+});
+it("reorders using keyboard without playing and persists the new order", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  root
+    .querySelector('[data-key="reorder-mbc-mfm"]')!
+    .dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+    );
+  await tick();
+  expect(saved.channelOrder).toEqual([
+    "sbs-powerpc",
+    "mbc-mfm",
+    "tbn-gyeongin",
+  ]);
+  expect(
+    [...root.querySelectorAll<HTMLElement>(".station")].map(
+      (el) => el.dataset.stationId,
+    ),
+  ).toEqual(saved.channelOrder);
+  expect(mock.start).not.toHaveBeenCalled();
 });
 it("does not let a late schedule response switch channel or reopen a panel", async () => {
   dispose = await mountApp(root);
@@ -424,11 +451,16 @@ it("shows transparency only while pinned, preserves the slider during playback u
   await tick();
   expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBe(slider);
   expect(slider.value).toBe("35");
-  for (const [position, percent, label] of [[0, 40, "투명도 60%"], [60, 100, "투명도 0%"]] as const) {
+  for (const [position, percent, label] of [
+    [0, 40, "투명도 60%"],
+    [60, 100, "투명도 0%"],
+  ] as const) {
     slider.value = String(position);
     slider.dispatchEvent(new Event("input"));
     await tick();
-    expect(mock.invoke).toHaveBeenLastCalledWith("set_player_opacity", { percent });
+    expect(mock.invoke).toHaveBeenLastCalledWith("set_player_opacity", {
+      percent,
+    });
     expect(slider.getAttribute("aria-valuetext")).toBe(label);
   }
   click("플레이어 고정 해제");
@@ -488,7 +520,9 @@ it("accepts only official HTTPS KBS artwork hosts", () => {
 });
 
 it("CBS artwork allows only the official HTTPS host", () => {
-  expect(safeArtwork("https://cbs.co.kr/data/cbs/upload/save/program/a.png")).toBeTruthy();
+  expect(
+    safeArtwork("https://cbs.co.kr/data/cbs/upload/save/program/a.png"),
+  ).toBeTruthy();
   expect(safeArtwork("https://cbs.co.kr.evil.test/a.png")).toBeNull();
   expect(safeArtwork("http://cbs.co.kr/a.png")).toBeNull();
 });
@@ -498,7 +532,9 @@ it("first-run introduction is optional, persists dismissal, and never starts aud
   dispose = await mountApp(root);
   const intro = root.querySelector<HTMLElement>(".welcome")!;
   expect(intro.hidden).toBe(false);
-  expect(root.querySelector<HTMLInputElement>(".welcome input")!.checked).toBe(false);
+  expect(root.querySelector<HTMLInputElement>(".welcome input")!.checked).toBe(
+    false,
+  );
   root.querySelector<HTMLButtonElement>(".welcome-start")!.click();
   await tick();
   expect(saved.onboardingCompleted).toBe(true);
@@ -514,9 +550,14 @@ it("failed onboarding save keeps the introduction and reports the error", async 
   saved = { ...defaults() };
   dispose = await mountApp(root);
   const previous = mock.invoke.getMockImplementation()!;
-  mock.invoke.mockImplementation(async (cmd, args) => cmd === "save_settings"
-    ? {ok:false,error:{code:"storage",message:"저장 실패",retryable:true}}
-    : previous(cmd,args));
+  mock.invoke.mockImplementation(async (cmd, args) =>
+    cmd === "save_settings"
+      ? {
+          ok: false,
+          error: { code: "storage", message: "저장 실패", retryable: true },
+        }
+      : previous(cmd, args),
+  );
   root.querySelector<HTMLButtonElement>(".welcome-start")!.click();
   await tick();
   expect(root.querySelector<HTMLElement>(".welcome")!.hidden).toBe(false);
@@ -536,13 +577,18 @@ it("mini mode reuses controls and preserves playback and list state", async () =
   expect(root.querySelector(".mini-player")).toBeTruthy();
   expect(root.querySelector(".mini-controls .play-button")).toBe(play);
   expect(root.querySelectorAll(".mini-controls button")).toHaveLength(3);
-  expect(mock.invoke).toHaveBeenCalledWith("set_player_size", expect.objectContaining({miniPlayer:true,height:98}));
+  expect(mock.invoke).toHaveBeenCalledWith(
+    "set_player_size",
+    expect.objectContaining({ miniPlayer: true, height: 98 }),
+  );
   expect(mock.stop).toHaveBeenCalledTimes(stops);
   click("일반 화면으로");
   await tick();
   expect(root.querySelector(".hero-bottom .play-button")).toBe(play);
   expect(root.querySelector(".mini-player")).toBeNull();
-  expect(root.querySelector(".channel-visibility")?.getAttribute("aria-expanded")).toBe("true");
+  expect(
+    root.querySelector(".channel-visibility")?.getAttribute("aria-expanded"),
+  ).toBe("true");
   expect(mock.stop).toHaveBeenCalledTimes(stops);
 });
 
@@ -554,20 +600,71 @@ it("keeps transparency available in pinned mini mode and retains its value acros
   expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
   click("플레이어 고정");
   await tick();
-  const slider = root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!;
+  const slider = root.querySelector<HTMLInputElement>(
+    '[aria-label="플레이어 투명도"]',
+  )!;
   expect(slider).not.toBeNull();
   slider.value = "20";
   slider.dispatchEvent(new Event("input"));
   await tick();
-  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", { percent: 60 });
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
+    percent: 60,
+  });
   click("일반 화면으로");
   await tick();
-  expect(root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!.value).toBe("20");
+  expect(
+    root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!
+      .value,
+  ).toBe("20");
   click("미니모드로 전환");
   await tick();
-  expect(root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!.value).toBe("20");
+  expect(
+    root.querySelector<HTMLInputElement>('[aria-label="플레이어 투명도"]')!
+      .value,
+  ).toBe("20");
   click("플레이어 고정 해제");
   await tick();
   expect(root.querySelector('[aria-label="플레이어 투명도"]')).toBeNull();
-  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", { percent: 100 });
+  expect(mock.invoke).toHaveBeenCalledWith("set_player_opacity", {
+    percent: 100,
+  });
+});
+
+it("persists pointer drop and cancels abandoned drags without playback", async () => {
+  dispose = await mountApp(root);
+  await tick();
+  const drag = (cancel: boolean) => {
+    const handle = root.querySelector<HTMLElement>(
+      '[data-key="reorder-mbc-mfm"]',
+    )!;
+    handle.setPointerCapture = vi.fn();
+    handle.hasPointerCapture = () => false;
+    handle.releasePointerCapture = vi.fn();
+    document.elementFromPoint = () =>
+      root.querySelector('[data-station-id="tbn-gyeongin"]');
+    handle.dispatchEvent(
+      new MouseEvent("pointerdown", { button: 0, bubbles: true }),
+    );
+    handle.dispatchEvent(
+      new MouseEvent("pointermove", {
+        clientX: 10,
+        clientY: 100,
+        bubbles: true,
+      }),
+    );
+    handle.dispatchEvent(
+      new MouseEvent(cancel ? "pointercancel" : "pointerup", { bubbles: true }),
+    );
+  };
+  drag(true);
+  await tick();
+  expect(saved.channelOrder).toEqual([]);
+  drag(false);
+  await tick();
+  expect(saved.channelOrder).toEqual([
+    "sbs-powerpc",
+    "tbn-gyeongin",
+    "mbc-mfm",
+  ]);
+  expect(mock.start).not.toHaveBeenCalled();
 });
