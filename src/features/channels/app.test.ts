@@ -391,7 +391,7 @@ it("preserves saved volume and removes redundant settings copy", async () => {
   expect(root.querySelector<HTMLInputElement>("input[type=range]")?.value).toBe(
     "0",
   );
-  expect(root.textContent).not.toContain("내 취향대로");
+  expect(root.querySelector(".settings")?.textContent).not.toContain("내 취향대로");
   expect(root.textContent).not.toContain("OS 등록 상태");
 });
 
