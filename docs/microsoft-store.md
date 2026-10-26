@@ -1,5 +1,11 @@
 # Microsoft Store 배포
 
+## 0.2.12 업데이트 — 2026-10-26
+
+제출 `1152921505702230255`에 0.2.12.0 x64 MSIX를 업로드하고 패키지 Validated를 확인했다. 한국어 소개에서 즐겨찾기를 채널 정렬·이동 설정으로 변경하고 릴리스 노트를 저장했다. 최종 **In certification** 상태이며 심사 통과 후 자동 게시한다. 기존 공개판과 업데이트 심사 상태는 구분한다.
+
+빌드 `40264142175`, 설치 smoke `40266756412` 성공. 소스 `2837f023055e65649d7b3c60f55c974fdc5059d8`, MSIX SHA256 `7c0d20415283e4de01a6b92f1539a4ad8f7524511aba72e3b1a0bda392b03c88`. 기존 Identity·Publisher 유지, 제출 패키지에 시험 인증서 없음. 가격·지역·연령등급은 변경하지 않았다.
+
 공통 제품 소스는 유지하고 direct, app-store(Mac), microsoft-store(Windows) 빌드를 구분한다. Microsoft Store 빌드는 Windows x64 전용이며 `npm run desktop:microsoft-store -- --target x86_64-pc-windows-msvc --no-bundle`로 빌드한다. 출력은 `src-tauri/target-microsoft-store`, 프런트는 `dist-microsoft-store`에 분리한다.
 
 스토어판은 직접 배포 updater·autostart 플러그인을 포함하지 않는다. 업데이트는 Microsoft Store가 처리하고 로그인 실행은 MSIX StartupTask API를 사용한다. 시작 작업의 별도 helper가 `--autostart`로 앱을 시작해 창·오디오 자동 시작을 막는다. 사용자가 Windows 시작 프로그램에서 끈 권한은 성공으로 가장하지 않는다. 직접 설치판과 별도 앱 ID/설정 경로를 사용하며 기존 설정을 자동 이전하지 않는다.

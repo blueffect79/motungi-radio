@@ -8,6 +8,8 @@
 - Windows CI `40264144745`, Linux CI `40264146914`(Debian 가상 실행 포함), Store MSIX CI `40264142175`, Store 설치 smoke `40266756412` 성공. Store 제출 패키지는 시험 인증서 미포함.
 - GitHub v0.2.12 파일 12개 공개 후 익명 다운로드·SHA256 일치. 4개 업데이트 파일 Ed25519 서명·변조 거절 검사 통과. Mac 업데이트 아카이브 AppleDouble 없음. 근거 `artifacts/release-0.2.12/`.
 - Mac·Windows 실기기 청취·로그인·절전은 미검증. Store 심사 완료/공개는 별도 확인한다.
+- Pages `40287873622` 성공, 공개 홈페이지 새 캡처·링크 및 피드 4개 대상 일치 확인. 실제 Tauri updater가 4,724,784바이트를 다운로드·서명 검증하고 격리 복사본에 0.2.12 설치 성공. 사용자 설치 앱은 변경하지 않음.
+- Microsoft Store 제출 `1152921505702230255`: 0.2.12.0 업로드·Validated·소개/변경 내용 저장·심사 접수 완료. 실제 포털 **In certification**, 통과 후 자동 게시 설정 확인. MSIX SHA256 `7c0d20415283e4de01a6b92f1539a4ad8f7524511aba72e3b1a0bda392b03c88`. 증빙 `artifacts/release-0.2.12/store-submitted.png`.
 
 ## 스토어 심사 제출 — 2026-10-18 21:50 KST
 
